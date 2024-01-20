@@ -36,7 +36,7 @@ alias ls='colorls'
 # brew install caarlos0/tap/timer
 # brew install terminal-notifier
 # Study stream aliases
-alias work="timer 60m && terminal-notifier -message 'Pomodoro'\
+alias focus="timer 60m && terminal-notifier -message 'Pomodoro'\
         -title 'Work Timer is up! Take a Break 😊'\
         -appIcon '~/Pictures/pumpkin.jpeg'\
         -sound Crystal"
