@@ -46,7 +46,7 @@ alias rest="timer 5m && terminal-notifier -message 'Pomodoro'\
         -appIcon '~/Pictures/pumpkin.jpeg'\
         -sound Crystal"
 
-
+alias vim=nvim
 
 
 # Generated for envman. Do not edit.
