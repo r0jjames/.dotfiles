@@ -15,8 +15,8 @@ end
 
 return {
 	-- ...your existing config
-	color_scheme = scheme_for_appearance(wezterm.gui.get_appearance()),
-	font = wezterm.font('JetBrains Mono', { weight = 'Bold', italic = true }),
+	-- color_scheme = scheme_for_appearance(wezterm.gui.get_appearance()),
+	-- font = wezterm.font('JetBrains Mono', { weight = 'Bold', italic = true }),
 	font_size = 14,
 	line_height = 1.2
 }
