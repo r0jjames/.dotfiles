@@ -1,0 +1,10 @@
+\.git
+\.site
+\.build.yml
+\.files
+archive
+backgrounds
+mail
+fonts
+^/.*\.org
+LICENSE
