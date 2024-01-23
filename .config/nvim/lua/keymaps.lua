@@ -21,3 +21,6 @@ vim.keymap.set("n", "<C-W>.", ":vertical resize +10<CR>", {})
 
 -- Options through Telescope
 vim.keymap.set("n", "<Leader><tab>", "<Cmd>lua require('telescope.builtin').commands()<CR>", { noremap = false })
+
+-- Go
+vim.keymap.set({ 'n', 'i' }, '<C-1>', '<Cmd>:w!<bar> GoRun -F<enter>', { noremap = false })
