@@ -193,11 +193,17 @@ require('lazy').setup({
   {
     -- Theme inspired by Atom
     -- 'navarasu/onedark.nvim',
-    'catppuccin/nvim',
+    --'catppuccin/nvim',
+    'folke/tokyonight.nvim',
+    lazy = false,
     priority = 1000,
+    opts = {
+      transparent = true,
+      style = 'night'
+    },
     config = function()
       --      vim.cmd.colorscheme 'onedark'
-      vim.cmd.colorscheme "catppuccin"
+      vim.cmd.colorscheme "tokyonight-night"
     end,
   },
 
@@ -208,7 +214,8 @@ require('lazy').setup({
     opts = {
       options = {
         icons_enabled = true,
-        theme = 'onedark',
+        --   theme = 'onedark',
+        theme = 'tokyonight',
         component_separators = '|',
         section_separators = '',
       },
