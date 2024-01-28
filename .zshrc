@@ -49,6 +49,7 @@ alias rest="timer 5m && terminal-notifier -message 'Pomodoro'\
 alias v='nvim'
 # Shortcut to Kubectl
 alias k='kubectl'
+alias kubectl="minikube kubectl --"
 # Make ls beautiful
 alias ls='colorls'
 # Press c to clear the terminal screen.
@@ -91,7 +92,17 @@ alias sep='cal -m 09'
 alias oct='cal -m 10'
 alias nov='cal -m 11'
 alias dec='cal -m 12'
+lg()
+{
+    export LAZYGIT_NEW_DIR_FILE=~/.lazygit/newdir
 
+    lazygit "$@"
+
+    if [ -f $LAZYGIT_NEW_DIR_FILE ]; then
+            cd "$(cat $LAZYGIT_NEW_DIR_FILE)"
+            rm -f $LAZYGIT_NEW_DIR_FILE > /dev/null
+    fi
+}
 # Generated for envman. Do not edit.
 [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 
