@@ -1,10 +1,10 @@
 \.git
-/.backup_files
 /backup_files
+\.bin
 README.*
 \.git
 \.gitignore
-
+.DS_Store
 ^/README.*
 ^/LICENSE.*
 ^/COPYING
