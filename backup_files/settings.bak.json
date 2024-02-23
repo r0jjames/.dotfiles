@@ -1,0 +1,38 @@
+{
+  "workbench.colorTheme": "Andromeda",
+  "workbench.iconTheme": "material-icon-theme",
+  "editor.bracketPairColorization.enabled": true,
+  "javascript.updateImportsOnFileMove.enabled": "always",
+  "editor.fontFamily": "'Monaspace Neon', monospace",
+  "editor.fontLigatures": "'calt', 'liga', 'dlig', 'ss01', 'ss02', ... (more stylistic sets) ...",
+  "git.decorations.enabled": false,
+  "workbench.editor.decorations.badges": false,
+  "gitlens.currentLine.enabled": false,
+  "gitlens.codeLens.recentChange.enabled": false,
+  "gitlens.codeLens.authors.enabled": false,
+  "git.autofetch": true,
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "window.zoomLevel": 1,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.minimap.enabled": false,
+  "editor.renderWhitespace": "none",
+  "editor.renderControlCharacters": false,
+  "files.autoSave": "afterDelay",
+  "editor.tabSize": 2,
+  "redhat.telemetry.enabled": false,
+  "launch": {
+    "configurations": [],
+    "compounds": []
+  },
+  "git.openRepositoryInParentFolders": "never",
+  "vs-kubernetes": {
+    "vscode-kubernetes.minikube-path-mac": "/Users/rojcarranza/.vs-kubernetes/tools/minikube/darwin-arm64/minikube",
+    "vscode-kubernetes.helm-path-mac": "/Users/rojcarranza/.vs-kubernetes/tools/helm/darwin-arm64/helm"
+  },
+  "search.useIgnoreFiles": false
+}
