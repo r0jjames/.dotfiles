@@ -21,8 +21,8 @@
   "vim.normalModeKeyBindingsNonRecursive": [
     // NAVIGATION
     // switch b/w buffers
-    { "before": ["<S-h>"], "commands": [":bprevious"] },
-    { "before": ["<S-l>"], "commands": [":bnext"] },
+    // { "before": ["<S-h>"], "commands": [":bprevious"] },
+    // { "before": ["<S-l>"], "commands": [":bnext"] },
 
     // splits
     { "before": ["leader", "v"], "commands": [":vsplit"] },
@@ -46,9 +46,9 @@
       "commands": ["workbench.action.focusRightGroup"]
     },
     // NICE TO HAVE
-    { "before": ["leader", "w"], "commands": [":w!"] },
-    { "before": ["leader", "q"], "commands": [":q!"] },
-    { "before": ["leader", "x"], "commands": [":x!"] },
+    // { "before": ["leader", "w"], "commands": [":w!"] },
+    // { "before": ["leader", "q"], "commands": [":q!"] },
+    // { "before": ["leader", "x"], "commands": [":x!"] },
     {
       "before": ["[", "d"],
       "commands": ["editor.action.marker.prev"]
@@ -66,8 +66,33 @@
     {
       "before": ["g", "h"],
       "commands": ["editor.action.showDefinitionPreviewHover"]
+    },
+    {
+      "before": [":"],
+      "commands": ["workbench.action.showCommands"],
+      "silent": true
+    },
+    {
+      "before": ["<leader>", "m"],
+      "commands": ["bookmarks.toggle"]
+    },
+    {
+      "before": ["<leader>", "b"],
+      "commands": ["bookmarks.list"]
+    },
+    {
+      "before": ["<leader>", "c", "b"],
+      "commands": ["bookmarks.clear"]
     }
   ],
+  "vim.insertModeKeyBindings": [
+    {
+      //exit insert mode
+      "before": ["j", "j"],
+      "after": ["<Esc>"]
+    }
+  ],
+  "vim.operatorPendingModeKeyBindings": [],
   "vim.visualModeKeyBindings": [
     // Stay in visual mode while indenting
     { "before": ["<"], "commands": ["editor.action.outdentLines"] },
@@ -88,6 +113,5 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "workbench.activityBar.location": "hidden",
   "editor.fontSize": 13
 }
