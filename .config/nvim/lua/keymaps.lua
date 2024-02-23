@@ -13,16 +13,13 @@ vim.keymap.set("n", "bd", ":bdelete<enter>", { noremap = false })
 --files
 vim.keymap.set("n", "QQ", ":q!<CR>", {})
 vim.keymap.set("n", "QA", ":qa!<CR>", {})
+vim.keymap.set("n", "WQ", ":wqa!<CR>", {})
 vim.keymap.set("n", "WW", ":w!<CR>", {})
 vim.keymap.set("n", "E", "$", {})
 --splits
 vim.keymap.set("n", "<C-W>,", ":vertical resize -10<CR><CR>", {})
 vim.keymap.set("n", "<C-W>.", ":vertical resize +10<CR>", {})
--- Options through Telescope
-vim.keymap.set("n", "<Leader><tab>", "<Cmd>lua require('telescope.builtin').commands()<CR>", { noremap = false })
-vim.keymap.set("n", "<C-f>",
-  "<cmd>Telescope current_buffer_fuzzy_find sorting_strategy=ascending prompt_position=top<CR>")
-vim.keymap.set("n", "<leader>stt", ":TodoTelescope<CR>", {})
+
 -- Go
 vim.keymap.set({ 'n', 'i' }, '<C-1>', '<Cmd>:w!<bar> GoRun -F<enter>', { noremap = false })
 -- [[ Basic Keymaps ]] -- Keymaps for better default experience
@@ -41,4 +38,4 @@ vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagn
 -- Neotree
 --vim.keymap.set("n", "<C-n>", ":Neotree filesystem reveal left<CR>", {})
 vim.keymap.set("n", "<C-n>", ":Neotree float<CR>", {})
-vim.keymap.set("n", "<leader>bf", ":Neotree buffers reveal float<CR>", {})
+vim.keymap.set("n", "<leader>.", ":Neotree buffers reveal float<CR>", {})

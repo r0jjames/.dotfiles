@@ -3,8 +3,8 @@
 ---  \ \/\/ / -_)_ /  _/ -_) '_| '  \
 ---   \_/\_/\___/__|\__\___|_| |_|_|_|
 ---
---- My Wezterm config file
-
+--- Roj's Wezterm config file
+--
 local wezterm = require("wezterm")
 local act = wezterm.action
 local mux = wezterm.mux
@@ -21,18 +21,21 @@ if wezterm.config_builder then config = wezterm.config_builder() end
 -- Settings
 config.default_prog = { zsh_path, "-l" }
 
-config.color_scheme = "Tokyo Night"
+-- config.color_scheme = "Tokyo Night"
+config.color_scheme = "Catppuccin Mocha"
+-- config.font = wezterm.font('JetBrains Mono')
 config.font = wezterm.font_with_fallback({
-	--	{ family = "Iosevka Nerd Font",       scale = 1.24, weight = "Medium", },
-	--	{ family = "CaskaydiaCove Nerd Font", scale = 1.2 },
+	-- { family = "iosevka nerd font",       scale = 1.24, weight = "medium", },
+	-- { family = "caskaydiacove nerd font", scale = 1.2 },
+	{ family = "JetBrains Mono", scale = 1.1 },
 })
 config.window_background_opacity = 0.9
 config.window_decorations = "RESIZE"
 config.window_close_confirmation = "AlwaysPrompt"
 config.scrollback_lines = 3000
 config.default_workspace = "main"
-config.font_size = 14
-config.line_height = 1.2
+config.font_size = 15
+-- config.line_height = 1.2
 config.use_fancy_tab_bar = false
 config.enable_scroll_bar = false
 config.window_padding = {
@@ -44,13 +47,18 @@ config.window_padding = {
 config.freetype_load_target = "HorizontalLcd"
 -- Dim inactive panes
 config.inactive_pane_hsb = {
-	saturation = 0.24,
+	saturation = 2.24,
 	brightness = 0.5
 }
 
 -- Keys
 config.leader = { key = "a", mods = "CMD", timeout_milliseconds = 1000 }
 config.keys = {
+	{
+		key = 'f',
+		mods = 'CTRL',
+		action = wezterm.action.ToggleFullScreen,
+	},
 	-- Send C-a when pressing C-a twice
 	{ key = "a",          mods = "LEADER|CMD", action = act.SendKey { key = "a", mods = "CMD" } },
 	{ key = "c",          mods = "LEADER",     action = act.ActivateCopyMode },

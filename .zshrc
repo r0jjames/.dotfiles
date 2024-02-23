@@ -1,8 +1,11 @@
+# PATH
+export PATH=$PATH:$(go env GOPATH)/bin
+export ZSH="$HOME/.oh-my-zsh"
+
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-
-export ZSH="$HOME/.oh-my-zsh"
+ 
 ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(
     git
@@ -86,4 +89,3 @@ lg()
 }
 # Generated for envman. Do not edit.
  [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
-
