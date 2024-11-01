@@ -2,6 +2,11 @@
 [
   // NAVIGATION
   {
+    "key": "tab",
+    "command": "tab",
+    "when": ""
+  },
+  {
     "key": "ctrl+shift+a",
     "command": "workbench.action.terminal.focusNext",
     "when": "terminalFocus"
@@ -11,9 +16,14 @@
     "command": "workbench.action.terminal.focusPrevious",
     "when": "terminalFocus"
   },
+  // {
+  //   "key": "ctrl+shift+j",
+  //   "command": "workbench.action.togglePanel"
+  // },
+  // Terminal
   {
-    "key": "ctrl+shift+j",
-    "command": "workbench.action.togglePanel"
+    "key": "ctrl+alt+m",
+    "command": "workbench.action.toggleMaximizedPanel"
   },
   {
     "key": "ctrl+shift+n",
@@ -28,11 +38,11 @@
   // FILE TREE
   {
     "command": "workbench.action.toggleSidebarVisibility",
-    "key": "ctrl+e"
+    "key": "cmd+e"
   },
   {
     "command": "workbench.files.action.focusFilesExplorer",
-    "key": "ctrl+e",
+    "key": "cmd+e",
     "when": "editorTextFocus"
   },
   {
@@ -50,17 +60,18 @@
     "command": "explorer.newFolder",
     "when": "explorerViewletFocus"
   },
-  {
-    "key": "shift+n",
-    "command": "workbench.action.newWindow",
-    "when": "!explorerViewletFocus"
-  },
+  // {
+  //   "key": "shift+n",
+  //   "command": "workbench.action.newWindow",
+  //   "when": "!explorerViewletFocus"
+  // },
   {
     "command": "deleteFile",
     "key": "d",
     "when": "filesExplorerFocus && !inputFocus"
   },
 
+  { "key": "ctrl+f", "command": "workbench.action.quickOpen" },
   // EXTRA
   {
     "key": "ctrl+shift+5",
@@ -102,5 +113,13 @@
   {
     "key": "cmd+5",
     "command": "workbench.action.openEditorAtIndex5"
+  },
+  {
+    "key": "alt+t",
+    "command": "go.test.cursor"
+  },
+  {
+    "key": "alt+y",
+    "command": "go.test.coverage"
   }
 ]

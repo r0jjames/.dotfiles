@@ -2,6 +2,13 @@
 export PATH=$PATH:$(go env GOPATH)/bin
 export ZSH="$HOME/.oh-my-zsh"
 
+# KAFKA
+export KAFKA_HOME=$(brew --prefix kafka)
+export PATH=$PATH:$KAFKA_HOME/bin
+
+# Postgres
+export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
+
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
@@ -31,9 +38,6 @@ alias rest="timer 5m && terminal-notifier -message 'Pomodoro'\
         -sound Crystal"
 # Shortcut to nvim
 alias v='nvim'
-# Shortcut to Kubectl
-alias k='kubectl'
-alias kubectl="minikube kubectl --"
 # Make ls beautiful
 alias ls='colorls'
 # Press c to clear the terminal screen.
@@ -76,6 +80,10 @@ alias sep='cal -m 09'
 alias oct='cal -m 10'
 alias nov='cal -m 11'
 alias dec='cal -m 12'
+
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$SDKMAN_DIR/bin/sdkman-init.sh" ]] && source "$SDKMAN_DIR/bin/sdkman-init.sh"
+
 lg()
 {
     export LAZYGIT_NEW_DIR_FILE=~/.lazygit/newdir
@@ -87,5 +95,9 @@ lg()
             rm -f $LAZYGIT_NEW_DIR_FILE > /dev/null
     fi
 }
+# Python
+eval "$(pyenv init --path)"
+# DBT
+alias env_dbt='source /Users/rojcarranza/dbt-env/bin/activate'
 # Generated for envman. Do not edit.
  [ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"

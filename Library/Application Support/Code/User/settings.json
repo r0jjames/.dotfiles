@@ -1,4 +1,78 @@
 {
+  //----anthdm -Anthony De Meulemeester
+  "editor.scrollbar.vertical": "hidden",
+  "editor.scrollbar.horizontal": "hidden",
+  "editor.matchBrackets": "never",
+  "editor.hideCursorInOverviewRuler": true,
+  "editor.overviewRulerBorder": false,
+  "editor.glyphMargin": false,
+  // This is for making the base-atelier-dune theme looks smooth on the variables
+  "editor.tokenColorCustomizations": {
+    //"variables": "#a6a28c",
+    "comments": "#2ea542"
+  },
+  // Suggestions
+  "editor.wordBasedSuggestions": "off",
+  "editor.acceptSuggestionOnEnter": "on",
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": false
+  },
+  "editor.roundedSelection": false,
+  "editor.renderLineHighlight": "none",
+  "editor.cursorStyle": "block",
+  "editor.cursorBlinking": "solid",
+  "editor.folding": false,
+  "editor.autoClosingBrackets": "never",
+  "editor.insertSpaces": false,
+  "diffEditor.renderSideBySide": false,
+  // Vim setup
+  "vim.enableNeovim": false,
+  "vim.neovimPath": "/usr/bin/nvim",
+  "vim.searchHighlightColor": "rgba(150, 255, 255, 0.3)",
+  "vim.cursorStylePerMode.insert": "block",
+  "vim.easymotion": true,
+  "vim.incsearch": true,
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.handleKeys": {
+    "<C-a>": false,
+    "<C-f>": false
+  },
+  "workbench.startupEditor": "newUntitledFile",
+  "javascript.format.enable": false,
+  "window.closeWhenEmpty": true,
+  "diffEditor.renderIndicators": false,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "go.buildFlags": ["-v"],
+  "go.useLanguageServer": true,
+  "go.testEnvFile": "",
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "editor.cursorSurroundingLines": 10,
+  "workbench.enableExperiments": false,
+  "explorer.compactFolders": false,
+  "telemetry.telemetryLevel": "off",
+  "vim.cursorStylePerMode.normal": "block",
+  "vim.neovimUseConfigFile": true,
+  "explorer.confirmDragAndDrop": false,
+  "editor.tabSize": 4,
+  "editor.wordSeparators": "/\\()\"':,.;<>~!@#$%^&*|+=[]{}`?-",
+  "editor.wordWrap": "off",
+  "extensions.ignoreRecommendations": true,
+  "editor.guides.indentation": false,
+  "workbench.colorCustomizations": {
+    // "editorError.foreground": "#3a2525",
+    // "editorWarning.foreground": "#00000000",
+    // "editorInfo.foreground": "#00000000",
+  },
+  //----anthdm -Anthony De Meulemeester
+
   // "editor.fontFamily": "'Monaspace Neon', monospace",
   "editor.fontFamily": "Jetbrains Mono",
   "editor.formatOnSave": true,
@@ -7,14 +81,13 @@
   "editor.linkedEditing": true,
   "javascript.updateImportsOnFileMove.enabled": "always",
   "window.zoomLevel": 0.5,
-  "launch": {},
-  "[json]": {},
-  "workbench.statusBar.visible": false,
   "editor.minimap.enabled": false,
-  "workbench.iconTheme": "material-icon-theme",
+  "workbench.iconTheme": "eq-material-theme-icons-palenight",
   "update.showReleaseNotes": false,
   "zenMode.hideLineNumbers": false,
   "editor.lineNumbers": "relative",
+  "editor.fontSize": 14,
+  "breadcrumbs.enabled": false,
 
   "vim.leader": "<Space>",
   "vim.hlsearch": true,
@@ -61,7 +134,8 @@
       "before": ["<leader>", "c", "a"],
       "commands": ["editor.action.quickFix"]
     },
-    { "before": ["leader", "f"], "commands": ["workbench.action.quickOpen"] },
+    // { "before": ["leader", "f"], "commands": ["workbench.action.quickOpen"] },
+
     { "before": ["leader", "p"], "commands": ["editor.action.formatDocument"] },
     {
       "before": ["g", "h"],
@@ -90,6 +164,11 @@
       //exit insert mode
       "before": ["j", "j"],
       "after": ["<Esc>"]
+    },
+    {
+      //exit insert mode
+      "before": ["k", "k"],
+      "after": ["<Esc>"]
     }
   ],
   "vim.operatorPendingModeKeyBindings": [],
@@ -113,5 +192,92 @@
   "[jsonc]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
-  "editor.fontSize": 13
+
+  "workbench.editor.empty.hint": "hidden",
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Launch Package",
+        "type": "go",
+        "request": "launch",
+        "mode": "auto",
+        // "program": "main.go"
+        "program": "${fileDirname}"
+      }
+    ]
+  },
+  // Go test with Code Coverage on save
+  "go.coverOnSave": true,
+  "go.coverageDecorator": {
+    "type": "gutter",
+    // "type": "highlight",
+    "coveredHighlightColor": "rgba(64,128,128,0.5)",
+    "uncoveredHighlightColor": "rgba(128,64,64,0.25)",
+    "coveredGutterStyle": "blockgreen",
+    "uncoveredGutterStyle": "blockred"
+  },
+  "go.coverOnSingleTest": true,
+  "hediet.vscode-drawio.resizeImages": null,
+  "code-runner.executorMap": {
+    "javascript": "node",
+    "java": "cd $dir && javac $fileName && java $fileNameWithoutExt",
+    "c": "cd $dir && gcc $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "zig": "zig run",
+    "cpp": "cd $dir && g++ $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "objective-c": "cd $dir && gcc -framework Cocoa $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "php": "php",
+    "python": "python3",
+    "perl": "perl",
+    "perl6": "perl6",
+    "ruby": "ruby",
+    "go": "go run",
+    "lua": "lua",
+    "groovy": "groovy",
+    "powershell": "powershell -ExecutionPolicy ByPass -File",
+    "bat": "cmd /c",
+    "shellscript": "bash",
+    "fsharp": "fsi",
+    "csharp": "scriptcs",
+    "vbscript": "cscript //Nologo",
+    "typescript": "ts-node",
+    "coffeescript": "coffee",
+    "scala": "scala",
+    "swift": "swift",
+    "julia": "julia",
+    "crystal": "crystal",
+    "ocaml": "ocaml",
+    "r": "Rscript",
+    "applescript": "osascript",
+    "clojure": "lein exec",
+    "haxe": "haxe --cwd $dirWithoutTrailingSlash --run $fileNameWithoutExt",
+    "rust": "cd $dir && rustc $fileName && $dir$fileNameWithoutExt",
+    "racket": "racket",
+    "scheme": "csi -script",
+    "ahk": "autohotkey",
+    "autoit": "autoit3",
+    "dart": "dart",
+    "pascal": "cd $dir && fpc $fileName && $dir$fileNameWithoutExt",
+    "d": "cd $dir && dmd $fileName && $dir$fileNameWithoutExt",
+    "haskell": "runghc",
+    "nim": "nim compile --verbosity:0 --hints:off --run",
+    "lisp": "sbcl --script",
+    "kit": "kitc --run",
+    "v": "v run",
+    "sass": "sass --style expanded",
+    "scss": "scss --style expanded",
+    "less": "cd $dir && lessc $fileName $fileNameWithoutExt.css",
+    "FortranFreeForm": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "fortran-modern": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "fortran_fixed-form": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "fortran": "cd $dir && gfortran $fileName -o $fileNameWithoutExt && $dir$fileNameWithoutExt",
+    "sml": "cd $dir && sml $fileName",
+    "mojo": "mojo run",
+    "erlang": "escript",
+    "spwn": "spwn build",
+    "pkl": "cd $dir && pkl eval -f yaml $fileName -o $fileNameWithoutExt.yaml",
+    "gleam": "gleam run -m $fileNameWithoutExt"
+  },
+  "gitlens.rebaseEditor.ordering": "asc",
+  "security.workspace.trust.untrustedFiles": "open"
 }

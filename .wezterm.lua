@@ -10,7 +10,7 @@ local act = wezterm.action
 local mux = wezterm.mux
 wezterm.on('gui-startup', function()
 	local tab, pane, window = mux.spawn_window({})
-	window:gui_window():maximize()
+--	window:gui_window():maximize()
 end)
 
 local zsh_path = "zsh"
@@ -29,12 +29,12 @@ config.font = wezterm.font_with_fallback({
 	-- { family = "caskaydiacove nerd font", scale = 1.2 },
 	{ family = "JetBrains Mono", scale = 1.1 },
 })
-config.window_background_opacity = 0.9
+-- config.window_background_opacity = 0.9
 config.window_decorations = "RESIZE"
 config.window_close_confirmation = "AlwaysPrompt"
 config.scrollback_lines = 3000
 config.default_workspace = "main"
-config.font_size = 15
+config.font_size = 13
 -- config.line_height = 1.2
 config.use_fancy_tab_bar = false
 config.enable_scroll_bar = false
