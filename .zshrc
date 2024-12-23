@@ -9,6 +9,10 @@ export PATH=$PATH:$KAFKA_HOME/bin
 # Postgres
 export PATH="/opt/homebrew/opt/postgresql@16/bin:$PATH"
 
+# GNU Utilities
+export PATH="/opt/homebrew/opt/coreutils/libexec/gnubin:$PATH"
+
+
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
