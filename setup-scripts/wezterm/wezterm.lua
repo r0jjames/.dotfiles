@@ -3,7 +3,7 @@
 ---  \ \/\/ / -_)_ /  _/ -_) '_| '  \
 ---   \_/\_/\___/__|\__\___|_| |_|_|_|
 ---
---- Roj's IDE-style WezTerm launcher
+--- roj-wezterm-setup
 
 local wezterm = require("wezterm")
 require("events")
@@ -30,8 +30,9 @@ config.window_padding = {
 -- ======================
 -- Cursor
 -- ======================
+
 config.default_cursor_style = "BlinkingBar"
--- config.cursor_blink_rate = 600
+
 
 -- ======================
 -- Window
@@ -55,6 +56,7 @@ config.color_scheme = "Nord (Gogh)"
 -- ======================
 -- Background
 -- ======================
+
 config.background = {
     {
         source = {
@@ -78,13 +80,10 @@ config.background = {
     },
 }
 
-
-
-
-
 -- ======================
 -- Keys
 -- ======================
+
 config.keys = {
     { key = "Enter",      mods = "CMD|SHIFT", action = wezterm.action.ToggleFullScreen },
     -- Create new tab
@@ -103,6 +102,7 @@ config.keys = {
 -- ======================
 -- Hyperlink rules (optional, colorful)
 -- ======================
+
 config.hyperlink_rules = {
     {
         regex = "\\b(https?://\\S+)\\b",
