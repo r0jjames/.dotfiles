@@ -1,9 +1,49 @@
 local wezterm = require("wezterm")
 local mux = wezterm.mux
 
-wezterm.on("gui-startup", function()
-  local _, _, window = mux.spawn_window({})
-  window:gui_window():maximize()
+wezterm.on("gui-startup", function(cmd)
+  -- spawn a window (tab, pane, window)
+  local tab, pane, window = mux.spawn_window(cmd or {})
+
+  -- desired terminal grid size (cols x rows) — adjust as needed
+  local DESIRED_COLS = 250
+  local DESIRED_ROWS = 100
+
+  -- try to compute actual character cell size from the spawned pane
+  local cell_w, cell_h
+  if pane then
+    local pd = pane:get_dimensions()
+    if pd and pd.viewport_cols and pd.viewport_rows and pd.pixel_width and pd.pixel_height then
+      cell_w = pd.pixel_width / pd.viewport_cols
+      cell_h = pd.pixel_height / pd.viewport_rows
+    end
+  end
+
+  -- sensible fallbacks if we couldn't measure
+  cell_w = cell_w or 8  -- tweak if text looks too wide/too narrow
+  cell_h = cell_h or 18 -- tweak if text looks too tall/too short
+
+  local width_px = math.floor(DESIRED_COLS * cell_w)
+  local height_px = math.floor(DESIRED_ROWS * cell_h)
+
+  local gui_win = window:gui_window()
+
+  -- set inner pixel size
+  gui_win:set_inner_size(width_px, height_px)
+
+  -- try to center on the main screen
+  local screens = wezterm.gui.screens()
+  -- screens() may return array-like; try index 1 first, then .main
+  local screen = (screens and screens[1]) or screens and screens.main
+
+  if screen and screen.width and screen.height then
+    local x = math.floor((screen.width - width_px) / 2)
+    local y = math.floor((screen.height - height_px) / 2)
+    gui_win:set_position(x, y)
+  else
+    -- fallback: maximize if we can't get screen geometry
+    gui_win:maximize()
+  end
 end)
 
 -- wezterm.on("window-resized", function(window, pane)

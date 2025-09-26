@@ -33,14 +33,13 @@ config.window_padding = {
 config.default_cursor_style = "BlinkingBar"
 -- config.cursor_blink_rate = 600
 
+
 -- ======================
 -- Window
 -- ======================
 -- Window size
 -- config.initial_cols = 168
 -- config.initial_rows = 55
-
-
 
 config.automatically_reload_config = true
 config.window_close_confirmation = "NeverPrompt"
@@ -61,38 +60,35 @@ config.color_scheme = "Nord (Gogh)"
 -- ======================
 config.background = {
     {
-        source = { 
-			File = "/Users/roj/Pictures/Wallpapers/Landscape/circus.jpg",
-		}, 
-		hsb = {
-			hue = 1.0,
-			saturation = 1.02,
-			brightness = 0.25,
-	    },
+        source = {
+            File = "/Users/roj/Pictures/Wallpapers/Landscape/circus.jpg",
+        },
+        hsb = {
+            hue = 1.0,
+            saturation = 1.02,
+            brightness = 0.25,
+        },
         width = "100%",
         height = "100%",
-   	},
-	{
-		source = {
-			Color = "#282c35",
-		},
-		width = "100%",
-		height = "100%",
-		opacity = 0.55,
-	},
+    },
+    {
+        source = {
+            Color = "#282c35",
+        },
+        width = "100%",
+        height = "100%",
+        opacity = 0.55,
+    },
 }
-
-
-
 
 
 -- ======================
 -- Keys
 -- ======================
 config.keys = {
-	{ key = "Enter", mods = "CMD|SHIFT", action = wezterm.action.ToggleFullScreen },
-    { key = "Enter", mods = "CTRL", action = wezterm.action({ SendString = "\x1b[13;5u" }) },
-    { key = "Enter", mods = "SHIFT", action = wezterm.action({ SendString = "\x1b[13;2u" }) },
+    { key = "Enter", mods = "CMD|SHIFT", action = wezterm.action.ToggleFullScreen },
+    { key = "Enter", mods = "CTRL",      action = wezterm.action({ SendString = "\x1b[13;5u" }) },
+    { key = "Enter", mods = "SHIFT",     action = wezterm.action({ SendString = "\x1b[13;2u" }) },
 }
 
 -- ======================
