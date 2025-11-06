@@ -60,7 +60,7 @@ config.color_scheme = "Nord (Gogh)"
 config.background = {
     {
         source = {
-            File = "/Users/roj/Pictures/Wallpapers/Landscape/circus.jpg",
+            Color = "#282c35"
         },
         hsb = {
             hue = 1.0,
