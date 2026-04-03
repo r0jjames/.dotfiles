@@ -12,6 +12,10 @@ else
 fi
 
 # font
+if brew install --cask font-ubuntu-mono &>/dev/null; then
+  echo "✅ font-ubuntu font installed"
+fi
+
 if brew install --cask font-go-mono-nerd-font &>/dev/null; then
   echo "✅ Go mono nerd font installed"
 else
