@@ -23,6 +23,9 @@ else
   brew install --cask font-go-mono-nerd-font
 fi
 
+# Shell stack (oh-my-zsh, p10k, plugins, .zshrc) is owned by setup-zsh.sh
+"$(dirname "$0")/setup-zsh.sh"
+
 # Create wezterm config directory
 echo "📂 Creating WezTerm config folder..."
 mkdir -p ~/.config/wezterm
