@@ -6,7 +6,7 @@ if ! command -v brew &> /dev/null; then
 fi
 
 # Install iTerm2 if not already installed
-if ! brew list --cask iterm2 &> /dev/null; then
+if [ ! -d "/Applications/iTerm.app" ]; then
   brew install --cask iterm2
 fi
 
