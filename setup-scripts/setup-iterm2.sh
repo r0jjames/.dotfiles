@@ -49,7 +49,7 @@ if ! grep -q "ZSH_THEME=\"powerlevel10k/powerlevel10k\"" ~/.zshrc; then
 fi
 
 # Update .zshrc plugins if not already set
-if ! grep -q "plugins=(\n  git\n  docker" ~/.zshrc; then
+if ! grep -q "zsh-syntax-highlighting" ~/.zshrc; then
   sed -i '' 's/^plugins=.*/plugins=(\n  git\n  docker\n  docker-compose\n  kubectl\n  helm\n  terraform\n  ansible\n  aws\n  ssh-agent\n  zsh-autosuggestions\n  zsh-syntax-highlighting\n)/' ~/.zshrc
 fi
 
