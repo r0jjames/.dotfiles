@@ -75,6 +75,11 @@ if [ -f ./nvim/init.lua ]; then
   cp ./nvim/init.lua ~/.config/nvim/init.lua
 fi
 
+if [ -f ./nvim/README.md ]; then
+  # Usage cheatsheet, so `:e ~/.config/nvim/README.md` works in-editor.
+  cp ./nvim/README.md ~/.config/nvim/README.md
+fi
+
 if [ -d ./nvim/lua ]; then
   # Refresh the lua/ tree so removed modules don't linger.
   rm -rf ~/.config/nvim/lua
