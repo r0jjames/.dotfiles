@@ -15,7 +15,9 @@ return {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
-      options = { theme = "catppuccin" },
+      -- "auto" derives colors from the active colorscheme (catppuccin) without a
+      -- load-order dependency on the theme's lualine module.
+      options = { theme = "auto" },
     },
   },
 
