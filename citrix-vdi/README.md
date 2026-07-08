@@ -43,9 +43,17 @@ Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
 
 In **Citrix Workspace app → Preferences (⌘,) → Keyboard**:
 
-- **"Send Alt using"** (or "Left Option key"): set so Option sends **Alt**.
-- Review the Command-key setting — leave it as **Command (Windows key)**
-  unless you want Cmd shortcuts forwarded differently.
+- **"Send Alt character using"**: default is `⌘⌥ Command (left)-Option`,
+  which means plain Option does NOT send Alt. Change it to the **⌥ Option**
+  variant if the dropdown offers one.
+- **Uncheck "Send F1 - F12 keys with ⌥ Option and the corresponding keypad
+  keys"** — Citrix's own F-key emulation hijacks Option+key combos and
+  fights both the Karabiner rule and Option-as-Alt.
+- If the dropdown has no plain-Option choice: set **Keyboard input mode →
+  Scancode** (instead of Automatic). Scancode mode sends raw PC scancodes —
+  Option physically becomes Alt, Command becomes the Windows key, and the
+  whole "Unicode mode" shortcut section stops applying.
+- **Disconnect and reconnect the VDI session** after changing these.
 
 Exact labels vary by Citrix Workspace version; the intent is: **Option must
 reach the VDI as Alt**.
