@@ -39,22 +39,10 @@ Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
 2. Go to **Complex Modifications → Add predefined rule**.
 3. Enable **"Citrix VDI: F1-F12 as function keys (with any modifiers)"**.
 4. Enable **"Citrix VDI: Left Command as Alt (all keyboards)"** — makes the
-   key next to the spacebar send Alt on the MacBook keyboard and on external
-   keyboards in Mac mode, so every keyboard feels the same. Right Command
-   still sends the Windows key. Note: an external keyboard in Windows mode
-   already sends Alt from that position; its Win-position key (which sends
-   Command) also becomes Alt inside the VDI — use Mac mode on external
-   keyboards for consistent behavior.
-
-5. Enable **"NuPhy (Windows mode): Mac feel outside Citrix (swap
-   Option/Command)"** if you use a NuPhy external keyboard. The NuPhy stays
-   in **Windows mode permanently**: inside Citrix its Cmd-position key sends
-   Alt natively; outside Citrix this rule swaps Option↔Command so
-   copy/paste and all Mac shortcuts feel identical to the built-in
-   keyboard. (Needed because the NuPhy's Mac mode sends the Cmd key in a
-   form Karabiner never receives over Bluetooth, so it can't be remapped
-   there.) Scoped to the NuPhy (vendor id 2007) — other keyboards
-   unaffected.
+   key next to the spacebar send Alt inside the VDI on the MacBook
+   keyboard. Right Command still sends the Windows key. (Despite the name,
+   it only affects keyboards Karabiner grabs — see the NuPhy section for
+   why the external keyboard is handled differently.)
 
 > Enabled rules are a copy — if this repo's rule file changes later, re-run
 > the installer, then remove and re-add the rules in Karabiner to pick up
@@ -78,6 +66,25 @@ In **Citrix Workspace app → Preferences (⌘,) → Keyboard**:
 
 Exact labels vary by Citrix Workspace version; the intent is: **Option must
 reach the VDI as Alt**.
+
+### 4. NuPhy external keyboard (one time) — *run on: Mac*
+
+Karabiner cannot reliably grab the NuPhy over Bluetooth (with "Modify
+events" on, its keys stop reaching Citrix correctly), so the NuPhy is
+configured *outside* Karabiner:
+
+1. **Karabiner-Elements → Settings → Devices**: leave **Modify events OFF**
+   for the NuPhy. Karabiner rules never apply to it — that's intended.
+2. Keep the NuPhy in **Windows mode permanently** (no more mode
+   switching). Inside the VDI its Cmd-position key sends Alt natively.
+3. **System Settings → Keyboard → Keyboard Shortcuts → Modifier Keys**,
+   select the NuPhy in the keyboard dropdown, then swap:
+   - **Control (⌃) key → ⌘ Command**
+   - **Command (⌘) key → ⌃ Control**
+
+   Result: the Ctrl-position key copies/pastes on the Mac (Windows feel)
+   and still acts as Ctrl inside the VDI, because the Citrix preference
+   "Send Control character using ⌘ Command (left)" converts it back.
 
 ## Diagnostic — *performed inside the VDI session (changes nothing there)*
 
