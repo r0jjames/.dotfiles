@@ -24,7 +24,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -49,7 +50,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -74,7 +76,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -99,7 +102,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -124,7 +128,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -149,7 +154,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -174,7 +180,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -199,7 +206,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -224,7 +232,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -249,7 +258,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -274,7 +284,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -299,7 +310,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -329,7 +341,8 @@
               "type": "frontmost_application_if",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             }
           ]
@@ -359,7 +372,8 @@
               "type": "frontmost_application_unless",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             },
             {
@@ -392,7 +406,8 @@
               "type": "frontmost_application_unless",
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
-                "^com\\.citrix\\.XenAppViewer$"
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
               ]
             },
             {
