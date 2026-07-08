@@ -46,6 +46,16 @@ Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
    Command) also becomes Alt inside the VDI — use Mac mode on external
    keyboards for consistent behavior.
 
+5. Enable **"NuPhy (Windows mode): Mac feel outside Citrix (swap
+   Option/Command)"** if you use a NuPhy external keyboard. The NuPhy stays
+   in **Windows mode permanently**: inside Citrix its Cmd-position key sends
+   Alt natively; outside Citrix this rule swaps Option↔Command so
+   copy/paste and all Mac shortcuts feel identical to the built-in
+   keyboard. (Needed because the NuPhy's Mac mode sends the Cmd key in a
+   form Karabiner never receives over Bluetooth, so it can't be remapped
+   there.) Scoped to the NuPhy (vendor id 2007) — other keyboards
+   unaffected.
+
 > Enabled rules are a copy — if this repo's rule file changes later, re-run
 > the installer, then remove and re-add the rules in Karabiner to pick up
 > the new version.
