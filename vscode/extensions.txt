@@ -1,0 +1,69 @@
+# VS Code extensions installed by vscode/setup.sh (one id per line, # = comment)
+
+# ---- Themes / UI ----
+vscode-icons-team.vscode-icons
+oderwat.indent-rainbow
+
+# ---- AI ----
+anthropic.claude-code
+yahyashareef.claude-code-usage-tracker
+
+# ---- DevOps ----
+ms-azuretools.vscode-docker
+ms-azuretools.vscode-containers
+ms-kubernetes-tools.vscode-kubernetes-tools
+kennylong.kubernetes-yaml-formatter
+kubescape.kubescape
+redhat.vscode-yaml
+tamasfe.even-better-toml
+hediet.vscode-drawio
+
+# ---- Remote (WSL / SSH / containers) ----
+ms-vscode-remote.vscode-remote-extensionpack
+ms-vscode-remote.remote-wsl
+ms-vscode-remote.remote-ssh
+ms-vscode-remote.remote-ssh-edit
+ms-vscode-remote.remote-containers
+ms-vscode.remote-explorer
+ms-vscode.remote-server
+
+# ---- Git ----
+mhutchie.git-graph
+github.vscode-pull-request-github
+
+# ---- Python ----
+ms-python.python
+ms-python.vscode-pylance
+ms-python.debugpy
+ms-python.pylint
+ms-python.autopep8
+ms-python.vscode-python-envs
+
+# ---- Java ----
+vscjava.vscode-java-pack
+redhat.java
+vscjava.vscode-java-debug
+vscjava.vscode-java-dependency
+vscjava.vscode-maven
+
+# ---- Go ----
+golang.go
+
+# ---- JS ----
+dbaeumer.vscode-eslint
+
+# ---- Markdown ----
+bierner.github-markdown-preview
+bierner.markdown-preview-github-styles
+bierner.markdown-mermaid
+bierner.markdown-checkbox
+bierner.markdown-emoji
+bierner.markdown-footnotes
+
+# ---- Editor utilities ----
+alefragnani.bookmarks
+christian-kohler.path-intellisense
+formulahendry.code-runner
+k--kato.intellij-idea-keybindings
+sumneko.lua
+tomoki1207.pdf
