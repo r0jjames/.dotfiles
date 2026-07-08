@@ -50,6 +50,7 @@ Installs Homebrew (if missing), then sets up everything below. Open a new termin
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
 | [`terminal-macos/`](terminal-macos/README.md) | Terminal.app themes + font | macOS only |
 | [`iterm2/`](iterm2/README.md) | iTerm2 + theme profile + shell integration | macOS only |
+| [`citrix-vdi/`](citrix-vdi/README.md) | Karabiner rule so Windows IDE shortcuts (Alt+F1, …) work in Citrix VDI | macOS only |
 | `lib/` | Shared script helpers (OS detection, brew, symlinking) | — |
 | `docs/` | Design specs and plans | — |
 | `archived/` | Old configs and retired scripts, kept for reference | — |
