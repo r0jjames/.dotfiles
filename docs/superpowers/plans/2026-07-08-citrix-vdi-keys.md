@@ -1,6 +1,6 @@
 # Citrix VDI Keyboard Fix Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Make Windows IDE shortcuts (`Alt+F1`, `Alt+F7`, `Shift+F6`, …) work from a Mac inside a Citrix Windows VDI, with no behavior change outside the VDI and no changes inside the VDI.
 
@@ -31,7 +31,7 @@
 **Interfaces:**
 - Produces: `citrix-vdi/karabiner-citrix.json` — copied verbatim by Task 2's `setup.sh`. Rule title shown in the Karabiner GUI: **"Citrix VDI: F1-F12 as function keys (with any modifiers)"**.
 
-- [ ] **Step 1: Write the rule file**
+- [x] **Step 1: Write the rule file**
 
 Twelve manipulators, one per F-key. Condition matches Citrix Viewer bundle ids (`com.citrix.receiver.icaviewer.mac` is the current Citrix Workspace session window; `com.citrix.XenAppViewer` covers older installs). `"modifiers": {"optional": ["any"]}` lets `Alt+F1`, `Ctrl+Alt+F7`, `Shift+F6` pass through intact.
 
@@ -218,12 +218,12 @@ Create `citrix-vdi/karabiner-citrix.json`:
 }
 ```
 
-- [ ] **Step 2: Validate JSON parses**
+- [x] **Step 2: Validate JSON parses**
 
 Run: `python3 -m json.tool citrix-vdi/karabiner-citrix.json > /dev/null && echo VALID`
 Expected: `VALID`
 
-- [ ] **Step 3: Verify 12 manipulators, all f1-f12 covered, from == to**
+- [x] **Step 3: Verify 12 manipulators, all f1-f12 covered, from == to**
 
 Run:
 
@@ -244,7 +244,7 @@ EOF
 
 Expected: `OK: 12 manipulators, f1-f12, modifiers optional any, Citrix-scoped`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add citrix-vdi/karabiner-citrix.json
@@ -262,7 +262,7 @@ git commit -m "Add Karabiner Citrix-scoped F-key rule"
 - Consumes: `citrix-vdi/karabiner-citrix.json` (Task 1); `lib/common.sh` helpers `detect_os`, `ensure_brew`, `brew_install`, `info`, `ok`, `skip`.
 - Produces: `citrix-vdi/setup.sh`, runnable standalone or via `install.sh` (Task 4). Installs the rule file to `~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json`.
 
-- [ ] **Step 1: Write setup.sh**
+- [x] **Step 1: Write setup.sh**
 
 Create `citrix-vdi/setup.sh` (mode 755):
 
@@ -306,12 +306,12 @@ ok "citrix-vdi setup complete. One-time manual steps remain (Karabiner rule enab
 
 Then: `chmod +x citrix-vdi/setup.sh`
 
-- [ ] **Step 2: Syntax check**
+- [x] **Step 2: Syntax check**
 
 Run: `bash -n citrix-vdi/setup.sh && echo SYNTAX-OK`
 Expected: `SYNTAX-OK`
 
-- [ ] **Step 3: Run twice, verify idempotent**
+- [x] **Step 3: Run twice, verify idempotent**
 
 Run: `bash citrix-vdi/setup.sh && echo --- && bash citrix-vdi/setup.sh`
 Expected first run: installs Karabiner-Elements cask if missing (or `✅ Karabiner-Elements already installed.`), then `📦 Installing Karabiner Citrix rule...`
@@ -320,7 +320,7 @@ Expected second run: every line `✅` (already installed / already up to date), 
 Verify rule landed: `diff citrix-vdi/karabiner-citrix.json ~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json && echo SAME`
 Expected: `SAME`
 
-- [ ] **Step 4: Commit**
+- [x] **Step 4: Commit**
 
 ```bash
 git add citrix-vdi/setup.sh
@@ -338,7 +338,7 @@ git commit -m "Add citrix-vdi setup script (Karabiner install + rule copy)"
 - Consumes: rule title from Task 1 ("Citrix VDI: F1-F12 as function keys (with any modifiers)"); `setup.sh` behavior from Task 2.
 - Produces: user-facing doc referenced by `setup.sh`'s completion message.
 
-- [ ] **Step 1: Write README.md**
+- [x] **Step 1: Write README.md**
 
 Create `citrix-vdi/README.md`:
 
@@ -425,7 +425,7 @@ keys must still act as media keys. The Karabiner rule only fires while the
 Citrix Viewer window is frontmost.
 ```
 
-- [ ] **Step 2: Commit**
+- [x] **Step 2: Commit**
 
 ```bash
 git add citrix-vdi/README.md
@@ -443,7 +443,7 @@ git commit -m "Add citrix-vdi README (manual steps, diagnostics, run-on-Mac mark
 - Consumes: `citrix-vdi/setup.sh` (Task 2) — `install.sh` requires `$tool/setup.sh` to exist.
 - Produces: `./install.sh citrix-vdi` works; full `./install.sh` includes it on macOS, skips it on Linux.
 
-- [ ] **Step 1: Add citrix-vdi to ALL_TOOLS and MAC_ONLY**
+- [x] **Step 1: Add citrix-vdi to ALL_TOOLS and MAC_ONLY**
 
 In `install.sh`, change lines 13–14 from:
 
@@ -459,12 +459,12 @@ ALL_TOOLS=(zsh starship nvim wezterm vscode terminal-macos iterm2 citrix-vdi)
 MAC_ONLY=(terminal-macos iterm2 citrix-vdi)
 ```
 
-- [ ] **Step 2: Run via installer, verify**
+- [x] **Step 2: Run via installer, verify**
 
 Run: `./install.sh citrix-vdi`
 Expected: `===== citrix-vdi =====` banner, then all `✅` lines (idempotent — Task 2 already installed everything), ending `✅ All done. ...`
 
-- [ ] **Step 3: Commit**
+- [x] **Step 3: Commit**
 
 ```bash
 git add install.sh
