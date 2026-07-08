@@ -52,39 +52,33 @@ Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
 
 In **Citrix Workspace app → Preferences (⌘,) → Keyboard**:
 
-- **"Send Alt character using"**: default is `⌘⌥ Command (left)-Option`,
-  which means plain Option does NOT send Alt. Change it to the **⌥ Option**
-  variant if the dropdown offers one.
-- **Uncheck "Send F1 - F12 keys with ⌥ Option and the corresponding keypad
-  keys"** — Citrix's own F-key emulation hijacks Option+key combos and
-  fights both the Karabiner rule and Option-as-Alt.
-- If the dropdown has no plain-Option choice: set **Keyboard input mode →
-  Scancode** (instead of Automatic). Scancode mode sends raw PC scancodes —
-  Option physically becomes Alt, Command becomes the Windows key, and the
-  whole "Unicode mode" shortcut section stops applying.
-- **Disconnect and reconnect the VDI session** after changing these.
-
-Exact labels vary by Citrix Workspace version; the intent is: **Option must
-reach the VDI as Alt**.
+- Set **Keyboard input mode → Scancode** (instead of Automatic). Scancode
+  mode sends raw PC scancodes: the Option key physically becomes Alt,
+  Command becomes the Windows key, Control stays Control, and the entire
+  "Unicode mode" shortcut section stops applying. This matters because some
+  Citrix versions offer no plain-Option choice for "Send Alt character
+  using" — in Unicode mode Alt would need a two-key chord.
+- **Disconnect and reconnect the VDI session** after changing this.
 
 ### 4. NuPhy external keyboard (one time) — *run on: Mac*
 
-Karabiner cannot reliably grab the NuPhy over Bluetooth (with "Modify
-events" on, its keys stop reaching Citrix correctly), so the NuPhy is
-configured *outside* Karabiner:
+Karabiner cannot grab the NuPhy over **Bluetooth** (grabbed keys stop
+flowing), but works fine over the **2.4G dongle** or USB cable:
 
-1. **Karabiner-Elements → Settings → Devices**: leave **Modify events OFF**
-   for the NuPhy. Karabiner rules never apply to it — that's intended.
-2. Keep the NuPhy in **Windows mode permanently** (no more mode
-   switching). Inside the VDI its Cmd-position key sends Alt natively.
-3. **System Settings → Keyboard → Keyboard Shortcuts → Modifier Keys**,
-   select the NuPhy in the keyboard dropdown, then swap:
-   - **Control (⌃) key → ⌘ Command**
-   - **Command (⌘) key → ⌃ Control**
-
-   Result: the Ctrl-position key copies/pastes on the Mac (Windows feel)
-   and still acts as Ctrl inside the VDI, because the Citrix preference
-   "Send Control character using ⌘ Command (left)" converts it back.
+1. Connect the NuPhy via its **2.4G dongle** (or cable) — permanently.
+2. Keep the NuPhy in **Windows mode permanently** (no mode switching).
+   Inside the VDI the layout is then natively correct in Scancode mode:
+   Ctrl-position = Ctrl, Cmd-position = Alt.
+3. **Karabiner-Elements → Settings → Devices**: **Modify events ON** for
+   the dongle entry (vendor id 6645); **OFF** for the Bluetooth entry
+   (vendor id 2007) if it appears.
+4. **Complex Modifications**: enable **"NuPhy (2.4G dongle, Windows mode):
+   Ctrl/Cmd swap outside Citrix"**. Outside the VDI this makes the
+   Ctrl-position key act as Cmd (Windows-style copy/paste on the Mac) and
+   the Win-position key act as Ctrl.
+5. **No macOS modifier swap**: System Settings → Keyboard → Keyboard
+   Shortcuts → Modifier Keys must be at defaults for the NuPhy (a global
+   swap there poisons Scancode mode inside the VDI).
 
 ## Diagnostic — *performed inside the VDI session (changes nothing there)*
 
@@ -92,7 +86,7 @@ In IntelliJ/PyCharm inside the VDI:
 
 | Test | Works? | Meaning |
 |---|---|---|
-| `Alt+Enter` (letter chord) | no | Citrix Option→Alt preference wrong → redo step 3 |
+| `Alt+Enter` (letter chord) | no | Alt not reaching the VDI → Scancode mode not set or session not reconnected (step 3) |
 | `Alt+Enter` yes, `Alt+F1` no | — | F-row rule not active → redo step 2 (rule enabled? Input Monitoring granted?) |
 | Both yes | — | Done. `Alt+F1, 1` opens Project view Select In |
 

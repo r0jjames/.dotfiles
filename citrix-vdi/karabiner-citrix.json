@@ -348,6 +348,81 @@
           ]
         }
       ]
+    },
+    {
+      "description": "NuPhy (2.4G dongle, Windows mode): Ctrl/Cmd swap outside Citrix",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_control",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_command"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "bundle_identifiers": [
+                "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
+              ]
+            },
+            {
+              "type": "device_if",
+              "identifiers": [
+                {
+                  "vendor_id": 6645,
+                  "product_id": 4136
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_command",
+            "modifiers": {
+              "optional": [
+                "any"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_control"
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "bundle_identifiers": [
+                "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
+              ]
+            },
+            {
+              "type": "device_if",
+              "identifiers": [
+                {
+                  "vendor_id": 6645,
+                  "product_id": 4136
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }
