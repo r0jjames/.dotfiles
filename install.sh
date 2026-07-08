@@ -10,8 +10,8 @@ source "$DOTFILES_DIR/lib/common.sh"
 
 detect_os
 
-ALL_TOOLS=(zsh starship nvim wezterm vscode terminal-macos iterm2)
-MAC_ONLY=(terminal-macos iterm2)
+ALL_TOOLS=(zsh starship nvim wezterm vscode terminal-macos iterm2 citrix-vdi)
+MAC_ONLY=(terminal-macos iterm2 citrix-vdi)
 
 TOOLS=("$@")
 if [ ${#TOOLS[@]} -eq 0 ]; then
