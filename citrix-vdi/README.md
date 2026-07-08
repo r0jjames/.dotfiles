@@ -38,10 +38,13 @@ Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
    `karabiner_grabber`).
 2. Go to **Complex Modifications → Add predefined rule**.
 3. Enable **"Citrix VDI: F1-F12 as function keys (with any modifiers)"**.
-4. Enable **"Citrix VDI: Left Command as Alt (built-in keyboard only)"** —
-   makes the key next to the spacebar send Alt on the MacBook keyboard,
-   matching a NuPhy/external keyboard in Windows mode. Right Command still
-   sends the Windows key. External keyboards are unaffected.
+4. Enable **"Citrix VDI: Left Command as Alt (all keyboards)"** — makes the
+   key next to the spacebar send Alt on the MacBook keyboard and on external
+   keyboards in Mac mode, so every keyboard feels the same. Right Command
+   still sends the Windows key. Note: an external keyboard in Windows mode
+   already sends Alt from that position; its Win-position key (which sends
+   Command) also becomes Alt inside the VDI — use Mac mode on external
+   keyboards for consistent behavior.
 
 > Enabled rules are a copy — if this repo's rule file changes later, re-run
 > the installer, then remove and re-add the rules in Karabiner to pick up

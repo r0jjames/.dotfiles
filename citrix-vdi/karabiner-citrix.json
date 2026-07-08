@@ -307,7 +307,7 @@
       ]
     },
     {
-      "description": "Citrix VDI: Left Command as Alt (built-in keyboard only)",
+      "description": "Citrix VDI: Left Command as Alt (all keyboards)",
       "manipulators": [
         {
           "type": "basic",
@@ -330,14 +330,6 @@
               "bundle_identifiers": [
                 "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
                 "^com\\.citrix\\.XenAppViewer$"
-              ]
-            },
-            {
-              "type": "device_if",
-              "identifiers": [
-                {
-                  "is_built_in_keyboard": true
-                }
               ]
             }
           ]
