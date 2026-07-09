@@ -1,24 +1,25 @@
 {
     // ---- Appearance ----
+    // Auto-switch theme with macOS appearance (System Settings > Appearance > Auto):
+    // Solarized Light by day, Solarized Dark at night.
+    "window.autoDetectColorScheme": true,
+    "workbench.preferredLightColorTheme": "Solarized Light",
+    "workbench.preferredDarkColorTheme": "Solarized Dark",
     "workbench.colorTheme": "Solarized Light",
     "workbench.iconTheme": "vscode-icons",
     "editor.fontSize": 15,
     "editor.fontFamily": "'MesloLGS Nerd Font', 'MesloLGS NF', Menlo, Consolas, monospace",
     "terminal.integrated.fontFamily": "'MesloLGS Nerd Font', 'MesloLGS NF', monospace",
-
     // ---- Files ----
     "files.autoSave": "onFocusChange",
     "files.trimTrailingWhitespace": true,
     "files.insertFinalNewline": true,
-
     // ---- Git ----
     "git.enableSmartCommit": true,
     "git.autofetch": true,
-
     // ---- AI / MCP ----
     "chat.mcp.gallery.enabled": true,
     "claudeCode.preferredLocation": "panel",
-
     // ---- Per-language formatting ----
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features",
