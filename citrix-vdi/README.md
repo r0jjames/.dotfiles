@@ -82,6 +82,19 @@ flowing), but works fine over the **2.4G dongle** or USB cable:
    Shortcuts → Modifier Keys must be at defaults for the NuPhy (a global
    swap there poisons Scancode mode inside the VDI).
 
+## What gets installed where — *on: Mac*
+
+Everything the setup (automated + manual steps) leaves on the Mac, and what
+removes it:
+
+| Location | What / written by | Removed by |
+|---|---|---|
+| `/Applications/Karabiner-Elements.app` (+ background services and the virtual keyboard driver) | Homebrew cask, installed by `setup.sh` | manual, optional (see Uninstall step 3) |
+| `~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json` | rule file copied by `setup.sh` | `uninstall.sh` |
+| `~/.config/karabiner/karabiner.json` — `profiles[*].complex_modifications.rules` | the three rules, copied in when you enable them in the GUI (setup steps 2 and 4) | `uninstall.sh` |
+| `~/.config/karabiner/karabiner.json` — per-device settings | "Modify events" toggles for the NuPhy entries (setup step 4) | nothing — harmless without rules, or reset in the GUI |
+| `~/Library/Application Support/Citrix Receiver/Config` — `KeyboardInputMode=Scancode` | Citrix Workspace preferences GUI (setup step 3) | manual, GUI only (Uninstall step 1) |
+
 ## Expected behavior once set up
 
 Consistent rule of thumb on both keyboards: **Ctrl-position key = shortcuts
@@ -112,12 +125,25 @@ Outside the VDI the MacBook is 100% standard Mac — nothing changes.
 
 All on the Mac; nothing to undo inside the VDI.
 
-1. **Karabiner rules**: Karabiner-Elements → Complex Modifications → Remove
-   all three "Citrix VDI"/"NuPhy" rules.
-2. **Rule file**:
-   ```sh
-   rm ~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json
-   ```
+### Automated part — *run on: Mac*
+
+```sh
+./citrix-vdi/uninstall.sh
+```
+
+Removes the three enabled "Citrix VDI"/"NuPhy" rules from
+`~/.config/karabiner/karabiner.json` (after backing it up to
+`karabiner.json.bak-YYYY-MM-DD`; Karabiner picks up the change
+automatically) and deletes the rule file from the assets folder. Safe to
+rerun.
+
+### Manual part — *on: Mac*
+
+1. **Citrix**: Preferences → Keyboard → Keyboard input mode → **Automatic**
+   (or press *Restore Defaults* to reset the whole pane). Reconnect the
+   session.
+2. **NuPhy**: free to use any mode (Mac/Windows) and any connection
+   (Bluetooth/dongle/cable) again.
 3. **Karabiner-Elements itself** (only if you don't use it for anything
    else): Karabiner-Elements → Settings → scroll to the uninstall section
    and use its own uninstaller (removes the virtual keyboard driver
@@ -125,12 +151,7 @@ All on the Mac; nothing to undo inside the VDI.
    ```sh
    brew uninstall --cask karabiner-elements
    ```
-4. **Citrix**: Preferences → Keyboard → Keyboard input mode → **Automatic**
-   (or press *Restore Defaults* to reset the whole pane). Reconnect the
-   session.
-5. **NuPhy**: free to use any mode (Mac/Windows) and any connection
-   (Bluetooth/dongle/cable) again.
-6. Repo side: remove `citrix-vdi` from `ALL_TOOLS`/`MAC_ONLY` in
+4. Repo side: remove `citrix-vdi` from `ALL_TOOLS`/`MAC_ONLY` in
    `install.sh` and delete the `citrix-vdi/` folder if you want it gone
    from the dotfiles too.
 
