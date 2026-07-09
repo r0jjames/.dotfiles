@@ -350,7 +350,7 @@
       ]
     },
     {
-      "description": "NuPhy (2.4G dongle, Windows mode): Ctrl/Cmd swap outside Citrix",
+      "description": "NuPhy (2.4G dongle + Bluetooth, Windows mode): Ctrl/Cmd swap outside Citrix",
       "manipulators": [
         {
           "type": "basic",
@@ -382,6 +382,9 @@
                 {
                   "vendor_id": 6645,
                   "product_id": 4136
+                },
+                {
+                  "vendor_id": 2007
                 }
               ]
             }
@@ -417,6 +420,9 @@
                 {
                   "vendor_id": 6645,
                   "product_id": 4136
+                },
+                {
+                  "vendor_id": 2007
                 }
               ]
             }

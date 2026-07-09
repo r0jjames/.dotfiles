@@ -64,20 +64,22 @@ In **Citrix Workspace app → Preferences (⌘,) → Keyboard**:
 
 ### 4. NuPhy external keyboard (one time) — *run on: Mac*
 
-Karabiner cannot grab the NuPhy over **Bluetooth** (grabbed keys stop
-flowing), but works fine over the **2.4G dongle** or USB cable:
+Works over the **2.4G dongle** and **Bluetooth** (the swap rule matches
+both; a wired USB-C cable is not covered by the rule):
 
-1. Connect the NuPhy via its **2.4G dongle** (or cable) — permanently.
+1. Connect the NuPhy via its **2.4G dongle** or **Bluetooth**.
 2. Keep the NuPhy in **Windows mode permanently** (no mode switching).
    Inside the VDI the layout is then natively correct in Scancode mode:
    Ctrl-position = Ctrl, Cmd-position = Alt.
 3. **Karabiner-Elements → Settings → Devices**: **Modify events ON** for
-   the dongle entry (vendor id 6645); **OFF** for the Bluetooth entry
-   (vendor id 2007) if it appears.
-4. **Complex Modifications**: enable **"NuPhy (2.4G dongle, Windows mode):
-   Ctrl/Cmd swap outside Citrix"**. Outside the VDI this makes the
-   Ctrl-position key act as Cmd (Windows-style copy/paste on the Mac) and
-   the Win-position key act as Ctrl.
+   both NuPhy entries — dongle (vendor id 6645) and Bluetooth (vendor
+   id 2007). *Troubleshooting:* if keys ever stop flowing over Bluetooth
+   (seen once during initial setup), turn Modify events OFF for the
+   vendor 2007 entry and use the dongle instead.
+4. **Complex Modifications**: enable **"NuPhy (2.4G dongle + Bluetooth,
+   Windows mode): Ctrl/Cmd swap outside Citrix"**. Outside the VDI this
+   makes the Ctrl-position key act as Cmd (Windows-style copy/paste on
+   the Mac) and the Win-position key act as Ctrl.
 5. **No macOS modifier swap**: System Settings → Keyboard → Keyboard
    Shortcuts → Modifier Keys must be at defaults for the NuPhy (a global
    swap there poisons Scancode mode inside the VDI).
@@ -100,7 +102,7 @@ removes it:
 Consistent rule of thumb on both keyboards: **Ctrl-position key = shortcuts
 (copy/paste), key next to the spacebar = Alt inside the VDI.**
 
-### NuPhy (Windows mode, 2.4G dongle)
+### NuPhy (Windows mode, 2.4G dongle or Bluetooth)
 
 | Key (by its Windows legend) | Outside VDI (Mac) | Inside VDI (Windows) |
 |---|---|---|
