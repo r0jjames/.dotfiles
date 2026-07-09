@@ -429,6 +429,99 @@
           ]
         }
       ]
+    },
+    {
+      "description": "NuPhy (2.4G dongle + Bluetooth, Windows mode): Ctrl+Left/Right switches desktop outside Citrix",
+      "manipulators": [
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "left_arrow",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "caps_lock"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "left_arrow",
+              "modifiers": [
+                "left_control"
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "bundle_identifiers": [
+                "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
+              ]
+            },
+            {
+              "type": "device_if",
+              "identifiers": [
+                {
+                  "vendor_id": 6645,
+                  "product_id": 4136
+                },
+                {
+                  "vendor_id": 2007
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "basic",
+          "from": {
+            "key_code": "right_arrow",
+            "modifiers": {
+              "mandatory": [
+                "command"
+              ],
+              "optional": [
+                "caps_lock"
+              ]
+            }
+          },
+          "to": [
+            {
+              "key_code": "right_arrow",
+              "modifiers": [
+                "left_control"
+              ]
+            }
+          ],
+          "conditions": [
+            {
+              "type": "frontmost_application_unless",
+              "bundle_identifiers": [
+                "^com\\.citrix\\.receiver\\.icaviewer\\.mac$",
+                "^com\\.citrix\\.XenAppViewer$",
+                "^com\\.citrix\\.receiver\\.nomas$"
+              ]
+            },
+            {
+              "type": "device_if",
+              "identifiers": [
+                {
+                  "vendor_id": 6645,
+                  "product_id": 4136
+                },
+                {
+                  "vendor_id": 2007
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

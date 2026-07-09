@@ -76,10 +76,14 @@ both; a wired USB-C cable is not covered by the rule):
    id 2007). *Troubleshooting:* if keys ever stop flowing over Bluetooth
    (seen once during initial setup), turn Modify events OFF for the
    vendor 2007 entry and use the dongle instead.
-4. **Complex Modifications**: enable **"NuPhy (2.4G dongle + Bluetooth,
-   Windows mode): Ctrl/Cmd swap outside Citrix"**. Outside the VDI this
-   makes the Ctrl-position key act as Cmd (Windows-style copy/paste on
-   the Mac) and the Win-position key act as Ctrl.
+4. **Complex Modifications**: enable both NuPhy rules —
+   **"NuPhy (… ): Ctrl/Cmd swap outside Citrix"** and
+   **"NuPhy (… ): Ctrl+Left/Right switches desktop outside Citrix"**.
+   Outside the VDI the first makes the Ctrl-position key act as Cmd
+   (Windows-style copy/paste on the Mac) and the Win-position key act as
+   Ctrl; the second keeps bare `Ctrl+←/→` working as macOS
+   desktop/Space switching (other modifiers added, e.g. `Ctrl+Shift+→`,
+   keep their ⌘ meaning).
 5. **No macOS modifier swap**: System Settings → Keyboard → Keyboard
    Shortcuts → Modifier Keys must be at defaults for the NuPhy (a global
    swap there poisons Scancode mode inside the VDI).
@@ -106,7 +110,7 @@ Consistent rule of thumb on both keyboards: **Ctrl-position key = shortcuts
 
 | Key (by its Windows legend) | Outside VDI (Mac) | Inside VDI (Windows) |
 |---|---|---|
-| `Ctrl` | ⌘ Command — Ctrl+C/V copies, Ctrl+Tab switches apps | Ctrl (native) — Ctrl+C/V, Ctrl+Shift+F, … |
+| `Ctrl` | ⌘ Command — Ctrl+C/V copies, Ctrl+Tab switches apps; bare Ctrl+←/→ stays desktop/Space switch (end/start of line: use Home/End) | Ctrl (native) — Ctrl+C/V, Ctrl+Shift+F, … |
 | `Win` | ⌃ Control — terminal interrupt, Mission Control combos | Alt (via Karabiner rule; Start menu via mouse) |
 | `Alt` (next to space) | ⌥ Option | Alt (native) — Alt+F1, Alt+Enter, Alt+F7 |
 | `F1`–`F12` | as the keyboard sends them | F1–F12 |
