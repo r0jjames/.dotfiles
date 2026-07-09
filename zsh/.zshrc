@@ -28,7 +28,9 @@ alias ls='eza --icons'
 alias cat='bat --paging=never'
 alias ..='cd ..'
 alias ...='cd ../..'
-
+alias vim='nvim'
+alias vi='nvim'
+alias v='nvim'
 # ---- Tool integrations ----
 command -v fzf &>/dev/null && eval "$(fzf --zsh)"
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
