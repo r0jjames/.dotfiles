@@ -23,7 +23,7 @@ Installs Homebrew (if missing), then sets up everything below. Open a new termin
    ```
 3. Clone and run:
    ```sh
-   git clone https://github.com/<you>/.dotfiles.git ~/Dev/.dotfiles
+   git clone git@github.com:r0jjames/.dotfiles.git ~/Dev/.dotfiles
    cd ~/Dev/.dotfiles
    ./install.sh
    ```
@@ -48,6 +48,7 @@ Installs Homebrew (if missing), then sets up everything below. Open a new termin
 | [`nvim/`](nvim/README.md) | Neovim DevOps IDE (k8s, Helm, Docker, Python, Ansible, Terraform) | macOS, WSL |
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
+| [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, WSL |
 | [`terminal-macos/`](terminal-macos/README.md) | Terminal.app themes + font | macOS only |
 | [`iterm2/`](iterm2/README.md) | iTerm2 + theme profile + shell integration | macOS only |
 | [`citrix-vdi/`](citrix-vdi/README.md) | Karabiner rule so Windows IDE shortcuts (Alt+F1, …) work in Citrix VDI | macOS only |

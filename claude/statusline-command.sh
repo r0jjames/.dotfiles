@@ -7,7 +7,7 @@ remaining=$(echo "$input" | jq -r '.context_window.remaining_percentage // empty
 
 # Shorten cwd to tilde-prefixed form
 home="$HOME"
-short_cwd="${cwd/#$home/\~}"
+short_cwd="${cwd/#$home/~}"
 
 # Get git branch (skip optional locks to avoid interference)
 branch=$(git -C "$cwd" branch --show-current 2>/dev/null)
