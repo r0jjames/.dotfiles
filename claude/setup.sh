@@ -20,9 +20,10 @@ else
   fi
 fi
 
-# ---- Settings + statusline ----
+# ---- Settings + statusline + global memory ----
 link_file "$SCRIPT_DIR/settings.json" "$HOME/.claude/settings.json"
 link_file "$SCRIPT_DIR/statusline-command.sh" "$HOME/.claude/statusline-command.sh"
+link_file "$SCRIPT_DIR/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
 
 info "Plugins listed in settings.json install automatically on the next 'claude' start."
 info "VS Code extension is handled by the vscode tool (vscode/extensions.txt)."

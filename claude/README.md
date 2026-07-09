@@ -13,6 +13,8 @@ plus an inventory of every installed plugin/skill and how to invoke it.
    lands in `~/.local/bin/claude`).
 2. Symlinks `claude/settings.json` → `~/.claude/settings.json`.
 3. Symlinks `claude/statusline-command.sh` → `~/.claude/statusline-command.sh`.
+4. Symlinks `claude/CLAUDE.md` → `~/.claude/CLAUDE.md` (global memory, loaded
+   into every session — keep it short).
 
 Plugins are **not** installed by the script: `settings.json` carries
 `enabledPlugins` and `extraKnownMarketplaces`, so Claude Code fetches the
@@ -30,7 +32,9 @@ Review them: commit to keep, checkout to revert.
 
 - `~/.claude.json` — machine state. Holds the global MCP servers; currently
   `MCP_DOCKER` (Docker MCP gateway: `docker mcp gateway run`). Re-add on a
-  new machine with: `claude mcp add MCP_DOCKER -s user -- docker mcp gateway run`
+  new machine with: `claude mcp add MCP_DOCKER -s user -- docker mcp gateway run`.
+  It only connects while Docker Desktop is running — a "Failed to connect"
+  in `claude mcp list` with Docker stopped is expected, not a config bug.
 - `~/.claude/projects/` (per-project memory), sessions, history, plugin cache.
 - claude.ai connectors (Gmail, Calendar, Spotify, …) — configured in the
   claude.ai account, not on this machine.
@@ -47,6 +51,24 @@ Review them: commit to keep, checkout to revert.
 
 Skills are invoked as slash commands (`/plugin:skill`) or picked up
 automatically by Claude when the task matches the skill description.
+
+**Global vs per-project:** heavy stack plugins — `vercel`, `supabase`,
+`frontend-design` — are installed but **disabled globally**
+(`"…": false` in `enabledPlugins`) so their ~45 skill descriptions don't
+load into every session. Projects that need them re-enable per repo in
+`.claude/settings.json`:
+
+```json
+{
+  "enabledPlugins": {
+    "vercel@claude-plugins-official": true,
+    "supabase@claude-plugins-official": true,
+    "frontend-design@claude-plugins-official": true
+  }
+}
+```
+
+Currently enabled this way in `~/Dev/worship-lineup`.
 
 ### superpowers — disciplined dev workflow (obra)
 
@@ -94,7 +116,7 @@ compressed output saves main-thread context.
 |---|---|
 | `/skill-creator:skill-creator` | Create, improve, or benchmark skills |
 
-### vercel
+### vercel (per-project only)
 
 Slash commands: `/vercel:deploy` (add `prod` for production), `/vercel:env`,
 `/vercel:status`, `/vercel:bootstrap`, `/vercel:marketplace`.
@@ -103,7 +125,7 @@ vercel-functions, storage, firewall, …) and agents (`vercel:ai-architect`,
 `vercel:deployment-expert`, `vercel:performance-optimizer`).
 Includes the Vercel MCP server (deployments, logs, projects).
 
-### supabase
+### supabase (per-project only)
 
 Auto-triggering skills: `supabase:supabase` (any Supabase task),
 `supabase:supabase-postgres-best-practices` (Postgres query/schema work).
@@ -126,15 +148,18 @@ while preserving behavior.
 `claude-automation-recommender` — analyze a codebase, recommend hooks,
 subagents, skills, MCP servers.
 
-### frontend-design
+### frontend-design (per-project only)
 
 `frontend-design:frontend-design` — intentional visual design guidance for
 new or reworked UI (auto-triggers on UI work).
 
 ## Project-level conventions
 
+- `.claude/settings.json` in a repo holds shareable project config — e.g.
+  per-project `enabledPlugins` (see worship-lineup above).
 - `.claude/settings.local.json` in a repo holds per-project permission
-  grants (committed here for this repo).
+  grants (committed here for this repo). Prune stale one-off entries
+  occasionally; `/fewer-permission-prompts` builds a sane allowlist.
 - `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and
   `docs/superpowers/plans/` — superpowers workflow artifacts.
 - No custom user-level skills yet (`~/.claude/skills/` unused); add one
