@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run test:run)",
+      "Bash(npx vitest run *)",
+      "Bash(npm run typecheck)",
+      "Bash(npm run typecheck:api)",
+      "Bash(npm run lint)",
+      "mcp__computer-use__screenshot",
+      "mcp__claude-in-chrome__tabs_context_mcp",
+      "mcp__claude-in-chrome__read_console_messages",
+      "mcp__claude-in-chrome__read_network_requests"
+    ]
+  }
+}
