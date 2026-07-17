@@ -37,6 +37,10 @@ COMMUNITY_SKILLS = [
     "add-educational-comments",
 ]
 
+CAVEMAN_REPO_URL = "https://github.com/juliusbrussee/caveman.git"
+CAVEMAN_BRANCH = "main"
+CAVEMAN_SKILLS = ["caveman"]
+
 
 def log(msg):
     print(f"[skills] {msg}")
@@ -169,42 +173,59 @@ def cache_dir():
     return Path.home() / ".agent-skills-cache" / "awesome-copilot"
 
 
+def caveman_cache_dir():
+    return Path.home() / ".agent-skills-cache" / "caveman"
+
+
 def run_git(args):
     subprocess.run(["git", *args], check=True)
 
 
-def update_community_cache(dry_run):
-    """Sparse-clone/refresh github/awesome-copilot. Returns cache path or
-    None when no usable cache exists."""
-    cache = cache_dir()
-    sparse = [f"skills/{s}" for s in COMMUNITY_SKILLS]
+def update_repo_cache(cache, url, branch, sparse, dry_run, label,
+                      fallback_url):
+    """Sparse-clone/refresh a skills repo. Returns cache path or None when
+    no usable cache exists."""
     if dry_run:
-        log(f"dry-run: would clone/update {AWESOME_REPO_URL} into {cache}")
+        log(f"dry-run: would clone/update {url} into {cache}")
         return cache if (cache / "skills").is_dir() else None
     try:
         if (cache / ".git").is_dir():
-            log("Updating awesome-copilot cache...")
+            log(f"Updating {label} cache...")
             run_git(["-C", str(cache), "sparse-checkout", "set", *sparse])
             run_git(["-C", str(cache), "fetch", "--depth", "1",
-                     "origin", AWESOME_BRANCH])
+                     "origin", branch])
             run_git(["-C", str(cache), "reset", "--hard",
-                     f"origin/{AWESOME_BRANCH}"])
+                     f"origin/{branch}"])
         else:
-            log("Cloning awesome-copilot (sparse, only needed skills)...")
+            log(f"Cloning {label} (sparse, only needed skills)...")
             cache.parent.mkdir(parents=True, exist_ok=True)
             run_git(["clone", "--depth", "1", "--filter=blob:none", "--sparse",
-                     "-b", AWESOME_BRANCH, AWESOME_REPO_URL, str(cache)])
+                     "-b", branch, url, str(cache)])
             run_git(["-C", str(cache), "sparse-checkout", "set", *sparse])
-        ok("awesome-copilot cache ready")
+        ok(f"{label} cache ready")
         return cache
     except (subprocess.CalledProcessError, FileNotFoundError):
-        warn("Could not clone/update awesome-copilot (offline? proxy?).")
+        warn(f"Could not clone/update {label} (offline? proxy?).")
         if (cache / "skills").is_dir():
             warn("Using existing local cache instead.")
             return cache
-        warn(f"Fallback: download the skill folders as ZIP from {ZIP_FALLBACK_URL}")
+        warn(f"Fallback: download the skill folders as ZIP from {fallback_url}")
         warn(f"and unzip into {cache / 'skills'}, then re-run this script.")
         return None
+
+
+def update_community_cache(dry_run):
+    return update_repo_cache(
+        cache_dir(), AWESOME_REPO_URL, AWESOME_BRANCH,
+        [f"skills/{s}" for s in COMMUNITY_SKILLS], dry_run,
+        "awesome-copilot", ZIP_FALLBACK_URL)
+
+
+def update_caveman_cache(dry_run):
+    return update_repo_cache(
+        caveman_cache_dir(), CAVEMAN_REPO_URL, CAVEMAN_BRANCH,
+        [f"skills/{s}" for s in CAVEMAN_SKILLS], dry_run,
+        "caveman", "https://github.com/juliusbrussee/caveman/tree/main/skills")
 
 
 def print_summary(results, targets, dry_run):
@@ -239,12 +260,16 @@ def main():
         sys.exit(f"No skills found in {SKILLS_SRC}")
 
     community_src = None
+    caveman_src = None
     if args.skills_only:
-        log("--skills-only: skipping community skills")
+        log("--skills-only: skipping community and caveman skills")
     else:
         cache = update_community_cache(args.dry_run)
         if cache:
             community_src = cache / "skills"
+        cave = update_caveman_cache(args.dry_run)
+        if cave:
+            caveman_src = cave / "skills"
 
     results = []
     for target in targets:
@@ -261,9 +286,12 @@ def main():
                 status = install_copy(skill, dest_root / skill.name,
                                       args.dry_run)
             results.append((target, skill.name, status))
-        if community_src:
-            for name in COMMUNITY_SKILLS:
-                src = community_src / name
+        for src_root, names in ((community_src, COMMUNITY_SKILLS),
+                                (caveman_src, CAVEMAN_SKILLS)):
+            if not src_root:
+                continue
+            for name in names:
+                src = src_root / name
                 if not src.is_dir():
                     results.append((target, name, "missing in cache — skipped"))
                     continue

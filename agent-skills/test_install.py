@@ -230,6 +230,27 @@ class TestCommunityCache(TempDirTest):
         self.assertEqual(calls[0][0], "clone")
         self.assertIn("sparse-checkout", calls[1])
 
+    def test_caveman_clone_uses_caveman_repo(self):
+        cache = self.tmp / "cache" / "caveman"
+        calls = []
+        with mock.patch("install.caveman_cache_dir", return_value=cache), \
+             mock.patch("install.run_git", side_effect=lambda a: calls.append(a)):
+            result = install.update_caveman_cache(dry_run=False)
+        self.assertEqual(result, cache)
+        self.assertIn(install.CAVEMAN_REPO_URL, calls[0])
+        self.assertIn("skills/caveman", calls[1])
+
+    def test_caveman_existing_cache_updates(self):
+        cache = self.tmp / "cache" / "caveman"
+        (cache / ".git").mkdir(parents=True)
+        calls = []
+        with mock.patch("install.caveman_cache_dir", return_value=cache), \
+             mock.patch("install.run_git", side_effect=lambda a: calls.append(a)):
+            result = install.update_caveman_cache(dry_run=False)
+        self.assertEqual(result, cache)
+        self.assertIn("fetch", calls[1])
+        self.assertIn("reset", calls[2])
+
 
 if __name__ == "__main__":
     unittest.main()

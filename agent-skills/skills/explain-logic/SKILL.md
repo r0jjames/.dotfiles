@@ -82,7 +82,7 @@ Never jump straight to line-by-line.
 | code-tour | after any walkthrough, offer a replayable `.tours/*.tour` |
 | architecture-blueprint-generator | change touches system structure: refresh the architecture doc |
 | add-educational-comments | offer AFTER the walkthrough; never add comments without asking |
-| caveman-mode | user asks terse/brief/save tokens: apply it to the output |
+| caveman | user asks terse/brief/save tokens: apply it to the output |
 
 Chain: context-map → acquire-codebase-knowledge → this skill → code-tour (optional).
 

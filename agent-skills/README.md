@@ -7,7 +7,6 @@ installer. One `SKILL.md` format serves both platforms.
 
 - `skills/explain-logic/` — guided code-comprehension walkthroughs
   (PR/branch diffs, files, functions) with language lenses.
-- `skills/caveman-mode/` — portable terse-output mode (token saver).
 - `prompts/` — Copilot/VS Code `.prompt.md` slash commands
   (`/explain-code`, `/explain-and-review`). Not used by Claude.
 - `install.py` — cross-platform installer (Python >= 3.8, stdlib only).
@@ -24,9 +23,13 @@ python3 install.py                    # interactive menu
 Flags: `--dry-run` (print planned actions), `--skills-only` (skip the
 community-skill fetch — offline or behind a proxy).
 
-Also fetched (Copilot community catalog, sparse-cloned into
-`~/.agent-skills-cache/`): code-tour, acquire-codebase-knowledge,
-context-map, architecture-blueprint-generator, add-educational-comments.
+Also fetched into `~/.agent-skills-cache/` and installed/updated in place
+(missing = install, present = update, unchanged = up to date):
+
+- From `github/awesome-copilot`: code-tour, acquire-codebase-knowledge,
+  context-map, architecture-blueprint-generator, add-educational-comments.
+- From `juliusbrussee/caveman`: the caveman terse-output skill (token
+  saver). explain-logic points at it for terse mode.
 
 `./install.sh agent-skills` from the repo root runs the Claude install
 (custom skills only) as part of normal dotfiles setup.
