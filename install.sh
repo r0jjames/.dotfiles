@@ -10,7 +10,7 @@ source "$DOTFILES_DIR/lib/common.sh"
 
 detect_os
 
-ALL_TOOLS=(zsh starship nvim wezterm vscode claude terminal-macos iterm2 citrix-vdi)
+ALL_TOOLS=(zsh starship nvim wezterm vscode claude agent-skills terminal-macos iterm2 citrix-vdi)
 MAC_ONLY=(terminal-macos iterm2 citrix-vdi)
 
 TOOLS=("$@")
