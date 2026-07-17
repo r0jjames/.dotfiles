@@ -311,6 +311,10 @@ public class CoffeeMachine {
 **Scoring guide:** Spots 1 and 2 -> hire-level. Spots 1 only -> on the line,
 probe further. Spots neither -> below bar for a Java-primary role.
 
+**Probe:** If they only spot the private-override compile error, ask what
+else could go wrong once that's fixed and the code actually runs — steer
+them toward the recursive field initializer and the `StackOverflowError`.
+
 **Red flags:** Doesn't notice the private-method-can't-override compile
 error even when prompted.
 
@@ -356,6 +360,11 @@ composites instead of a full boolean array).
 primes within a minute. Below bar: stares at it, can't figure out what
 `yield` does — for a role where Python is "nice-to-have" that's tolerable,
 but note it.
+
+**Probe:** Once they've identified it as prime-finding, push for depth —
+what does the dictionary actually store, and why does memory stay small?
+(It only tracks upcoming composites keyed by the prime that will strike
+them, not a full boolean sieve array.)
 
 **Red flags:** Can't identify what `yield` does at all, even after a hint.
 
