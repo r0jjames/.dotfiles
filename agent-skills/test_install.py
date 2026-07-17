@@ -141,5 +141,67 @@ class TestInstallSymlink(TempDirTest):
         self.assertFalse(dest.exists())
 
 
+class TestPickTargets(unittest.TestCase):
+    def test_explicit_targets(self):
+        self.assertEqual(install.pick_targets("copilot"), ["copilot"])
+        self.assertEqual(install.pick_targets("claude"), ["claude"])
+        self.assertEqual(install.pick_targets("both"), ["copilot", "claude"])
+
+    def test_interactive_menu(self):
+        with mock.patch("builtins.input", return_value="2"):
+            self.assertEqual(install.pick_targets(None), ["claude"])
+
+    def test_interactive_invalid_exits(self):
+        with mock.patch("builtins.input", return_value="9"):
+            with self.assertRaises(SystemExit):
+                install.pick_targets(None)
+
+
+class TestVscodePromptsDir(TempDirTest):
+    def test_appdata_windows_layout(self):
+        user = self.tmp / "AppData" / "Code" / "User"
+        user.mkdir(parents=True)
+        with mock.patch.dict(os.environ, {"APPDATA": str(self.tmp / "AppData")}):
+            self.assertEqual(install.vscode_prompts_dir(), user / "prompts")
+
+    def test_none_when_no_vscode(self):
+        with mock.patch.dict(os.environ, {}, clear=True), \
+             mock.patch("install.Path.home", return_value=self.tmp):
+            self.assertIsNone(install.vscode_prompts_dir())
+
+
+class TestInstallPrompts(TempDirTest):
+    def test_installs_and_reports(self):
+        prompts_src = self.tmp / "prompts"
+        prompts_src.mkdir()
+        (prompts_src / "explain-code.prompt.md").write_text("prompt body")
+        user_dir = self.tmp / "Code" / "User"
+        user_dir.mkdir(parents=True)
+        with mock.patch("install.PROMPTS_SRC", prompts_src), \
+             mock.patch("install.vscode_prompts_dir",
+                        return_value=user_dir / "prompts"):
+            results = install.install_prompts(dry_run=False)
+        self.assertEqual(results, [("copilot", "prompt:explain-code.prompt", "installed")])
+        self.assertEqual((user_dir / "prompts" / "explain-code.prompt.md").read_text(),
+                         "prompt body")
+
+    def test_up_to_date_second_run(self):
+        prompts_src = self.tmp / "prompts"
+        prompts_src.mkdir()
+        (prompts_src / "explain-code.prompt.md").write_text("prompt body")
+        user_dir = self.tmp / "Code" / "User"
+        user_dir.mkdir(parents=True)
+        with mock.patch("install.PROMPTS_SRC", prompts_src), \
+             mock.patch("install.vscode_prompts_dir",
+                        return_value=user_dir / "prompts"):
+            install.install_prompts(dry_run=False)
+            results = install.install_prompts(dry_run=False)
+        self.assertEqual(results[0][2], "up to date")
+
+    def test_no_vscode_dir_warns_and_returns_empty(self):
+        with mock.patch("install.vscode_prompts_dir", return_value=None):
+            self.assertEqual(install.install_prompts(dry_run=False), [])
+
+
 if __name__ == "__main__":
     unittest.main()
