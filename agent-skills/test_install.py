@@ -203,5 +203,33 @@ class TestInstallPrompts(TempDirTest):
             self.assertEqual(install.install_prompts(dry_run=False), [])
 
 
+class TestCommunityCache(TempDirTest):
+    def test_clone_failure_warns_and_returns_none(self):
+        cache = self.tmp / "cache" / "awesome-copilot"
+        boom = subprocess.CalledProcessError(128, ["git", "clone"])
+        with mock.patch("install.cache_dir", return_value=cache), \
+             mock.patch("install.run_git", side_effect=boom):
+            self.assertIsNone(install.update_community_cache(dry_run=False))
+
+    def test_clone_failure_uses_existing_cache(self):
+        cache = self.tmp / "cache" / "awesome-copilot"
+        (cache / ".git").mkdir(parents=True)
+        (cache / "skills" / "code-tour").mkdir(parents=True)
+        boom = subprocess.CalledProcessError(128, ["git", "fetch"])
+        with mock.patch("install.cache_dir", return_value=cache), \
+             mock.patch("install.run_git", side_effect=boom):
+            self.assertEqual(install.update_community_cache(dry_run=False), cache)
+
+    def test_fresh_clone_invokes_git(self):
+        cache = self.tmp / "cache" / "awesome-copilot"
+        calls = []
+        with mock.patch("install.cache_dir", return_value=cache), \
+             mock.patch("install.run_git", side_effect=lambda a: calls.append(a)):
+            result = install.update_community_cache(dry_run=False)
+        self.assertEqual(result, cache)
+        self.assertEqual(calls[0][0], "clone")
+        self.assertIn("sparse-checkout", calls[1])
+
+
 if __name__ == "__main__":
     unittest.main()

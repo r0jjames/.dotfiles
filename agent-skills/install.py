@@ -163,3 +163,118 @@ def install_prompts(dry_run):
                 shutil.copy2(p, dest)
         results.append(("copilot", f"prompt:{p.stem}", status))
     return results
+
+
+def cache_dir():
+    return Path.home() / ".agent-skills-cache" / "awesome-copilot"
+
+
+def run_git(args):
+    subprocess.run(["git", *args], check=True)
+
+
+def update_community_cache(dry_run):
+    """Sparse-clone/refresh github/awesome-copilot. Returns cache path or
+    None when no usable cache exists."""
+    cache = cache_dir()
+    sparse = [f"skills/{s}" for s in COMMUNITY_SKILLS]
+    if dry_run:
+        log(f"dry-run: would clone/update {AWESOME_REPO_URL} into {cache}")
+        return cache if (cache / "skills").is_dir() else None
+    try:
+        if (cache / ".git").is_dir():
+            log("Updating awesome-copilot cache...")
+            run_git(["-C", str(cache), "sparse-checkout", "set", *sparse])
+            run_git(["-C", str(cache), "fetch", "--depth", "1",
+                     "origin", AWESOME_BRANCH])
+            run_git(["-C", str(cache), "reset", "--hard",
+                     f"origin/{AWESOME_BRANCH}"])
+        else:
+            log("Cloning awesome-copilot (sparse, only needed skills)...")
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            run_git(["clone", "--depth", "1", "--filter=blob:none", "--sparse",
+                     "-b", AWESOME_BRANCH, AWESOME_REPO_URL, str(cache)])
+            run_git(["-C", str(cache), "sparse-checkout", "set", *sparse])
+        ok("awesome-copilot cache ready")
+        return cache
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        warn("Could not clone/update awesome-copilot (offline? proxy?).")
+        if (cache / "skills").is_dir():
+            warn("Using existing local cache instead.")
+            return cache
+        warn(f"Fallback: download the skill folders as ZIP from {ZIP_FALLBACK_URL}")
+        warn(f"and unzip into {cache / 'skills'}, then re-run this script.")
+        return None
+
+
+def print_summary(results, targets, dry_run):
+    print()
+    title = "Planned actions (dry run)" if dry_run else "Install summary"
+    log(title + ":")
+    for target, name, status in results:
+        print(f"  {target:8} {name:35} {status}")
+    print()
+    if "copilot" in targets:
+        log("Verify Copilot:  /skills list  in Copilot CLI, or ask VS Code "
+            "agent mode 'What skills do you have available?'")
+    if "claude" in targets:
+        log("Verify Claude:   ask 'what skills are available?' in a new "
+            "claude session")
+
+
+def main():
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--target", choices=["copilot", "claude", "both"],
+                    help="where to install (omit for interactive menu)")
+    ap.add_argument("--skills-only", action="store_true",
+                    help="skip fetching community skills (offline/proxy)")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="print planned actions without writing anything")
+    args = ap.parse_args()
+
+    targets = pick_targets(args.target)
+    custom = sorted(p for p in SKILLS_SRC.iterdir() if p.is_dir())
+    if not custom:
+        sys.exit(f"No skills found in {SKILLS_SRC}")
+
+    community_src = None
+    if args.skills_only:
+        log("--skills-only: skipping community skills")
+    else:
+        cache = update_community_cache(args.dry_run)
+        if cache:
+            community_src = cache / "skills"
+
+    results = []
+    for target in targets:
+        dest_root = Path.home() / (".copilot" if target == "copilot"
+                                   else ".claude") / "skills"
+        log(f"Target {target}: {dest_root}")
+        if not args.dry_run:
+            dest_root.mkdir(parents=True, exist_ok=True)
+        for skill in custom:
+            if target == "claude":
+                status = install_symlink(skill, dest_root / skill.name,
+                                         args.dry_run)
+            else:
+                status = install_copy(skill, dest_root / skill.name,
+                                      args.dry_run)
+            results.append((target, skill.name, status))
+        if community_src:
+            for name in COMMUNITY_SKILLS:
+                src = community_src / name
+                if not src.is_dir():
+                    results.append((target, name, "missing in cache — skipped"))
+                    continue
+                results.append((target, name,
+                                install_copy(src, dest_root / name,
+                                             args.dry_run)))
+        if target == "copilot":
+            results.extend(install_prompts(args.dry_run))
+
+    print_summary(results, targets, args.dry_run)
+
+
+if __name__ == "__main__":
+    main()
