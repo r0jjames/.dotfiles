@@ -64,8 +64,12 @@ Linux + VM creation (VMware vSphere), Cloud (Azure or AWS), Databases
    - Part 1 matrix: one row per role competency, verdict
      Confident / Validate / Absent, with CV evidence quoted.
    - Part 4: one deep-dive block per significant project/claim + one block
-     per CV flag.
-   - Part 5: baseline set, embedded in full (rule 3).
+     per CV flag (CV oddities only — overlapping dates, unnamed employers,
+     tool-less/vague claims). Absent competencies are handled only by Part
+     6's grouped gap-check, never here.
+   - Part 5: baseline set, embedded in full (rule 3). Where the CV clearly
+     shows depth on a baseline topic, add a one-line skip note (ask faster,
+     don't dwell) — the question itself always stays.
    - Part 6: 5-8 CV-specific questions — deep where the CV claims depth;
      ONE grouped gap-check question covering all Absent competencies (never
      six separate zero-questions).
