@@ -8,9 +8,12 @@ from __future__ import annotations
 import filecmp
 import platform as _platform
 import shutil
+import subprocess
 import sys
+from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
+from typing import Callable, Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 
@@ -146,3 +149,137 @@ def uncopy_file(src: Path, target: Path) -> bool:
     ok(f"Removed {target}")
     _restore_newest_backup(target)
     return True
+
+
+# ---- Subprocess ----
+def run(cmd, check: bool = True, capture: bool = False, shell: bool = False):
+    """Thin subprocess.run wrapper. cmd is a list, or a string when shell=True."""
+    return subprocess.run(cmd, check=check, shell=shell,
+                          capture_output=capture, text=True)
+
+
+def have(name: str) -> bool:
+    return shutil.which(name) is not None
+
+
+# ---- Homebrew (port of ensure_brew/brew_install in common.sh) ----
+_BREW_PATHS = (
+    "/opt/homebrew/bin/brew",
+    "/usr/local/bin/brew",
+    "/home/linuxbrew/.linuxbrew/bin/brew",
+)
+_brew_cache: Optional[str] = None
+
+
+def _find_brew() -> Optional[str]:
+    found = shutil.which("brew")
+    if found:
+        return found
+    for p in _BREW_PATHS:
+        if Path(p).exists():
+            return p
+    return None
+
+
+def ensure_brew() -> str:
+    """Return the brew executable, installing Homebrew when missing."""
+    global _brew_cache
+    if _brew_cache:
+        return _brew_cache
+    brew = _find_brew()
+    if brew is None:
+        info("Installing Homebrew...")
+        run('/bin/bash -c "$(curl -fsSL '
+            'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"',
+            shell=True)
+        brew = _find_brew()
+        if brew is None:
+            raise DotfilesError(
+                "Homebrew install failed or brew not on PATH. See https://brew.sh")
+    _brew_cache = brew
+    return brew
+
+
+def brew_install(pkg: str, cask: bool = False) -> None:
+    """Install pkg via brew only if missing (brew list check, as before)."""
+    brew = ensure_brew()
+    listed = run([brew, "list", pkg], check=False, capture=True)
+    if listed.returncode == 0:
+        ok(f"{pkg} already installed.")
+        return
+    info(f"Installing {pkg}...")
+    cmd = [brew, "install"]
+    if cask:
+        cmd.append("--cask")
+    cmd.append(pkg)
+    run(cmd)
+
+
+# ---- Tool model ----
+@dataclass(frozen=True)
+class Link:
+    src: str      # repo-relative path (absolute allowed, used by tests)
+    target: str   # target path, ~ expanded
+
+    def src_path(self) -> Path:
+        p = Path(self.src)
+        return p if p.is_absolute() else REPO_ROOT / p
+
+    def target_path(self) -> Path:
+        return Path(self.target).expanduser()
+
+
+@dataclass(frozen=True)
+class Tool:
+    name: str
+    doc: str
+    platforms: frozenset
+    brew: tuple = ()
+    casks: tuple = ()
+    links: tuple = ()                       # tuple[Link, ...]
+    post_install: Optional[Callable[[], None]] = None
+    extra_uninstall: Optional[Callable[[], None]] = None
+    status_probe: Optional[Callable[[], bool]] = None  # tools without links
+
+
+INSTALLED = "installed"
+PARTIAL = "partial"
+NOT_INSTALLED = "not installed"
+
+
+def link_ok(link: Link) -> bool:
+    t = link.target_path()
+    return t.is_symlink() and t.resolve() == link.src_path().resolve()
+
+
+def tool_status(tool: Tool) -> str:
+    if tool.links:
+        done = sum(1 for l in tool.links if link_ok(l))
+        if done == len(tool.links):
+            return INSTALLED
+        return PARTIAL if done else NOT_INSTALLED
+    if tool.status_probe is not None:
+        return INSTALLED if tool.status_probe() else NOT_INSTALLED
+    return NOT_INSTALLED
+
+
+def install_tool(tool: Tool) -> None:
+    """brew packages -> links -> post_install."""
+    if tool.brew or tool.casks:
+        ensure_brew()
+    for pkg in tool.brew:
+        brew_install(pkg, cask=False)
+    for pkg in tool.casks:
+        brew_install(pkg, cask=True)
+    for link in tool.links:
+        link_file(link.src_path(), link.target_path())
+    if tool.post_install is not None:
+        tool.post_install()
+
+
+def uninstall_tool(tool: Tool) -> None:
+    """extra_uninstall -> remove links -> restore backups. Brew untouched."""
+    if tool.extra_uninstall is not None:
+        tool.extra_uninstall()
+    for link in tool.links:
+        unlink_file(link.src_path(), link.target_path())

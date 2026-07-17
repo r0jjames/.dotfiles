@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from datetime import date
 from pathlib import Path
+from unittest import mock
 
 from lib import core
 
@@ -129,6 +130,68 @@ class CopyFileTest(unittest.TestCase):
 class DetectOsTest(unittest.TestCase):
     def test_returns_known_value(self):
         self.assertIn(core.detect_os(), ("macos", "linux", "gitbash"))
+
+
+class ToolStatusTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        (self.root / "a").write_text("a")
+        (self.root / "b").write_text("b")
+        self.tool = core.Tool(
+            name="fake", doc="fake tool", platforms=frozenset({"macos", "linux"}),
+            links=(core.Link(str(self.root / "a"), str(self.root / "home_a")),
+                   core.Link(str(self.root / "b"), str(self.root / "home_b"))))
+
+    def test_not_installed(self):
+        self.assertEqual(core.tool_status(self.tool), core.NOT_INSTALLED)
+
+    def test_partial_then_installed(self):
+        core.link_file(self.root / "a", self.root / "home_a")
+        self.assertEqual(core.tool_status(self.tool), core.PARTIAL)
+        core.link_file(self.root / "b", self.root / "home_b")
+        self.assertEqual(core.tool_status(self.tool), core.INSTALLED)
+
+    def test_probe_used_when_no_links(self):
+        probed = core.Tool(name="p", doc="", platforms=frozenset({"macos"}),
+                           status_probe=lambda: True)
+        self.assertEqual(core.tool_status(probed), core.INSTALLED)
+
+
+class InstallUninstallTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        (self.root / "conf").write_text("repo")
+        self.target = self.root / ".conf"
+        self.events = []
+        self.tool = core.Tool(
+            name="fake", doc="", platforms=frozenset({"macos", "linux"}),
+            brew=("somepkg",),
+            links=(core.Link(str(self.root / "conf"), str(self.target)),),
+            post_install=lambda: self.events.append("post"),
+            extra_uninstall=lambda: self.events.append("cleanup"))
+
+    def test_install_orders_brew_links_post(self):
+        with mock.patch.object(core, "brew_install") as bi, \
+             mock.patch.object(core, "ensure_brew", return_value="brew"):
+            core.install_tool(self.tool)
+        bi.assert_called_once_with("somepkg", cask=False)
+        self.assertTrue(self.target.is_symlink())
+        self.assertEqual(self.events, ["post"])
+
+    def test_uninstall_symmetry(self):
+        self.target.write_text("pre-existing")
+        with mock.patch.object(core, "brew_install"), \
+             mock.patch.object(core, "ensure_brew", return_value="brew"):
+            core.install_tool(self.tool)
+        core.uninstall_tool(self.tool)
+        self.assertEqual(self.events, ["post", "cleanup"])
+        self.assertFalse(self.target.is_symlink())
+        self.assertEqual(self.target.read_text(), "pre-existing")
+        self.assertEqual(core.tool_status(self.tool), core.NOT_INSTALLED)
 
 
 if __name__ == "__main__":
