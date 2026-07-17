@@ -33,9 +33,11 @@ Never fail because the vault is absent.
    The user reviews and commits manually. Read-only git commands allowed.
 2. **Evidence-driven:** every CV-specific question must trace to a CV claim
    or a role-competency gap. No generic filler questions.
-3. **Baseline is fixed:** embed ALL of B1-B10 + BC1 + BC2 from
-   `references/base-questions.md` in full. Reorder freely; never rewrite,
-   drop, or dilute their content or expected answers.
+3. **Baseline is fixed:** embed ALL `B*` and `BC*` entries from
+   `references/base-questions.md` in full (currently B1-B23 + BC1/BC2).
+   Reorder freely; never rewrite, drop, or dilute their content or expected
+   answers. Entries marked `Optional` stay in the doc — the skip note may
+   say "ask only if time allows".
 4. **Non-accusatory flags:** CV oddities (overlapping dates, unnamed
    employers, tool-less claims like "built CI/CD" with no tool named) get a
    direct but neutral question in the deep dive — flag, don't accuse.
