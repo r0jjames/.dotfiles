@@ -5,7 +5,7 @@ Usage:
   python3 install.py --target claude
   python3 install.py --target copilot
   python3 install.py --target both --dry-run
-  python3 install.py                # interactive target menu
+  python3 install.py                # interactive: pick target + items
   python3 install.py --target claude --skills-only   # skip community fetch
 
 Python >= 3.8, standard library only.
@@ -132,6 +132,40 @@ def pick_targets(arg_target):
     return targets
 
 
+def build_items(custom_skills, prompt_files):
+    """Ordered installable items as (kind, name): custom skills, prompt
+    files, then community skills."""
+    items = [("skill", n) for n in custom_skills]
+    items += [("prompt", n) for n in prompt_files]
+    items += [("community", n) for n in COMMUNITY_SKILLS + CAVEMAN_SKILLS]
+    return items
+
+
+def pick_items(items):
+    """Interactive toggle menu over (kind, name) items. All pre-selected.
+    Number toggles one, 'a' toggles all, empty input confirms. Exits when
+    nothing is selected."""
+    selected = [True] * len(items)
+    while True:
+        print("\nSelect items to install:")
+        for i, ((kind, name), on) in enumerate(zip(items, selected), 1):
+            print(f"  [{'x' if on else ' '}] {i:2}) {kind:9} {name}")
+        raw = input("Toggle number, 'a' = all, enter = confirm: ").strip().lower()
+        if raw == "":
+            chosen = [item for item, on in zip(items, selected) if on]
+            if not chosen:
+                sys.exit("Nothing selected — exiting without changes.")
+            return chosen
+        if raw == "a":
+            value = not all(selected)
+            selected = [value] * len(items)
+        elif raw.isdigit() and 1 <= int(raw) <= len(items):
+            idx = int(raw) - 1
+            selected[idx] = not selected[idx]
+        else:
+            print("Invalid input.")
+
+
 def vscode_prompts_dir():
     """Locate the VS Code user prompts dir, or None if VS Code is absent."""
     candidates = []
@@ -147,8 +181,9 @@ def vscode_prompts_dir():
     return None
 
 
-def install_prompts(dry_run):
-    """Copy prompts/*.prompt.md into the VS Code user prompts dir."""
+def install_prompts(dry_run, names=None):
+    """Copy prompts/*.prompt.md into the VS Code user prompts dir.
+    names: optional set of file names to install; None = all."""
     results = []
     user_dir = vscode_prompts_dir()
     if user_dir is None:
@@ -158,6 +193,8 @@ def install_prompts(dry_run):
     if not dry_run:
         user_dir.mkdir(parents=True, exist_ok=True)
     for p in sorted(PROMPTS_SRC.glob("*.prompt.md")):
+        if names is not None and p.name not in names:
+            continue
         dest = user_dir / p.name
         if dest.exists() and filecmp.cmp(p, dest, shallow=False):
             status = "up to date"
@@ -254,22 +291,39 @@ def main():
                     help="print planned actions without writing anything")
     args = ap.parse_args()
 
+    interactive = args.target is None
     targets = pick_targets(args.target)
     custom = sorted(p for p in SKILLS_SRC.iterdir() if p.is_dir())
     if not custom:
         sys.exit(f"No skills found in {SKILLS_SRC}")
+    prompt_files = sorted(p.name for p in PROMPTS_SRC.glob("*.prompt.md"))
+
+    if interactive:
+        chosen = pick_items(build_items([p.name for p in custom],
+                                        prompt_files))
+        sel_skills = {n for k, n in chosen if k == "skill"}
+        sel_prompts = {n for k, n in chosen if k == "prompt"}
+        sel_community = {n for k, n in chosen if k == "community"}
+        custom = [p for p in custom if p.name in sel_skills]
+    else:
+        sel_prompts = None
+        sel_community = set(COMMUNITY_SKILLS + CAVEMAN_SKILLS)
 
     community_src = None
     caveman_src = None
     if args.skills_only:
         log("--skills-only: skipping community and caveman skills")
+    elif not sel_community:
+        log("no community skills selected — skipping fetch")
     else:
-        cache = update_community_cache(args.dry_run)
-        if cache:
-            community_src = cache / "skills"
-        cave = update_caveman_cache(args.dry_run)
-        if cave:
-            caveman_src = cave / "skills"
+        if sel_community & set(COMMUNITY_SKILLS):
+            cache = update_community_cache(args.dry_run)
+            if cache:
+                community_src = cache / "skills"
+        if sel_community & set(CAVEMAN_SKILLS):
+            cave = update_caveman_cache(args.dry_run)
+            if cave:
+                caveman_src = cave / "skills"
 
     results = []
     for target in targets:
@@ -291,6 +345,8 @@ def main():
             if not src_root:
                 continue
             for name in names:
+                if name not in sel_community:
+                    continue
                 src = src_root / name
                 if not src.is_dir():
                     results.append((target, name, "missing in cache — skipped"))
@@ -299,7 +355,7 @@ def main():
                                 install_copy(src, dest_root / name,
                                              args.dry_run)))
         if target == "copilot":
-            results.extend(install_prompts(args.dry_run))
+            results.extend(install_prompts(args.dry_run, names=sel_prompts))
 
     print_summary(results, targets, args.dry_run)
 

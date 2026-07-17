@@ -252,5 +252,68 @@ class TestCommunityCache(TempDirTest):
         self.assertIn("reset", calls[2])
 
 
+class TestBuildItems(unittest.TestCase):
+    def test_orders_skills_prompts_community(self):
+        items = install.build_items(
+            custom_skills=["explain-logic", "soundboarding"],
+            prompt_files=["create-sb.prompt.md", "explain-code.prompt.md"])
+        kinds = [k for k, _ in items]
+        self.assertEqual(kinds[:2], ["skill", "skill"])
+        self.assertEqual(kinds[2:4], ["prompt", "prompt"])
+        self.assertTrue(all(k == "community" for k in kinds[4:]))
+        names = [n for _, n in items]
+        for s in install.COMMUNITY_SKILLS + install.CAVEMAN_SKILLS:
+            self.assertIn(s, names)
+
+
+class TestPickItems(unittest.TestCase):
+    ITEMS = [("skill", "explain-logic"), ("skill", "soundboarding"),
+             ("prompt", "create-sb.prompt.md"), ("community", "caveman")]
+
+    def pick(self, inputs):
+        it = iter(inputs)
+        with mock.patch("builtins.input", side_effect=lambda *_: next(it)):
+            return install.pick_items(list(self.ITEMS))
+
+    def test_enter_confirms_all_preselected(self):
+        self.assertEqual(self.pick([""]), self.ITEMS)
+
+    def test_number_toggles_off(self):
+        result = self.pick(["2", ""])
+        self.assertNotIn(("skill", "soundboarding"), result)
+        self.assertEqual(len(result), 3)
+
+    def test_toggle_twice_back_on(self):
+        self.assertEqual(self.pick(["2", "2", ""]), self.ITEMS)
+
+    def test_a_toggles_all_then_one_on(self):
+        result = self.pick(["a", "3", ""])
+        self.assertEqual(result, [("prompt", "create-sb.prompt.md")])
+
+    def test_zero_selected_exits(self):
+        with self.assertRaises(SystemExit):
+            self.pick(["a", ""])
+
+    def test_invalid_input_reprompts(self):
+        self.assertEqual(self.pick(["zzz", "99", ""]), self.ITEMS)
+
+
+class TestInstallPromptsFilter(TempDirTest):
+    def test_names_filter_limits_install(self):
+        prompts_src = self.tmp / "prompts"
+        prompts_src.mkdir()
+        (prompts_src / "a.prompt.md").write_text("a")
+        (prompts_src / "b.prompt.md").write_text("b")
+        user_dir = self.tmp / "Code" / "User"
+        user_dir.mkdir(parents=True)
+        with mock.patch("install.PROMPTS_SRC", prompts_src), \
+             mock.patch("install.vscode_prompts_dir",
+                        return_value=user_dir / "prompts"):
+            results = install.install_prompts(dry_run=False,
+                                              names={"b.prompt.md"})
+        self.assertEqual([r[1] for r in results], ["prompt:b.prompt"])
+        self.assertFalse((user_dir / "prompts" / "a.prompt.md").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
