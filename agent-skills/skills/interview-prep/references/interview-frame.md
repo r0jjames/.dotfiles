@@ -22,7 +22,7 @@
 > location, or notable project>
 >
 > The role we're looking to fill is a DevOps engineer on our team. The focus
-> is CI/CD pipelines, Linux, containers, and Kubernetes, with Java being the
+> is building CI/CD pipelines using Java, Python, scripts, golang, Linux, containers, and Kubernetes, with Java being the
 > primary language for pipeline scripting. We'll cover all of that today.
 >
 > **Here's the plan for the next 50-60 minutes. We'll start with you — walk

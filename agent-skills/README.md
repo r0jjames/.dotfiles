@@ -38,8 +38,8 @@ Also fetched into `~/.agent-skills-cache/` and installed/updated in place
 - From `juliusbrussee/caveman`: the caveman terse-output skill (token
   saver). explain-logic points at it for terse mode.
 
-`./install.sh agent-skills` from the repo root runs the Claude install
-(custom skills only) as part of normal dotfiles setup.
+`./install.py install agent-skills` from the repo root runs the Claude
+install (custom skills only) as part of normal dotfiles setup.
 
 ## Work VDI (Windows, Git Bash)
 

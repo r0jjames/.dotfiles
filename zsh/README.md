@@ -5,7 +5,7 @@ Shell stack: zsh + modern CLI tools + plugins + managed `~/.zshrc`.
 ## Run
 
 ```sh
-./zsh/setup.sh        # or: ./install.sh zsh
+./install.py install zsh
 ```
 
 ## What it installs

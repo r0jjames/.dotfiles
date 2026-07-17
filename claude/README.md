@@ -3,10 +3,10 @@
 Reproducible Claude Code setup: CLI, global settings, plugins, statusline,
 plus an inventory of every installed plugin/skill and how to invoke it.
 
-## What setup.sh does
+## What the installer does
 
 ```sh
-./install.sh claude    # or: bash claude/setup.sh
+./install.py install claude
 ```
 
 1. Installs the Claude Code CLI if missing (official native installer,
@@ -16,7 +16,7 @@ plus an inventory of every installed plugin/skill and how to invoke it.
 4. Symlinks `claude/CLAUDE.md` → `~/.claude/CLAUDE.md` (global memory, loaded
    into every session — keep it short).
 
-Plugins are **not** installed by the script: `settings.json` carries
+Plugins are **not** installed by the installer: `settings.json` carries
 `enabledPlugins` and `extraKnownMarketplaces`, so Claude Code fetches the
 marketplaces and installs every enabled plugin on its next start.
 

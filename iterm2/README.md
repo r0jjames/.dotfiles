@@ -5,7 +5,7 @@ iTerm2 with the repo's theme/font profile and shell integration.
 ## Run
 
 ```sh
-./iterm2/setup.sh        # or: ./install.sh iterm2
+./install.py install iterm2
 ```
 
 ## What it does
@@ -18,4 +18,4 @@ Restart iTerm2 (Cmd+Q, relaunch) after first run. Skips itself on Linux/WSL.
 
 ## Tweaking the theme
 
-Edit `com.dotfiles.json`, re-run the script (it re-copies when the file differs), restart iTerm2.
+Edit `com.dotfiles.json`, re-run the installer (it re-copies when the file differs), restart iTerm2.

@@ -11,7 +11,7 @@ VS Code settings, keybindings, and a curated extension list — same editor on p
 ## Run — macOS
 
 ```sh
-./vscode/setup.sh        # or: ./install.sh vscode
+./install.py install vscode
 ```
 
 Symlinks settings + keybindings into `~/Library/Application Support/Code/User` and installs missing extensions.
@@ -25,13 +25,13 @@ VS Code runs on the Windows host (WSL connects via the Remote-WSL extension), so
 3. In Git Bash:
    ```sh
    git clone https://github.com/<you>/.dotfiles.git ~/dotfiles
-   cd ~/dotfiles && ./vscode/setup.sh
+   cd ~/dotfiles && ./install.py install vscode
    ```
 
-On Windows the script **copies** (with dated backup) instead of symlinking — symlinks there need admin rights. Re-run after pulling changes.
+On Windows the installer **copies** (with dated backup) instead of symlinking — symlinks there need admin rights. Re-run after pulling changes.
 
 ## Requirements / notes
 
-- `code` CLI on PATH (script skips extensions with instructions if missing).
+- `code` CLI on PATH (installer skips extensions with instructions if missing).
 - The editor font falls back Menlo/Consolas until a MesloLGS Nerd Font is installed ([`iterm2/`](../iterm2/README.md) or [`terminal-macos/`](../terminal-macos/README.md) install it on macOS; on Windows install manually — see root README).
 - Alternative: VS Code's built-in **Settings Sync** (sign in with GitHub) syncs the same things automatically — use it if your work machine allows account sign-in; this folder remains the versioned source of truth.

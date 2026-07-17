@@ -5,14 +5,14 @@
 ## Run (macOS)
 
 ```sh
-./wezterm/setup.sh        # or: ./install.sh wezterm
+./install.py install wezterm
 ```
 
 Installs WezTerm + fonts via Homebrew casks and symlinks [`wezterm.lua`](wezterm.lua) / [`events.lua`](events.lua) into `~/.config/wezterm/`.
 
 ## Windows (WSL setup)
 
-The script intentionally skips on WSL — WezTerm must run on the Windows host:
+The installer marks wezterm macOS-only — WezTerm must run on the Windows host:
 
 1. Install WezTerm on Windows: `winget install wez.wezterm`
 2. Point it at this repo's config. Create `%USERPROFILE%\.wezterm.lua` containing:

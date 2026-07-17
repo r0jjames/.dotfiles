@@ -5,7 +5,7 @@
 ## Run
 
 ```sh
-./starship/setup.sh        # or: ./install.sh starship
+./install.py install starship
 ```
 
 ## What it does

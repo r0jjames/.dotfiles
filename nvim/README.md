@@ -5,7 +5,7 @@ Neovim as a DevOps IDE: Kubernetes, Helm, Docker, Python, Ansible, Terraform.
 ## Run
 
 ```sh
-./nvim/setup.sh        # or: ./install.sh nvim
+./install.py install nvim
 ```
 
 ## What it installs

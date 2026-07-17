@@ -5,7 +5,7 @@ Apple Terminal.app: Solarized Dark theme + MesloLGS Nerd Font.
 ## Run
 
 ```sh
-./terminal-macos/setup.sh        # or: ./install.sh terminal-macos
+./install.py install terminal-macos
 ```
 
 ## What it does

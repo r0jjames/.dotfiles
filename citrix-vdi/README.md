@@ -27,7 +27,7 @@ keep working everywhere else on the Mac.
 ### 1. Automated part — *run on: Mac*
 
 ```sh
-./install.sh citrix-vdi
+./install.py install citrix-vdi
 ```
 
 Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
@@ -95,9 +95,9 @@ removes it:
 
 | Location | What / written by | Removed by |
 |---|---|---|
-| `/Applications/Karabiner-Elements.app` (+ background services and the virtual keyboard driver) | Homebrew cask, installed by `setup.sh` | manual, optional (see Uninstall step 3) |
-| `~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json` | rule file copied by `setup.sh` | `uninstall.sh` |
-| `~/.config/karabiner/karabiner.json` — `profiles[*].complex_modifications.rules` | the three rules, copied in when you enable them in the GUI (setup steps 2 and 4) | `uninstall.sh` |
+| `/Applications/Karabiner-Elements.app` (+ background services and the virtual keyboard driver) | Homebrew cask, installed by the installer | manual, optional (see Uninstall step 3) |
+| `~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json` | rule file copied by the installer | `./install.py uninstall citrix-vdi` |
+| `~/.config/karabiner/karabiner.json` — `profiles[*].complex_modifications.rules` | the three rules, copied in when you enable them in the GUI (setup steps 2 and 4) | `./install.py uninstall citrix-vdi` |
 | `~/.config/karabiner/karabiner.json` — per-device settings | "Modify events" toggles for the NuPhy entries (setup step 4) | nothing — harmless without rules, or reset in the GUI |
 | `~/Library/Application Support/Citrix Receiver/Config` — `KeyboardInputMode=Scancode` | Citrix Workspace preferences GUI (setup step 3) | manual, GUI only (Uninstall step 1) |
 
@@ -134,7 +134,7 @@ All on the Mac; nothing to undo inside the VDI.
 ### Automated part — *run on: Mac*
 
 ```sh
-./citrix-vdi/uninstall.sh
+./install.py uninstall citrix-vdi
 ```
 
 Removes the three enabled "Citrix VDI"/"NuPhy" rules from
@@ -157,8 +157,8 @@ rerun.
    ```sh
    brew uninstall --cask karabiner-elements
    ```
-4. Repo side: remove `citrix-vdi` from `ALL_TOOLS`/`MAC_ONLY` in
-   `install.sh` and delete the `citrix-vdi/` folder if you want it gone
+4. Repo side: remove `citrix_vdi` from `lib/tools/__init__.py` and delete
+   `lib/tools/citrix_vdi.py` + the `citrix-vdi/` folder if you want it gone
    from the dotfiles too.
 
 ## Diagnostic — *performed inside the VDI session (changes nothing there)*
