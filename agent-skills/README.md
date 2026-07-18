@@ -9,6 +9,11 @@ installer. One `SKILL.md` format serves both platforms.
   (PR/branch diffs, files, functions) with language lenses.
 - `skills/soundboarding/` — story → SB document → task-by-task
   implementation workflow (bundled `SB-template.md` + examples).
+- `skills/interview-prep/` — DevOps interview doc generator from a CV
+  (vault-aware, bundled calibration references).
+- `skills/investigate-issue/` — problem `.md` in, validated root cause +
+  fix-steps `-investigation.md` out (Bamboo plans/agents, Java, Python,
+  Bash, Go, Docker, k8s).
 - `prompts/` — Copilot/VS Code `.prompt.md` slash commands
   (`/explain-code`, `/explain-and-review`, `/create-sb`, `/implement-sb`,
   `/create-implement-sb`). Not used by Claude.
@@ -37,6 +42,8 @@ Also fetched into `~/.agent-skills-cache/` and installed/updated in place
   context-map, architecture-blueprint-generator, add-educational-comments.
 - From `juliusbrussee/caveman`: the caveman terse-output skill (token
   saver). explain-logic points at it for terse mode.
+- From `addyosmani/agent-skills`: debugging-and-error-recovery
+  (root-cause discipline). investigate-issue chains it when present.
 
 `./install.py install agent-skills` from the repo root runs the Claude
 install (custom skills only) as part of normal dotfiles setup.
@@ -59,6 +66,8 @@ Claude Code:
 
 - [explain-logic](skills/explain-logic/USAGE.md)
 - [soundboarding](skills/soundboarding/USAGE.md)
+- [interview-prep](skills/interview-prep/USAGE.md)
+- [investigate-issue](skills/investigate-issue/USAGE.md)
 - [community skills](docs/community-skills.md) (code-tour, caveman, ...)
 
 ## Tests
