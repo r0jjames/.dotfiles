@@ -10,6 +10,9 @@
     "editor.fontSize": 15,
     "editor.fontFamily": "'MesloLGS Nerd Font', 'MesloLGS NF', Menlo, Consolas, monospace",
     "terminal.integrated.fontFamily": "'MesloLGS Nerd Font', 'MesloLGS NF', monospace",
+    // ---- Terminal ----
+    // Windows only: Git Bash as default shell. macOS keeps VS Code's default (zsh).
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
     // ---- Files ----
     "files.autoSave": "onFocusChange",
     "files.trimTrailingWhitespace": true,
