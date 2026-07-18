@@ -17,6 +17,28 @@ from lib.core import Tool
 
 _FILES = ("settings.json", "keybindings.json")
 
+# extensions.txt platform tags -> detect_os() names ("gitbash" is the
+# work Windows machine; VS Code runs on the Windows host there).
+_TAG_TO_OS = {"@macos": "macos", "@windows": "gitbash"}
+
+
+def parse_extensions(text: str, os_name: str) -> list[str]:
+    """Extension ids from extensions.txt that apply to os_name.
+
+    Line format: `<ext-id> [@macos|@windows ...]  # comment`.
+    Untagged lines apply to every platform; unknown tags never match.
+    """
+    exts = []
+    for line in text.splitlines():
+        tokens = line.split("#", 1)[0].split()
+        if not tokens:
+            continue
+        ext, tags = tokens[0], tokens[1:]
+        if tags and os_name not in {_TAG_TO_OS.get(t) for t in tags}:
+            continue
+        exts.append(ext)
+    return exts
+
 
 def _target() -> Tuple[Path, str]:
     """Return (user dir, mode) where mode is 'link' or 'copy'."""
@@ -45,10 +67,8 @@ def _install_extensions() -> None:
                  core.run([code, "--list-extensions"],
                           capture=True).stdout.splitlines()}
     ext_file = core.REPO_ROOT / "vscode" / "extensions.txt"
-    for line in ext_file.read_text().splitlines():
-        ext = line.split("#", 1)[0].strip()
-        if not ext:
-            continue
+    expected = parse_extensions(ext_file.read_text(), core.detect_os())
+    for ext in expected:
         if ext.lower() in installed:
             core.ok(f"{ext} already installed.")
             continue
@@ -56,6 +76,18 @@ def _install_extensions() -> None:
         result = core.run([code, "--install-extension", ext], check=False)
         if result.returncode != 0:
             core.warn(f"Failed to install {ext} (continuing).")
+    _report_extras(installed, expected)
+
+
+def _report_extras(installed: set[str], expected: list[str]) -> None:
+    """List installed extensions missing from extensions.txt (report only)."""
+    extras = sorted(installed - {ext.lower() for ext in expected})
+    if not extras:
+        return
+    core.warn(f"{len(extras)} installed extension(s) not in extensions.txt "
+              "— add them there or uninstall:")
+    for ext in extras:
+        print(f"    code --uninstall-extension {ext}")
 
 
 def _post() -> None:

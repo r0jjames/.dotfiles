@@ -8,6 +8,22 @@ VS Code settings, keybindings, and a curated extension list — same editor on p
 - [`keybindings.json`](keybindings.json) — custom terminal/file-tree/navigation keybindings
 - [`extensions.txt`](extensions.txt) — curated extension ids, grouped by purpose (DevOps, Remote/WSL, Python, Java, Go, Markdown, AI, utilities)
 
+### Platform tags in extensions.txt
+
+Lines may end with `@macos` or `@windows`; untagged lines install on both machines.
+Used for the AI split — Claude Code on the personal Mac, Copilot on the work
+Windows machine — and for Windows-only extensions like Remote-WSL:
+
+```
+anthropic.claude-code @macos
+github.copilot @windows
+ms-vscode-remote.remote-wsl @windows
+```
+
+After installing, the installer reports extensions that are installed but not in
+the list (with ready-to-paste `code --uninstall-extension` commands). It never
+uninstalls anything itself — extras on the work machine may be IT-mandated.
+
 ## Run — macOS
 
 ```sh
