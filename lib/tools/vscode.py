@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import filecmp
 import os
+import shutil
 from pathlib import Path
 from typing import Tuple
 
@@ -31,14 +32,17 @@ def _target() -> Tuple[Path, str]:
 
 
 def _install_extensions() -> None:
-    if not core.have("code"):
+    # Full path from which(): on Windows the CLI is code.cmd, which
+    # subprocess can't resolve from the bare name (no PATHEXT lookup).
+    code = shutil.which("code")
+    if not code:
         core.warn("'code' CLI not found — skipping extension install.")
         core.warn("In VS Code: Cmd/Ctrl+Shift+P -> 'Shell Command: Install "
                   "code command in PATH', then re-run.")
         return
     core.info("Installing extensions (skipping already installed)...")
     installed = {line.strip().lower() for line in
-                 core.run(["code", "--list-extensions"],
+                 core.run([code, "--list-extensions"],
                           capture=True).stdout.splitlines()}
     ext_file = core.REPO_ROOT / "vscode" / "extensions.txt"
     for line in ext_file.read_text().splitlines():
@@ -49,7 +53,7 @@ def _install_extensions() -> None:
             core.ok(f"{ext} already installed.")
             continue
         core.info(f"Installing {ext}...")
-        result = core.run(["code", "--install-extension", ext], check=False)
+        result = core.run([code, "--install-extension", ext], check=False)
         if result.returncode != 0:
             core.warn(f"Failed to install {ext} (continuing).")
 
