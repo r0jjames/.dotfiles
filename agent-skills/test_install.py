@@ -251,6 +251,16 @@ class TestCommunityCache(TempDirTest):
         self.assertIn("fetch", calls[1])
         self.assertIn("reset", calls[2])
 
+    def test_addy_clone_uses_addy_repo(self):
+        cache = self.tmp / "cache" / "addy-agent-skills"
+        calls = []
+        with mock.patch("install.addy_cache_dir", return_value=cache), \
+             mock.patch("install.run_git", side_effect=lambda a: calls.append(a)):
+            result = install.update_addy_cache(dry_run=False)
+        self.assertEqual(result, cache)
+        self.assertIn(install.ADDY_REPO_URL, calls[0])
+        self.assertIn("skills/debugging-and-error-recovery", calls[1])
+
 
 class TestBuildItems(unittest.TestCase):
     def test_orders_skills_prompts_community(self):
@@ -262,7 +272,8 @@ class TestBuildItems(unittest.TestCase):
         self.assertEqual(kinds[2:4], ["prompt", "prompt"])
         self.assertTrue(all(k == "community" for k in kinds[4:]))
         names = [n for _, n in items]
-        for s in install.COMMUNITY_SKILLS + install.CAVEMAN_SKILLS:
+        for s in (install.COMMUNITY_SKILLS + install.CAVEMAN_SKILLS
+                  + install.ADDY_SKILLS):
             self.assertIn(s, names)
 
 

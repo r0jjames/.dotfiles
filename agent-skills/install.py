@@ -41,6 +41,11 @@ CAVEMAN_REPO_URL = "https://github.com/juliusbrussee/caveman.git"
 CAVEMAN_BRANCH = "main"
 CAVEMAN_SKILLS = ["caveman"]
 
+# Chained by investigate-issue for root-cause discipline.
+ADDY_REPO_URL = "https://github.com/addyosmani/agent-skills.git"
+ADDY_BRANCH = "main"
+ADDY_SKILLS = ["debugging-and-error-recovery"]
+
 
 def log(msg):
     print(f"[skills] {msg}")
@@ -137,7 +142,8 @@ def build_items(custom_skills, prompt_files):
     files, then community skills."""
     items = [("skill", n) for n in custom_skills]
     items += [("prompt", n) for n in prompt_files]
-    items += [("community", n) for n in COMMUNITY_SKILLS + CAVEMAN_SKILLS]
+    items += [("community", n)
+              for n in COMMUNITY_SKILLS + CAVEMAN_SKILLS + ADDY_SKILLS]
     return items
 
 
@@ -214,6 +220,10 @@ def caveman_cache_dir():
     return Path.home() / ".agent-skills-cache" / "caveman"
 
 
+def addy_cache_dir():
+    return Path.home() / ".agent-skills-cache" / "addy-agent-skills"
+
+
 def run_git(args):
     subprocess.run(["git", *args], check=True)
 
@@ -265,6 +275,14 @@ def update_caveman_cache(dry_run):
         "caveman", "https://github.com/juliusbrussee/caveman/tree/main/skills")
 
 
+def update_addy_cache(dry_run):
+    return update_repo_cache(
+        addy_cache_dir(), ADDY_REPO_URL, ADDY_BRANCH,
+        [f"skills/{s}" for s in ADDY_SKILLS], dry_run,
+        "addyosmani/agent-skills",
+        "https://github.com/addyosmani/agent-skills/tree/main/skills")
+
+
 def print_summary(results, targets, dry_run):
     print()
     title = "Planned actions (dry run)" if dry_run else "Install summary"
@@ -307,10 +325,11 @@ def main():
         custom = [p for p in custom if p.name in sel_skills]
     else:
         sel_prompts = None
-        sel_community = set(COMMUNITY_SKILLS + CAVEMAN_SKILLS)
+        sel_community = set(COMMUNITY_SKILLS + CAVEMAN_SKILLS + ADDY_SKILLS)
 
     community_src = None
     caveman_src = None
+    addy_src = None
     if args.skills_only:
         log("--skills-only: skipping community and caveman skills")
     elif not sel_community:
@@ -324,6 +343,10 @@ def main():
             cave = update_caveman_cache(args.dry_run)
             if cave:
                 caveman_src = cave / "skills"
+        if sel_community & set(ADDY_SKILLS):
+            addy = update_addy_cache(args.dry_run)
+            if addy:
+                addy_src = addy / "skills"
 
     results = []
     for target in targets:
@@ -341,7 +364,8 @@ def main():
                                       args.dry_run)
             results.append((target, skill.name, status))
         for src_root, names in ((community_src, COMMUNITY_SKILLS),
-                                (caveman_src, CAVEMAN_SKILLS)):
+                                (caveman_src, CAVEMAN_SKILLS),
+                                (addy_src, ADDY_SKILLS)):
             if not src_root:
                 continue
             for name in names:
