@@ -42,7 +42,8 @@ ms-python.autopep8
 ms-python.vscode-python-envs
 
 # ---- Java ----
-vscjava.vscode-java-pack
+# No vscjava.vscode-java-pack: the pack auto-installs extras
+# (Copilot app modernization, IntelliCode) — individuals listed instead.
 redhat.java
 vscjava.vscode-java-debug
 vscjava.vscode-java-dependency
