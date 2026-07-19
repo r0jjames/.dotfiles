@@ -37,7 +37,7 @@ checks on uninstall).
 
 Interactive runs (no flags) show an item picker: toggle individual skills,
 prompt files, and community skills by number, `a` for all, enter to
-confirm. Flag runs install everything, unchanged. Interactive picker tags items
+confirm. Flag runs install custom skills, prompts, and the default community set; cherry-picks are interactive-only. Interactive picker tags items
 as `[installed]`, `[update]`, or `[conflict]`.
 
 Community skills are fetched into `~/.agent-skills-cache/` and installed/updated
