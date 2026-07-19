@@ -230,15 +230,43 @@ def build_items(custom_skills, prompt_files):
     return items
 
 
-def pick_items(items):
-    """Interactive toggle menu over (kind, name) items. All pre-selected.
-    Number toggles one, 'a' toggles all, empty input confirms. Exits when
-    nothing is selected."""
-    selected = [True] * len(items)
+def item_tag(kind, name, targets, plugin_map):
+    """Picker annotation: [installed] [update] [conflict], or ''."""
+    tags = []
+    if kind == "prompt":
+        d = vscode_prompts_dir()
+        if d and (d / name).is_file():
+            tags.append("[installed]")
+    else:
+        for target in targets:
+            dest = target_root(target) / name
+            if not (dest.is_symlink() or dest.exists()):
+                continue
+            tags.append("[installed]")
+            if kind == "skill":
+                src = SKILLS_SRC / name
+                if (src and src.is_dir() and not dest.is_symlink()
+                        and dest.is_dir() and not dirs_equal(src, dest)):
+                    tags.append("[update]")
+            break
+        if "claude" in targets and name in plugin_map:
+            tags.append("[conflict]")
+    return " ".join(tags)
+
+
+def pick_items(items, preselected=None, tags=None):
+    """Interactive toggle menu over (kind, name) items. preselected:
+    optional bool list (default all True). tags: optional
+    {(kind, name): str} shown after the item."""
+    selected = (list(preselected) if preselected is not None
+                else [True] * len(items))
+    tags = tags or {}
     while True:
         print("\nSelect items to install:")
         for i, ((kind, name), on) in enumerate(zip(items, selected), 1):
-            print(f"  [{'x' if on else ' '}] {i:2}) {kind:9} {name}")
+            tag = tags.get((kind, name), "")
+            suffix = f"  {tag}" if tag else ""
+            print(f"  [{'x' if on else ' '}] {i:2}) {kind:9} {name}{suffix}")
         raw = input("Toggle number, 'a' = all, enter = confirm: ").strip().lower()
         if raw == "":
             chosen = [item for item, on in zip(items, selected) if on]
@@ -584,8 +612,15 @@ def main():
     prompt_files = sorted(p.name for p in PROMPTS_SRC.glob("*.prompt.md"))
 
     if interactive:
-        chosen = pick_items(build_items([p.name for p in custom],
-                                        prompt_files))
+        items = build_items([p.name for p in custom], prompt_files)
+        reg = registry()
+        plugin_map = plugin_skills()
+        preselected = [reg[n][1]["default"] if k == "community" else True
+                       for k, n in items]
+        tags = {(k, n): item_tag(k, n, targets, plugin_map)
+                for k, n in items}
+        tags = {kn: t for kn, t in tags.items() if t}
+        chosen = pick_items(items, preselected=preselected, tags=tags)
         sel_skills = {n for k, n in chosen if k == "skill"}
         sel_prompts = {n for k, n in chosen if k == "prompt"}
         sel_community = {n for k, n in chosen if k == "community"}

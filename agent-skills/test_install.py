@@ -496,6 +496,50 @@ class TestStatus(TempDirTest):
         self.assertEqual(result, {})
 
 
+class TestPickerTags(TempDirTest):
+    def test_installed_tag(self):
+        root = self.tmp / "claude" / "skills"
+        (root / "code-tour").mkdir(parents=True)
+        with mock.patch("install.target_root", return_value=root):
+            tag = install.item_tag("community", "code-tour", ["claude"], {})
+        self.assertEqual(tag, "[installed]")
+
+    def test_conflict_tag_from_plugin(self):
+        root = self.tmp / "claude" / "skills"
+        root.mkdir(parents=True)
+        with mock.patch("install.target_root", return_value=root):
+            tag = install.item_tag("community", "caveman", ["claude"],
+                                   {"caveman": "caveman@caveman"})
+        self.assertEqual(tag, "[conflict]")
+
+    def test_update_tag_for_stale_custom_copy(self):
+        src = self.make_skill("repo", name="explain-logic",
+                              content="new")
+        root = self.tmp / "copilot" / "skills"
+        (root / "explain-logic").mkdir(parents=True)
+        (root / "explain-logic" / "SKILL.md").write_text("old")
+        with mock.patch("install.target_root", return_value=root), \
+             mock.patch("install.SKILLS_SRC", src.parent):
+            tag = install.item_tag("skill", "explain-logic",
+                                   ["copilot"], {})
+        self.assertEqual(tag, "[installed] [update]")
+
+    def test_no_tag_when_absent(self):
+        root = self.tmp / "claude" / "skills"
+        root.mkdir(parents=True)
+        with mock.patch("install.target_root", return_value=root):
+            self.assertEqual(
+                install.item_tag("community", "pdf", ["claude"], {}), "")
+
+    def test_pick_items_preselected_and_tags_render(self):
+        items = [("community", "pdf"), ("community", "code-tour")]
+        with mock.patch("builtins.input", side_effect=["1", ""]):
+            chosen = install.pick_items(
+                items, preselected=[False, True],
+                tags={("community", "code-tour"): "[installed]"})
+        self.assertEqual(chosen, items)  # 'pdf' toggled on by input "1"
+
+
 class TestUninstall(TempDirTest):
     def test_removes_copy_and_symlink(self):
         dest = self.tmp / "skills"
