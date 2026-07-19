@@ -326,5 +326,50 @@ class TestInstallPromptsFilter(TempDirTest):
         self.assertFalse((user_dir / "prompts" / "a.prompt.md").exists())
 
 
+class TestRegistry(unittest.TestCase):
+    def test_caveman_is_copilot_only(self):
+        source, meta = install.registry()["caveman"]
+        self.assertEqual(meta["targets"], ("copilot",))
+        self.assertEqual(source["label"], "caveman")
+
+    def test_debugging_is_copilot_only_default(self):
+        _, meta = install.registry()["debugging-and-error-recovery"]
+        self.assertEqual(meta["targets"], ("copilot",))
+        self.assertTrue(meta["default"])
+
+    def test_cherry_picks_not_default(self):
+        reg = install.registry()
+        for name in ("observability-and-instrumentation", "ci-cd-and-automation",
+                     "security-and-hardening", "deprecation-and-migration",
+                     "pdf", "docx", "pptx", "xlsx"):
+            self.assertFalse(reg[name][1]["default"], name)
+
+    def test_default_names_match_legacy_constants(self):
+        self.assertEqual(
+            install.default_community_names(),
+            set(install.COMMUNITY_SKILLS + install.CAVEMAN_SKILLS
+                + ["debugging-and-error-recovery"]))
+
+    def test_legacy_cache_dir_used_for_awesome(self):
+        source = install.source_by_label("awesome-copilot")
+        with mock.patch("install.cache_dir",
+                        return_value=Path("/tmp/xyz")) as m:
+            self.assertEqual(install.source_cache_dir(source), Path("/tmp/xyz"))
+            m.assert_called_once()
+
+    def test_new_source_gets_registry_cache_path(self):
+        source = install.source_by_label("anthropics-skills")
+        self.assertEqual(install.source_cache_dir(source),
+                         Path.home() / ".agent-skills-cache" / "anthropics-skills")
+
+    def test_update_source_cache_sparse_names(self):
+        source = install.source_by_label("addy-agent-skills")
+        with mock.patch("install.update_repo_cache") as m:
+            install.update_source_cache(source, dry_run=False,
+                                        names=["security-and-hardening"])
+        sparse = m.call_args[0][3]
+        self.assertEqual(sparse, ["skills/security-and-hardening"])
+
+
 if __name__ == "__main__":
     unittest.main()

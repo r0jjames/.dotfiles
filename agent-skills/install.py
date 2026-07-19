@@ -28,23 +28,101 @@ PROMPTS_SRC = REPO_ROOT / "prompts"
 AWESOME_REPO_URL = "https://github.com/github/awesome-copilot.git"
 AWESOME_BRANCH = "main"
 ZIP_FALLBACK_URL = "https://github.com/github/awesome-copilot/tree/main/skills"
-
-COMMUNITY_SKILLS = [
-    "code-tour",
-    "acquire-codebase-knowledge",
-    "context-map",
-    "architecture-blueprint-generator",
-    "add-educational-comments",
-]
-
 CAVEMAN_REPO_URL = "https://github.com/juliusbrussee/caveman.git"
 CAVEMAN_BRANCH = "main"
-CAVEMAN_SKILLS = ["caveman"]
-
-# Chained by investigate-issue for root-cause discipline.
 ADDY_REPO_URL = "https://github.com/addyosmani/agent-skills.git"
 ADDY_BRANCH = "main"
-ADDY_SKILLS = ["debugging-and-error-recovery"]
+
+BOTH = ("copilot", "claude")
+
+# Community sources. Per skill: targets it may install to, whether it is
+# pre-selected (default) or an explicit cherry-pick, and an optional note
+# shown when a target is skipped.
+SOURCES = [
+    {
+        "label": "awesome-copilot",
+        "url": AWESOME_REPO_URL,
+        "branch": AWESOME_BRANCH,
+        "cache": "awesome-copilot",
+        "fallback": ZIP_FALLBACK_URL,
+        "skills": {
+            "code-tour": {"targets": BOTH, "default": True},
+            "acquire-codebase-knowledge": {"targets": BOTH, "default": True},
+            "context-map": {"targets": BOTH, "default": True},
+            "architecture-blueprint-generator": {"targets": BOTH,
+                                                 "default": True},
+            "add-educational-comments": {"targets": BOTH, "default": True},
+        },
+    },
+    {
+        "label": "caveman",
+        "url": CAVEMAN_REPO_URL,
+        "branch": CAVEMAN_BRANCH,
+        "cache": "caveman",
+        "fallback": "https://github.com/juliusbrussee/caveman/tree/main/skills",
+        "skills": {
+            "caveman": {"targets": ("copilot",), "default": True,
+                        "note": "claude uses the caveman plugin"},
+        },
+    },
+    {
+        "label": "addy-agent-skills",
+        "url": ADDY_REPO_URL,
+        "branch": ADDY_BRANCH,
+        "cache": "addy-agent-skills",
+        "fallback": "https://github.com/addyosmani/agent-skills/tree/main/skills",
+        "skills": {
+            # Chained by investigate-issue on Copilot; Claude uses
+            # superpowers:systematic-debugging instead.
+            "debugging-and-error-recovery": {
+                "targets": ("copilot",), "default": True,
+                "note": "claude uses superpowers:systematic-debugging"},
+            "observability-and-instrumentation": {"targets": BOTH,
+                                                  "default": False},
+            "ci-cd-and-automation": {"targets": BOTH, "default": False},
+            "security-and-hardening": {"targets": BOTH, "default": False},
+            "deprecation-and-migration": {"targets": BOTH, "default": False},
+        },
+    },
+    {
+        "label": "anthropics-skills",
+        "url": "https://github.com/anthropics/skills.git",
+        "branch": "main",
+        "cache": "anthropics-skills",
+        "fallback": "https://github.com/anthropics/skills/tree/main/skills",
+        "skills": {
+            "pdf": {"targets": BOTH, "default": False},
+            "docx": {"targets": BOTH, "default": False},
+            "pptx": {"targets": BOTH, "default": False},
+            "xlsx": {"targets": BOTH, "default": False},
+        },
+    },
+]
+
+
+def registry():
+    """{skill_name: (source, meta)} across all sources."""
+    return {name: (source, meta)
+            for source in SOURCES
+            for name, meta in source["skills"].items()}
+
+
+def source_by_label(label):
+    return next(s for s in SOURCES if s["label"] == label)
+
+
+def all_community_names():
+    return set(registry())
+
+
+def default_community_names():
+    return {n for n, (_, meta) in registry().items() if meta["default"]}
+
+
+# Legacy constants, derived — external callers and tests rely on them.
+COMMUNITY_SKILLS = list(source_by_label("awesome-copilot")["skills"])
+CAVEMAN_SKILLS = list(source_by_label("caveman")["skills"])
+ADDY_SKILLS = list(source_by_label("addy-agent-skills")["skills"])
 
 
 def log(msg):
@@ -224,6 +302,28 @@ def addy_cache_dir():
     return Path.home() / ".agent-skills-cache" / "addy-agent-skills"
 
 
+# Legacy cache dirs pre-date the registry; keep them authoritative so
+# existing caches (and tests that patch them) stay valid.
+_LEGACY_CACHE_FUNCS = {"awesome-copilot": "cache_dir",
+                       "caveman": "caveman_cache_dir",
+                       "addy-agent-skills": "addy_cache_dir"}
+
+
+def source_cache_dir(source):
+    fn_name = _LEGACY_CACHE_FUNCS.get(source["label"])
+    if fn_name:
+        return globals()[fn_name]()
+    return Path.home() / ".agent-skills-cache" / source["cache"]
+
+
+def update_source_cache(source, dry_run, names=None):
+    names = sorted(names) if names else sorted(source["skills"])
+    return update_repo_cache(
+        source_cache_dir(source), source["url"], source["branch"],
+        [f"skills/{n}" for n in names], dry_run, source["label"],
+        source["fallback"])
+
+
 def run_git(args):
     subprocess.run(["git", *args], check=True)
 
@@ -262,25 +362,15 @@ def update_repo_cache(cache, url, branch, sparse, dry_run, label,
 
 
 def update_community_cache(dry_run):
-    return update_repo_cache(
-        cache_dir(), AWESOME_REPO_URL, AWESOME_BRANCH,
-        [f"skills/{s}" for s in COMMUNITY_SKILLS], dry_run,
-        "awesome-copilot", ZIP_FALLBACK_URL)
+    return update_source_cache(source_by_label("awesome-copilot"), dry_run)
 
 
 def update_caveman_cache(dry_run):
-    return update_repo_cache(
-        caveman_cache_dir(), CAVEMAN_REPO_URL, CAVEMAN_BRANCH,
-        [f"skills/{s}" for s in CAVEMAN_SKILLS], dry_run,
-        "caveman", "https://github.com/juliusbrussee/caveman/tree/main/skills")
+    return update_source_cache(source_by_label("caveman"), dry_run)
 
 
 def update_addy_cache(dry_run):
-    return update_repo_cache(
-        addy_cache_dir(), ADDY_REPO_URL, ADDY_BRANCH,
-        [f"skills/{s}" for s in ADDY_SKILLS], dry_run,
-        "addyosmani/agent-skills",
-        "https://github.com/addyosmani/agent-skills/tree/main/skills")
+    return update_source_cache(source_by_label("addy-agent-skills"), dry_run)
 
 
 def print_summary(results, targets, dry_run):
