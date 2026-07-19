@@ -15,6 +15,7 @@ to copying.
 """
 import argparse
 import filecmp
+import json
 import os
 import shutil
 import subprocess
@@ -402,6 +403,92 @@ def install_community_for_target(target, dest_root, sel_community, dry_run):
     return results
 
 
+def enabled_plugins(settings_path=None):
+    settings_path = settings_path or (Path.home() / ".claude"
+                                      / "settings.json")
+    try:
+        data = json.loads(Path(settings_path).read_text())
+    except (OSError, ValueError):
+        return {}
+    plugins = data.get("enabledPlugins") or {}
+    return {k: True for k, v in plugins.items() if v}
+
+
+def plugin_skills(cache_root=None, settings_path=None):
+    """{skill_name: plugin_id} across enabled Claude plugins (any cached
+    version). Empty dict when config or cache is absent."""
+    cache_root = Path(cache_root or Path.home() / ".claude" / "plugins"
+                      / "cache")
+    out = {}
+    for plugin_id in enabled_plugins(settings_path):
+        name, _, marketplace = plugin_id.partition("@")
+        plugin_dir = cache_root / marketplace / name
+        if not plugin_dir.is_dir():
+            continue
+        for version in plugin_dir.iterdir():
+            skills_dir = version / "skills"
+            if not skills_dir.is_dir():
+                continue
+            for entry in skills_dir.iterdir():
+                if entry.is_dir():
+                    out[entry.name] = plugin_id
+    return out
+
+
+def gather_status(target, dest_root, custom_names, plugin_map):
+    """Classify installed skills in dest_root. Returns (rows, warnings);
+    row = (name, kind, mechanism)."""
+    reg = registry()
+    rows, warnings = [], []
+    if not dest_root.is_dir():
+        return rows, warnings
+    for entry in sorted(dest_root.iterdir()):
+        if not (entry.is_dir() or entry.is_symlink()):
+            continue
+        name = entry.name
+        if name in custom_names:
+            kind = "custom"
+        elif name in reg:
+            kind = f"community ({reg[name][0]['label']})"
+        else:
+            kind = "unknown"
+        mech = "symlink" if entry.is_symlink() else "copy"
+        rows.append((name, kind, mech))
+        if entry.is_symlink() and not entry.exists():
+            warnings.append(f"{target}: {name} is a broken symlink")
+        if name in reg and target not in reg[name][1]["targets"]:
+            note = reg[name][1].get("note", "wrong target")
+            warnings.append(f"{target}: {name} not meant for this target"
+                            f" — {note}")
+        if target == "claude" and name in plugin_map:
+            warnings.append(f"claude: {name} also provided by enabled"
+                            f" plugin {plugin_map[name]} — remove the"
+                            f" skills-dir copy")
+    return rows, warnings
+
+
+def show_status(targets):
+    custom_names = {p.name for p in SKILLS_SRC.iterdir() if p.is_dir()}
+    plugin_map = plugin_skills()
+    all_warnings = []
+    for target in targets:
+        dest_root = target_root(target)
+        print(f"\n{target}: {dest_root}")
+        rows, warnings = gather_status(target, dest_root, custom_names,
+                                       plugin_map)
+        if not rows:
+            print("  (nothing installed)")
+        for name, kind, mech in rows:
+            print(f"  {name:35} {kind:32} {mech}")
+        all_warnings.extend(warnings)
+    print()
+    if all_warnings:
+        for w in all_warnings:
+            warn(w)
+    else:
+        ok("no conflicts detected")
+
+
 def print_summary(results, targets, dry_run):
     print()
     title = "Planned actions (dry run)" if dry_run else "Install summary"
@@ -426,7 +513,14 @@ def main():
                     help="skip fetching community skills (offline/proxy)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print planned actions without writing anything")
+    ap.add_argument("--status", action="store_true",
+                    help="show installed skills per target and conflicts")
     args = ap.parse_args()
+
+    if args.status:
+        show_status(["copilot", "claude"] if args.target in (None, "both")
+                    else [args.target])
+        return
 
     interactive = args.target is None
     targets = pick_targets(args.target)

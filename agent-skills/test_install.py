@@ -424,5 +424,77 @@ class TestInstallCommunityForTarget(TempDirTest):
         self.assertEqual(results, [])
 
 
+class TestStatus(TempDirTest):
+    def make_dest(self):
+        dest = self.tmp / "claude-skills"
+        dest.mkdir(parents=True)
+        return dest
+
+    def test_classifies_custom_community_unknown(self):
+        dest = self.make_dest()
+        src = self.make_skill("repo", name="explain-logic")
+        (dest / "explain-logic").symlink_to(src)
+        (dest / "code-tour").mkdir()
+        (dest / "mystery").mkdir()
+        rows, warnings = install.gather_status(
+            "claude", dest, {"explain-logic"}, {})
+        by_name = {r[0]: r for r in rows}
+        self.assertEqual(by_name["explain-logic"][1:],
+                         ("custom", "symlink"))
+        self.assertEqual(by_name["code-tour"][1:],
+                         ("community (awesome-copilot)", "copy"))
+        self.assertEqual(by_name["mystery"][1:], ("unknown", "copy"))
+        self.assertEqual(warnings, [])
+
+    def test_broken_symlink_warns(self):
+        dest = self.make_dest()
+        (dest / "explain-logic").symlink_to(self.tmp / "gone")
+        _, warnings = install.gather_status(
+            "claude", dest, {"explain-logic"}, {})
+        self.assertIn("claude: explain-logic is a broken symlink", warnings)
+
+    def test_wrong_target_warns(self):
+        dest = self.make_dest()
+        (dest / "caveman").mkdir()
+        _, warnings = install.gather_status("claude", dest, set(), {})
+        self.assertTrue(any("caveman" in w and "claude" in w
+                            for w in warnings))
+
+    def test_plugin_duplicate_warns(self):
+        dest = self.make_dest()
+        (dest / "brainstorming").mkdir()
+        _, warnings = install.gather_status(
+            "claude", dest, set(),
+            {"brainstorming": "superpowers@claude-plugins-official"})
+        self.assertTrue(any("superpowers@claude-plugins-official" in w
+                            for w in warnings))
+
+    def test_plugin_duplicate_ignored_on_copilot(self):
+        dest = self.make_dest()
+        (dest / "brainstorming").mkdir()
+        _, warnings = install.gather_status(
+            "copilot", dest, set(),
+            {"brainstorming": "superpowers@claude-plugins-official"})
+        self.assertEqual(warnings, [])
+
+    def test_plugin_skills_reads_enabled_only(self):
+        settings = self.tmp / "settings.json"
+        settings.write_text(
+            '{"enabledPlugins": {"good@mp": true, "off@mp": false}}')
+        cache = self.tmp / "plugcache"
+        for plug, skill in (("good", "alpha"), ("off", "beta")):
+            (cache / "mp" / plug / "1.0.0" / "skills" / skill).mkdir(
+                parents=True)
+        result = install.plugin_skills(cache_root=cache,
+                                       settings_path=settings)
+        self.assertEqual(result, {"alpha": "good@mp"})
+
+    def test_plugin_skills_missing_config_empty(self):
+        result = install.plugin_skills(
+            cache_root=self.tmp / "nope",
+            settings_path=self.tmp / "nope.json")
+        self.assertEqual(result, {})
+
+
 if __name__ == "__main__":
     unittest.main()
