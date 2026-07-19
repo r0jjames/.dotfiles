@@ -371,5 +371,58 @@ class TestRegistry(unittest.TestCase):
         self.assertEqual(sparse, ["skills/security-and-hardening"])
 
 
+class TestInstallCommunityForTarget(TempDirTest):
+    def fake_sources(self, with_cache=True):
+        cache = self.tmp / "cache"
+        (cache / "skills" / "tool-x").mkdir(parents=True)
+        (cache / "skills" / "tool-x" / "SKILL.md").write_text("x")
+        return [{
+            "label": "fake", "url": "u", "branch": "main", "cache": "fake",
+            "fallback": "f",
+            "_cache": cache if with_cache else None,
+            "skills": {
+                "tool-x": {"targets": ("copilot", "claude"), "default": True},
+                "cop-only": {"targets": ("copilot",), "default": True,
+                             "note": "claude uses plugin"},
+            },
+        }]
+
+    def test_installs_allowed_skill(self):
+        dest = self.tmp / "dest"
+        with mock.patch("install.SOURCES", self.fake_sources()):
+            results = install.install_community_for_target(
+                "claude", dest, {"tool-x"}, dry_run=False)
+        self.assertEqual(results, [("claude", "tool-x", "installed")])
+        self.assertTrue((dest / "tool-x" / "SKILL.md").is_file())
+
+    def test_skips_wrong_target_with_note(self):
+        dest = self.tmp / "dest"
+        with mock.patch("install.SOURCES", self.fake_sources()):
+            results = install.install_community_for_target(
+                "claude", dest, {"cop-only"}, dry_run=False)
+        self.assertEqual(results,
+                         [("claude", "cop-only",
+                           "skipped (claude uses plugin)")])
+        self.assertFalse((dest / "cop-only").exists())
+
+    def test_missing_in_cache_reported(self):
+        sources = self.fake_sources()
+        sources[0]["skills"]["ghost"] = {"targets": ("claude",),
+                                         "default": True}
+        dest = self.tmp / "dest"
+        with mock.patch("install.SOURCES", sources):
+            results = install.install_community_for_target(
+                "claude", dest, {"ghost"}, dry_run=False)
+        self.assertEqual(results,
+                         [("claude", "ghost", "missing in cache — skipped")])
+
+    def test_no_cache_skips_silently(self):
+        dest = self.tmp / "dest"
+        with mock.patch("install.SOURCES", self.fake_sources(with_cache=False)):
+            results = install.install_community_for_target(
+                "claude", dest, {"tool-x"}, dry_run=False)
+        self.assertEqual(results, [])
+
+
 if __name__ == "__main__":
     unittest.main()

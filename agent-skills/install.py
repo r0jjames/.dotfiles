@@ -199,6 +199,11 @@ def install_symlink(src, dest, dry_run):
         return install_copy(src, dest, dry_run=False) + " (copy fallback)"
 
 
+def target_root(target):
+    return Path.home() / (".copilot" if target == "copilot"
+                          else ".claude") / "skills"
+
+
 def pick_targets(arg_target):
     """Resolve --target value (or interactive menu) to a list of targets."""
     if arg_target:
@@ -220,8 +225,7 @@ def build_items(custom_skills, prompt_files):
     files, then community skills."""
     items = [("skill", n) for n in custom_skills]
     items += [("prompt", n) for n in prompt_files]
-    items += [("community", n)
-              for n in COMMUNITY_SKILLS + CAVEMAN_SKILLS + ADDY_SKILLS]
+    items += [("community", n) for n in sorted(all_community_names())]
     return items
 
 
@@ -373,6 +377,31 @@ def update_addy_cache(dry_run):
     return update_source_cache(source_by_label("addy-agent-skills"), dry_run)
 
 
+def install_community_for_target(target, dest_root, sel_community, dry_run):
+    """Install selected community skills for one target, honoring each
+    skill's target policy. Sources carry their fetched cache under
+    '_cache' (None = fetch failed or skipped)."""
+    results = []
+    for source in SOURCES:
+        cache = source.get("_cache")
+        for name, meta in source["skills"].items():
+            if name not in sel_community:
+                continue
+            if target not in meta["targets"]:
+                note = meta.get("note", "not for " + target)
+                results.append((target, name, f"skipped ({note})"))
+                continue
+            if not cache:
+                continue
+            src = cache / "skills" / name
+            if not src.is_dir():
+                results.append((target, name, "missing in cache — skipped"))
+                continue
+            results.append((target, name,
+                            install_copy(src, dest_root / name, dry_run)))
+    return results
+
+
 def print_summary(results, targets, dry_run):
     print()
     title = "Planned actions (dry run)" if dry_run else "Install summary"
@@ -415,33 +444,22 @@ def main():
         custom = [p for p in custom if p.name in sel_skills]
     else:
         sel_prompts = None
-        sel_community = set(COMMUNITY_SKILLS + CAVEMAN_SKILLS + ADDY_SKILLS)
+        sel_community = default_community_names()
 
-    community_src = None
-    caveman_src = None
-    addy_src = None
     if args.skills_only:
-        log("--skills-only: skipping community and caveman skills")
-    elif not sel_community:
-        log("no community skills selected — skipping fetch")
+        log("--skills-only: skipping community skills")
+        for source in SOURCES:
+            source["_cache"] = None
     else:
-        if sel_community & set(COMMUNITY_SKILLS):
-            cache = update_community_cache(args.dry_run)
-            if cache:
-                community_src = cache / "skills"
-        if sel_community & set(CAVEMAN_SKILLS):
-            cave = update_caveman_cache(args.dry_run)
-            if cave:
-                caveman_src = cave / "skills"
-        if sel_community & set(ADDY_SKILLS):
-            addy = update_addy_cache(args.dry_run)
-            if addy:
-                addy_src = addy / "skills"
+        for source in SOURCES:
+            wanted = sel_community & set(source["skills"])
+            source["_cache"] = (update_source_cache(source, args.dry_run,
+                                                    names=wanted)
+                                if wanted else None)
 
     results = []
     for target in targets:
-        dest_root = Path.home() / (".copilot" if target == "copilot"
-                                   else ".claude") / "skills"
+        dest_root = target_root(target)
         log(f"Target {target}: {dest_root}")
         if not args.dry_run:
             dest_root.mkdir(parents=True, exist_ok=True)
@@ -453,21 +471,8 @@ def main():
                 status = install_copy(skill, dest_root / skill.name,
                                       args.dry_run)
             results.append((target, skill.name, status))
-        for src_root, names in ((community_src, COMMUNITY_SKILLS),
-                                (caveman_src, CAVEMAN_SKILLS),
-                                (addy_src, ADDY_SKILLS)):
-            if not src_root:
-                continue
-            for name in names:
-                if name not in sel_community:
-                    continue
-                src = src_root / name
-                if not src.is_dir():
-                    results.append((target, name, "missing in cache — skipped"))
-                    continue
-                results.append((target, name,
-                                install_copy(src, dest_root / name,
-                                             args.dry_run)))
+        results.extend(install_community_for_target(
+            target, dest_root, sel_community, args.dry_run))
         if target == "copilot":
             results.extend(install_prompts(args.dry_run, names=sel_prompts))
 
