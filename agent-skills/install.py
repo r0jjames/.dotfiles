@@ -489,6 +489,27 @@ def show_status(targets):
         ok("no conflicts detected")
 
 
+def uninstall_skills(names, target, dest_root, known_names, force, dry_run):
+    results = []
+    for name in names:
+        path = dest_root / name
+        if not (path.is_symlink() or path.exists()):
+            results.append((target, name, "not installed"))
+            continue
+        if name not in known_names and not force:
+            results.append((target, name, "unknown — use --force"))
+            continue
+        if path.is_symlink():
+            if not dry_run:
+                path.unlink()
+            results.append((target, name, "removed (symlink)"))
+        else:
+            if not dry_run:
+                shutil.rmtree(path)
+            results.append((target, name, "removed"))
+    return results
+
+
 def print_summary(results, targets, dry_run):
     print()
     title = "Planned actions (dry run)" if dry_run else "Install summary"
@@ -515,11 +536,44 @@ def main():
                     help="print planned actions without writing anything")
     ap.add_argument("--status", action="store_true",
                     help="show installed skills per target and conflicts")
+    ap.add_argument("--uninstall", metavar="NAME[,NAME...]",
+                    help="remove skills (or prompt:<stem>) from the target")
+    ap.add_argument("--force", action="store_true",
+                    help="allow --uninstall of names the installer does "
+                         "not know")
     args = ap.parse_args()
 
     if args.status:
         show_status(["copilot", "claude"] if args.target in (None, "both")
                     else [args.target])
+        return
+
+    if args.uninstall:
+        targets = pick_targets(args.target)
+        names = [n.strip() for n in args.uninstall.split(",") if n.strip()]
+        known = ({p.name for p in SKILLS_SRC.iterdir() if p.is_dir()}
+                 | all_community_names())
+        results = []
+        for target in targets:
+            skills = [n for n in names if not n.startswith("prompt:")]
+            results.extend(uninstall_skills(
+                skills, target, target_root(target), known,
+                args.force, args.dry_run))
+            if target == "copilot":
+                prompts_dir = vscode_prompts_dir()
+                for n in names:
+                    if not n.startswith("prompt:"):
+                        continue
+                    stem = n[len("prompt:"):]
+                    f = (prompts_dir / f"{stem}.prompt.md"
+                         if prompts_dir else None)
+                    if f and f.is_file():
+                        if not args.dry_run:
+                            f.unlink()
+                        results.append((target, n, "removed"))
+                    else:
+                        results.append((target, n, "not installed"))
+        print_summary(results, targets, args.dry_run)
         return
 
     interactive = args.target is None

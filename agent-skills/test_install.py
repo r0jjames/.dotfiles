@@ -496,5 +496,57 @@ class TestStatus(TempDirTest):
         self.assertEqual(result, {})
 
 
+class TestUninstall(TempDirTest):
+    def test_removes_copy_and_symlink(self):
+        dest = self.tmp / "skills"
+        src = self.make_skill("repo", name="explain-logic")
+        dest.mkdir()
+        (dest / "explain-logic").symlink_to(src)
+        (dest / "code-tour").mkdir()
+        results = install.uninstall_skills(
+            ["explain-logic", "code-tour"], "claude", dest,
+            {"explain-logic", "code-tour"}, force=False, dry_run=False)
+        self.assertEqual(results,
+                         [("claude", "explain-logic", "removed (symlink)"),
+                          ("claude", "code-tour", "removed")])
+        self.assertFalse((dest / "explain-logic").is_symlink())
+        self.assertFalse((dest / "code-tour").exists())
+        self.assertTrue(src.exists())  # repo source untouched
+
+    def test_unknown_refused_without_force(self):
+        dest = self.tmp / "skills"
+        (dest / "mystery").mkdir(parents=True)
+        results = install.uninstall_skills(
+            ["mystery"], "claude", dest, set(), force=False, dry_run=False)
+        self.assertEqual(results,
+                         [("claude", "mystery", "unknown — use --force")])
+        self.assertTrue((dest / "mystery").exists())
+
+    def test_unknown_removed_with_force(self):
+        dest = self.tmp / "skills"
+        (dest / "mystery").mkdir(parents=True)
+        results = install.uninstall_skills(
+            ["mystery"], "claude", dest, set(), force=True, dry_run=False)
+        self.assertEqual(results, [("claude", "mystery", "removed")])
+        self.assertFalse((dest / "mystery").exists())
+
+    def test_not_installed(self):
+        dest = self.tmp / "skills"
+        dest.mkdir()
+        results = install.uninstall_skills(
+            ["ghost"], "claude", dest, {"ghost"}, force=False,
+            dry_run=False)
+        self.assertEqual(results, [("claude", "ghost", "not installed")])
+
+    def test_dry_run_removes_nothing(self):
+        dest = self.tmp / "skills"
+        (dest / "code-tour").mkdir(parents=True)
+        results = install.uninstall_skills(
+            ["code-tour"], "claude", dest, {"code-tour"}, force=False,
+            dry_run=True)
+        self.assertEqual(results, [("claude", "code-tour", "removed")])
+        self.assertTrue((dest / "code-tour").exists())
+
+
 if __name__ == "__main__":
     unittest.main()
