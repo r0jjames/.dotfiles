@@ -238,16 +238,22 @@ def item_tag(kind, name, targets, plugin_map):
         if d and (d / name).is_file():
             tags.append("[installed]")
     else:
+        reg = registry()
         for target in targets:
             dest = target_root(target) / name
             if not (dest.is_symlink() or dest.exists()):
                 continue
             tags.append("[installed]")
+            src = None
             if kind == "skill":
                 src = SKILLS_SRC / name
-                if (src and src.is_dir() and not dest.is_symlink()
-                        and dest.is_dir() and not dirs_equal(src, dest)):
-                    tags.append("[update]")
+            elif name in reg:
+                cand = (source_cache_dir(reg[name][0]) / "skills" / name)
+                if cand.is_dir():
+                    src = cand
+            if (src and src.is_dir() and not dest.is_symlink()
+                    and dest.is_dir() and not dirs_equal(src, dest)):
+                tags.append("[update]")
             break
         if "claude" in targets and name in plugin_map:
             tags.append("[conflict]")

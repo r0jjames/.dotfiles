@@ -500,7 +500,8 @@ class TestPickerTags(TempDirTest):
     def test_installed_tag(self):
         root = self.tmp / "claude" / "skills"
         (root / "code-tour").mkdir(parents=True)
-        with mock.patch("install.target_root", return_value=root):
+        with mock.patch("install.target_root", return_value=root), \
+             mock.patch("install.source_cache_dir", return_value=self.tmp / "cache"):
             tag = install.item_tag("community", "code-tour", ["claude"], {})
         self.assertEqual(tag, "[installed]")
 
@@ -522,6 +523,18 @@ class TestPickerTags(TempDirTest):
              mock.patch("install.SKILLS_SRC", src.parent):
             tag = install.item_tag("skill", "explain-logic",
                                    ["copilot"], {})
+        self.assertEqual(tag, "[installed] [update]")
+
+    def test_update_tag_for_stale_community_copy(self):
+        cache = self.tmp / "cache"
+        (cache / "skills" / "code-tour").mkdir(parents=True)
+        (cache / "skills" / "code-tour" / "SKILL.md").write_text("new")
+        root = self.tmp / "claude" / "skills"
+        (root / "code-tour").mkdir(parents=True)
+        (root / "code-tour" / "SKILL.md").write_text("old")
+        with mock.patch("install.target_root", return_value=root), \
+             mock.patch("install.source_cache_dir", return_value=cache):
+            tag = install.item_tag("community", "code-tour", ["claude"], {})
         self.assertEqual(tag, "[installed] [update]")
 
     def test_no_tag_when_absent(self):
