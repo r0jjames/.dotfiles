@@ -41,8 +41,17 @@
     "key": "cmd+e"
   },
   {
+    "command": "workbench.action.toggleSidebarVisibility",
+    "key": "ctrl+e"
+  },
+  {
     "command": "workbench.files.action.focusFilesExplorer",
     "key": "cmd+e",
+    "when": "editorTextFocus"
+  },
+  {
+    "command": "workbench.files.action.focusFilesExplorer",
+    "key": "ctrl+e",
     "when": "editorTextFocus"
   },
   {
@@ -78,7 +87,7 @@
     "command": "editor.emmet.action.matchTag"
   },
   {
-    "key": "ctrl+z",
+    "key": "ctrl+alt+z",
     "command": "workbench.action.toggleZenMode"
   },
   //TAB
@@ -95,7 +104,15 @@
     "command": "workbench.action.openLastEditorInGroup"
   },
   {
+    "key": "ctrl+0",
+    "command": "workbench.action.openLastEditorInGroup"
+  },
+  {
     "key": "cmd+1",
+    "command": "workbench.action.openEditorAtIndex1"
+  },
+  {
+    "key": "ctrl+1",
     "command": "workbench.action.openEditorAtIndex1"
   },
   {
@@ -103,7 +120,15 @@
     "command": "workbench.action.openEditorAtIndex2"
   },
   {
+    "key": "ctrl+2",
+    "command": "workbench.action.openEditorAtIndex2"
+  },
+  {
     "key": "cmd+3",
+    "command": "workbench.action.openEditorAtIndex3"
+  },
+  {
+    "key": "ctrl+3",
     "command": "workbench.action.openEditorAtIndex3"
   },
   {
@@ -111,7 +136,15 @@
     "command": "workbench.action.openEditorAtIndex4"
   },
   {
+    "key": "ctrl+4",
+    "command": "workbench.action.openEditorAtIndex4"
+  },
+  {
     "key": "cmd+5",
+    "command": "workbench.action.openEditorAtIndex5"
+  },
+  {
+    "key": "ctrl+5",
     "command": "workbench.action.openEditorAtIndex5"
   },
   {
