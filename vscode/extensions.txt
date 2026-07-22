@@ -20,6 +20,8 @@ kubescape.kubescape
 redhat.vscode-yaml
 tamasfe.even-better-toml
 hediet.vscode-drawio
+hashicorp.terraform
+redhat.ansible
 
 # ---- Remote (WSL / SSH / containers) ----
 ms-vscode-remote.remote-wsl @windows
