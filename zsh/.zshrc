@@ -31,6 +31,9 @@ alias ...='cd ../..'
 alias vim='nvim'
 alias vi='nvim'
 alias v='nvim'
+alias python="python3"
+alias pip="pip3"
+
 # ---- Tool integrations ----
 command -v fzf &>/dev/null && eval "$(fzf --zsh)"
 command -v zoxide &>/dev/null && eval "$(zoxide init zsh)"
