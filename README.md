@@ -62,6 +62,7 @@ are left installed — the summary lists them for manual removal.
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
 | [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, WSL |
+| `maven` | Maven build tool, via SDKMAN | macOS, WSL |
 | [`terminal-macos/`](terminal-macos/README.md) | Terminal.app themes + font | macOS only |
 | [`iterm2/`](iterm2/README.md) | iTerm2 + theme profile + shell integration | macOS only |
 | [`citrix-vdi/`](citrix-vdi/README.md) | Karabiner rule so Windows IDE shortcuts (Alt+F1, …) work in Citrix VDI | macOS only |

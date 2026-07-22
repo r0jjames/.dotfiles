@@ -27,7 +27,10 @@ Pinned versions:
 `lib/tools/maven.py`:
 - `_ensure_sdkman()` — installs SDKMAN via its official
   `curl -s "https://get.sdkman.io" | bash` installer, only if
-  `~/.sdkman/bin/sdkman-init.sh` is missing. Runs once, ever.
+  `~/.sdkman/bin/sdkman-init.sh` is missing. Runs once, ever. SDKMAN's
+  installer requires Bash 4+ (macOS ships 3.2), so this first ensures
+  `brew install bash` — a small formula (gettext, ncurses, readline, ...),
+  not the openjdk-style dependency chain this design is avoiding.
 - `_sdk(cmd)` — runs an `sdk` subcommand via
   `bash -c 'source ~/.sdkman/bin/sdkman-init.sh && <cmd>'`, since `sdk` is a
   shell function (not a binary on PATH) and can't be invoked like `brew`.

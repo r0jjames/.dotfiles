@@ -1,7 +1,7 @@
 """Tool registry. Order here is menu/run order (mirrors old ALL_TOOLS)."""
 from __future__ import annotations
 
-from lib.tools import (agent_skills, citrix_vdi, claude, iterm2, nvim,
+from lib.tools import (agent_skills, citrix_vdi, claude, iterm2, maven, nvim,
                        starship, terminal_macos, vscode, wezterm, zsh)
 
 _ALL = (
@@ -12,6 +12,7 @@ _ALL = (
     vscode.TOOL,
     claude.TOOL,
     agent_skills.TOOL,
+    maven.TOOL,
     terminal_macos.TOOL,
     iterm2.TOOL,
     citrix_vdi.TOOL,
