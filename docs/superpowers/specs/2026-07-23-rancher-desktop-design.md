@@ -48,16 +48,14 @@ TOOL = Tool(
 ```
 
 - `_post()`:
-  1. Pre-seed Rancher Desktop's macOS deployment-profile defaults via
-     `defaults write io.rancherdesktop.profile.defaults ...` (same
-     mechanism as `iterm2.py`'s `defaults write com.googlecode.iterm2 ...`)
-     so first launch already has: container engine = moby, Kubernetes
-     disabled. **Exact plist keys/domain must be confirmed against Rancher
-     Desktop's current deployment-profile schema during implementation** —
-     if the defaults-write approach doesn't hold up (e.g. Rancher Desktop
-     ignores it or the domain/keys differ from what's assumed), fall back
-     to printing a one-time manual setup reminder instead of silently
-     no-op'ing.
+  1. Print a one-time reminder with the exact command to run after first
+     launch (Rancher Desktop's first run needs the GUI wizard completed
+     before its backend/`rdctl` API is available, so this can't be
+     automated blindly at install time):
+     `rdctl set --container-engine.name moby --kubernetes.enabled=false`
+     (flags confirmed against Rancher Desktop's official `rdctl` command
+     reference: `--container-engine.name` accepts `docker`/`containerd`/
+     `moby`, `--kubernetes.enabled` is a bool).
   2. Warn (print only, no action) when conflicting software is present:
      - `pgrep -x Docker` succeeds → tell user to quit Docker Desktop
      - `brew list --cask orbstack` succeeds → print
@@ -65,10 +63,11 @@ TOOL = Tool(
      - `/Applications/Docker.app` exists → note it isn't brew-managed,
        print reminder to remove it manually (drag to Trash)
   3. Print a reminder to launch Rancher Desktop once to complete first-run
-     setup (matches `iterm2.py`'s "Restart iTerm2" reminder).
-- `_uninstall()`: skip/warn only — app and defaults left in place (matches
-  `maven.py` / `iterm2.py` convention: uninstall never removes brew
-  packages or apps, only what the tool itself created).
+     setup, then run the `rdctl set` command from step 1 (matches
+     `iterm2.py`'s "Restart iTerm2" reminder).
+- `_uninstall()`: skip/warn only — app left in place, no settings to undo
+  since nothing was written to disk by this tool (matches `maven.py` /
+  `iterm2.py` convention: uninstall never removes brew packages or apps).
 - `_probe()`: `Path("/Applications/Rancher Desktop.app").is_dir()`
 
 ## Docs
@@ -85,11 +84,12 @@ No dedicated test file (matches `maven`/`iterm2` — neither has one).
 Generic `test_registry.py` checks cover the new entry automatically.
 Manual verification after implementation:
 
-1. `./install.py install rancher-desktop` — cask installs, defaults get
-   set, warnings print correctly for the existing Docker.app/orbstack
+1. `./install.py install rancher-desktop` — cask installs, reminder text
+   and warnings print correctly for the existing Docker.app/orbstack
    state on this machine.
-2. Launch Rancher Desktop once, confirm engine mode is moby and
-   Kubernetes is off in its own UI.
+2. Launch Rancher Desktop, complete the first-run wizard, run
+   `rdctl set --container-engine.name moby --kubernetes.enabled=false`,
+   confirm engine mode is moby and Kubernetes is off in its own UI.
 3. `docker context ls` shows a `rancher-desktop` context after first
    launch.
 4. `./install.py status` shows `rancher-desktop` as installed.
