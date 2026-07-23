@@ -2,7 +2,8 @@
 from __future__ import annotations
 
 from lib.tools import (agent_skills, citrix_vdi, claude, iterm2, maven, nvim,
-                       starship, terminal_macos, vscode, wezterm, zsh)
+                       rancher_desktop, starship, terminal_macos, vscode,
+                       wezterm, zsh)
 
 _ALL = (
     zsh.TOOL,
@@ -16,6 +17,7 @@ _ALL = (
     terminal_macos.TOOL,
     iterm2.TOOL,
     citrix_vdi.TOOL,
+    rancher_desktop.TOOL,
 )
 
 REGISTRY = {t.name: t for t in _ALL}
