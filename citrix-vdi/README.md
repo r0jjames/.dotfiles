@@ -30,25 +30,61 @@ keep working everywhere else on the Mac.
 ./install.py install citrix-vdi
 ```
 
-Installs Karabiner-Elements (Homebrew cask) and copies the rule file to
-`~/.config/karabiner/assets/complex_modifications/`.
+Installs Karabiner-Elements (Homebrew cask) and copies **two** rule files to
+`~/.config/karabiner/assets/complex_modifications/`:
 
-### 2. Enable the Karabiner rule (one time) — *run on: Mac*
+- `karabiner-citrix.json` — the **base package** (F-keys, Left-Cmd-as-Alt).
+  Needed in every mode, on every keyboard.
+- `karabiner-nuphy-windows-mode.json` — the **NuPhy Windows-mode-extra
+  package** (Ctrl/Cmd swap, Ctrl+Arrow desktop-switch fix). Only needed
+  while the NuPhy is in Windows mode outside Citrix.
 
-1. Open **Karabiner-Elements** (first launch: approve the system prompts,
-   including **Privacy & Security → Input Monitoring** for
-   `karabiner_grabber`).
-2. Go to **Complex Modifications → Add predefined rule**.
-3. Enable **"Citrix VDI: F1-F12 as function keys (with any modifiers)"**.
-4. Enable **"Citrix VDI: Left Command as Alt (all keyboards)"** — makes the
-   key next to the spacebar send Alt inside the VDI on the MacBook
-   keyboard. Right Command still sends the Windows key. (Despite the name,
-   it only affects keyboards Karabiner grabs — see the NuPhy section for
-   why the external keyboard is handled differently.)
+### 2. Set up two Karabiner profiles (one time) — *run on: Mac*
 
-> Enabled rules are a copy — if this repo's rule file changes later, re-run
-> the installer, then remove and re-add the rules in Karabiner to pick up
-> the new version.
+You'll keep two Karabiner-Elements profiles and switch between them
+whenever you flip the NuPhy's hardware Win/Mac switch. First launch:
+approve the system prompts, including **Privacy & Security → Input
+Monitoring** for `karabiner_grabber`.
+
+**"NuPhy Windows mode" profile** (rename your current default profile to
+this — Karabiner-Elements → Settings → Profiles → double-click the name):
+
+1. **Complex Modifications → Add predefined rule** → enable all 4 rules:
+   - "Citrix VDI: F1-F12 as function keys (with any modifiers)"
+   - "Citrix VDI: Left Command as Alt (all keyboards)"
+   - "NuPhy (2.4G dongle + Bluetooth, Windows mode): Ctrl/Cmd swap outside Citrix"
+   - "NuPhy (2.4G dongle + Bluetooth, Windows mode): Ctrl+Left/Right switches desktop outside Citrix"
+2. **Devices** tab: **Modify events ON** for both NuPhy entries — dongle
+   (vendor id 6645) and Bluetooth (vendor id 2007).
+
+**"NuPhy Mac mode" profile** (Settings → Profiles → **Add profile**, or
+duplicate the Windows-mode profile and trim it — duplicating is faster
+since Modify-events settings carry over):
+
+1. **Complex Modifications**: enable only the 2 base rules — "Citrix VDI:
+   F1-F12 as function keys" and "Citrix VDI: Left Command as Alt". Leave
+   the 2 NuPhy Windows-mode rules disabled (or remove them if you
+   duplicated from the Windows-mode profile).
+2. **Devices** tab: **Modify events ON** for both NuPhy entries, same as
+   above — the base rules still need to see the device.
+
+> Enabled rules are a copy — if this repo's rule files change later,
+> re-run the installer, then remove and re-add the affected rules in each
+> profile to pick up the new version.
+
+### Switching NuPhy mode — *run on: Mac, every time you flip modes*
+
+Two flicks, done together:
+
+1. **NuPhy hardware switch** (bottom of the keyboard, or `Fn`+`Win/Cmd`
+   depending on firmware) → Win or Mac.
+2. **Karabiner-Elements menu-bar icon** → select the matching profile:
+   "NuPhy Windows mode" or "NuPhy Mac mode".
+
+Mismatched state (e.g. NuPhy in Mac mode but the "Windows mode" profile
+still active) re-triggers the double-swap bug this setup fixes — Ctrl/Cmd
+will feel backwards outside Citrix. If that happens, just switch the
+profile to match.
 
 ### 3. Citrix Workspace keyboard preferences (one time) — *run on: Mac*
 
@@ -62,31 +98,29 @@ In **Citrix Workspace app → Preferences (⌘,) → Keyboard**:
   using" — in Unicode mode Alt would need a two-key chord.
 - **Disconnect and reconnect the VDI session** after changing this.
 
-### 4. NuPhy external keyboard (one time) — *run on: Mac*
+### 4. NuPhy external keyboard — *run on: Mac*
 
 Works over the **2.4G dongle** and **Bluetooth** (the swap rule matches
 both; a wired USB-C cable is not covered by the rule):
 
 1. Connect the NuPhy via its **2.4G dongle** or **Bluetooth**.
-2. Keep the NuPhy in **Windows mode permanently** (no mode switching).
-   Inside the VDI the layout is then natively correct in Scancode mode:
-   Ctrl-position = Ctrl, Cmd-position = Alt.
-3. **Karabiner-Elements → Settings → Devices**: **Modify events ON** for
-   both NuPhy entries — dongle (vendor id 6645) and Bluetooth (vendor
-   id 2007). *Troubleshooting:* if keys ever stop flowing over Bluetooth
-   (seen once during initial setup), turn Modify events OFF for the
-   vendor 2007 entry and use the dongle instead.
-4. **Complex Modifications**: enable both NuPhy rules —
-   **"NuPhy (… ): Ctrl/Cmd swap outside Citrix"** and
-   **"NuPhy (… ): Ctrl+Left/Right switches desktop outside Citrix"**.
-   Outside the VDI the first makes the Ctrl-position key act as Cmd
-   (Windows-style copy/paste on the Mac) and the Win-position key act as
-   Ctrl; the second keeps bare `Ctrl+←/→` working as macOS
-   desktop/Space switching (other modifiers added, e.g. `Ctrl+Shift+→`,
-   keep their ⌘ meaning).
-5. **No macOS modifier swap**: System Settings → Keyboard → Keyboard
+2. Pick your mode per the "Switching NuPhy mode" section above:
+   - **Windows mode** (needed inside Citrix; optional default outside
+     Citrix too) — the Karabiner "NuPhy Windows mode" profile's swap rule
+     makes the Ctrl-position key act as Cmd and the Win-position key act
+     as Ctrl outside Citrix (Windows-style copy/paste on the Mac), plus
+     bare `Ctrl+←/→` keeps working as macOS desktop/Space switching.
+     Inside Citrix the layout is natively correct in Scancode mode either
+     way: Ctrl-position = Ctrl, Cmd-position = Alt.
+   - **Mac mode** — the keyboard already sends native Mac modifier codes
+     outside Citrix, so the "NuPhy Mac mode" profile needs no swap rule at
+     all: Ctrl-position = Ctrl, Option-position = Option, Cmd-position =
+     Cmd, all standard. Inside Citrix, the base package's "Left Command as
+     Alt" rule still turns the Cmd-position key into Alt, matching the
+     Windows-mode experience.
+3. **No macOS modifier swap**: System Settings → Keyboard → Keyboard
    Shortcuts → Modifier Keys must be at defaults for the NuPhy (a global
-   swap there poisons Scancode mode inside the VDI).
+   swap there poisons Scancode mode inside the VDI, in either NuPhy mode).
 
 ## What gets installed where — *on: Mac*
 
@@ -96,9 +130,10 @@ removes it:
 | Location | What / written by | Removed by |
 |---|---|---|
 | `/Applications/Karabiner-Elements.app` (+ background services and the virtual keyboard driver) | Homebrew cask, installed by the installer | manual, optional (see Uninstall step 3) |
-| `~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json` | rule file copied by the installer | `./install.py uninstall citrix-vdi` |
-| `~/.config/karabiner/karabiner.json` — `profiles[*].complex_modifications.rules` | the three rules, copied in when you enable them in the GUI (setup steps 2 and 4) | `./install.py uninstall citrix-vdi` |
-| `~/.config/karabiner/karabiner.json` — per-device settings | "Modify events" toggles for the NuPhy entries (setup step 4) | nothing — harmless without rules, or reset in the GUI |
+| `~/.config/karabiner/assets/complex_modifications/karabiner-citrix.json` + `karabiner-nuphy-windows-mode.json` | base + NuPhy-Windows-mode-extra rule files copied by the installer | `./install.py uninstall citrix-vdi` |
+| `~/.config/karabiner/karabiner.json` — `profiles[*].complex_modifications.rules` | 2 rules in the "NuPhy Mac mode" profile, 4 in the "NuPhy Windows mode" profile, copied in when you enable them in the GUI (setup step 2) | `./install.py uninstall citrix-vdi` |
+| `~/.config/karabiner/karabiner.json` — `profiles[*].name` | the two profile names themselves ("NuPhy Windows mode", "NuPhy Mac mode") | manual, Karabiner-Elements → Settings → Profiles |
+| `~/.config/karabiner/karabiner.json` — per-device settings | "Modify events" toggles for the NuPhy entries (setup step 2) | nothing — harmless without rules, or reset in the GUI |
 | `~/Library/Application Support/Citrix Receiver/Config` — `KeyboardInputMode=Scancode` | Citrix Workspace preferences GUI (setup step 3) | manual, GUI only (Uninstall step 1) |
 
 ## Expected behavior once set up
@@ -137,10 +172,11 @@ All on the Mac; nothing to undo inside the VDI.
 ./install.py uninstall citrix-vdi
 ```
 
-Removes the three enabled "Citrix VDI"/"NuPhy" rules from
+Removes the enabled "Citrix VDI"/"NuPhy" rules (from both the base and
+NuPhy-Windows-mode-extra packages) from every profile in
 `~/.config/karabiner/karabiner.json` (after backing it up to
 `karabiner.json.bak-YYYY-MM-DD`; Karabiner picks up the change
-automatically) and deletes the rule file from the assets folder. Safe to
+automatically) and deletes both rule files from the assets folder. Safe to
 rerun.
 
 ### Manual part — *on: Mac*
