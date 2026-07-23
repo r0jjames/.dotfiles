@@ -7,5 +7,5 @@
 - Heavy stack plugins (`vercel`, `supabase`, `frontend-design`) are disabled
   globally to keep sessions lean. Enable per project via that repo's
   `.claude/settings.json` `enabledPlugins` (see `worship-lineup` for the pattern).
-- The `MCP_DOCKER` MCP server only connects when Docker Desktop is running;
-  a failed connection there is expected, not a config bug.
+- The `MCP_DOCKER` MCP server only connects when Rancher Desktop is
+  running; a failed connection there is expected, not a config bug.
