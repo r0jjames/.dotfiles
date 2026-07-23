@@ -14,8 +14,11 @@ from lib import core
 from lib.core import Tool
 
 
-def _rules_src() -> Path:
-    return core.REPO_ROOT / "citrix-vdi" / "karabiner-citrix.json"
+def _rules_srcs() -> list[Path]:
+    return [
+        core.REPO_ROOT / "citrix-vdi" / "karabiner-citrix.json",
+        core.REPO_ROOT / "citrix-vdi" / "karabiner-nuphy-windows-mode.json",
+    ]
 
 
 def _assets_file() -> Path:

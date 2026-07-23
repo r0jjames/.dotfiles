@@ -47,5 +47,27 @@ class RemoveEnabledRulesTest(unittest.TestCase):
         self.assertEqual(citrix_vdi.remove_enabled_rules(self.rules, self.config), 0)
 
 
+class RuleFilesTest(unittest.TestCase):
+    def test_two_rule_files_with_expected_descriptions(self):
+        files = citrix_vdi._rules_srcs()
+        self.assertEqual(
+            [f.name for f in files],
+            ["karabiner-citrix.json", "karabiner-nuphy-windows-mode.json"])
+        for f in files:
+            self.assertTrue(f.is_file(), f"{f} does not exist")
+
+        base = json.loads(files[0].read_text())
+        self.assertEqual(
+            [r["description"] for r in base["rules"]],
+            ["Citrix VDI: F1-F12 as function keys (with any modifiers)",
+             "Citrix VDI: Left Command as Alt (all keyboards)"])
+
+        extra = json.loads(files[1].read_text())
+        self.assertEqual(
+            [r["description"] for r in extra["rules"]],
+            ["NuPhy (2.4G dongle + Bluetooth, Windows mode): Ctrl/Cmd swap outside Citrix",
+             "NuPhy (2.4G dongle + Bluetooth, Windows mode): Ctrl+Left/Right switches desktop outside Citrix"])
+
+
 if __name__ == "__main__":
     unittest.main()
