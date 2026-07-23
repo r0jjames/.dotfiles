@@ -186,14 +186,15 @@ rerun.
    session.
 2. **NuPhy**: free to use any mode (Mac/Windows) and any connection
    (Bluetooth/dongle/cable) again.
-3. **Karabiner-Elements itself** (only if you don't use it for anything
+3. **Karabiner profiles**: delete the 'NuPhy Windows mode' and 'NuPhy Mac mode' profiles if you no longer want them (Karabiner-Elements → Settings → Profiles).
+4. **Karabiner-Elements itself** (only if you don't use it for anything
    else): Karabiner-Elements → Settings → scroll to the uninstall section
    and use its own uninstaller (removes the virtual keyboard driver
    properly), or:
    ```sh
    brew uninstall --cask karabiner-elements
    ```
-4. Repo side: remove `citrix_vdi` from `lib/tools/__init__.py` and delete
+5. Repo side: remove `citrix_vdi` from `lib/tools/__init__.py` and delete
    `lib/tools/citrix_vdi.py` + the `citrix-vdi/` folder if you want it gone
    from the dotfiles too.
 
