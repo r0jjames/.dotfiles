@@ -21,9 +21,12 @@ def _rules_srcs() -> list[Path]:
     ]
 
 
-def _assets_file() -> Path:
-    return (Path.home() / ".config/karabiner/assets/complex_modifications"
-            / "karabiner-citrix.json")
+def _assets_dir() -> Path:
+    return Path.home() / ".config/karabiner/assets/complex_modifications"
+
+
+def _asset_file_for(src: Path) -> Path:
+    return _assets_dir() / src.name
 
 
 def _karabiner_config() -> Path:
@@ -54,9 +57,10 @@ def _post() -> None:
         core.ok("Karabiner-Elements already installed.")
     else:
         core.brew_install("karabiner-elements", cask=True)
-    core.copy_file(_rules_src(), _assets_file())
+    for src in _rules_srcs():
+        core.copy_file(src, _asset_file_for(src))
     core.ok("citrix-vdi setup complete. One-time manual steps remain "
-            "(Karabiner rule enable + Citrix keyboard preferences) — "
+            "(Karabiner profile setup + Citrix keyboard preferences) — "
             "see citrix-vdi/README.md.")
 
 
@@ -71,31 +75,40 @@ def _uninstall() -> None:
         if not backup.exists():
             core.info(f"Backing up {config} -> {backup}")
             shutil.copy2(config, backup)
-        removed = remove_enabled_rules(_rules_src(), config)
+        removed = sum(remove_enabled_rules(src, config)
+                      for src in _rules_srcs())
         if removed:
             core.ok(f"Removed {removed} enabled rule(s) from karabiner.json "
                     "(Karabiner reloads automatically).")
         else:
             core.ok("No Citrix/NuPhy rules enabled in karabiner.json.")
-    # ---- 2. Remove the rule file from the assets folder ----
-    if _assets_file().exists():
-        _assets_file().unlink()
-        core.ok(f"Removed {_assets_file()}")
-    else:
-        core.ok("Rule file already absent from assets folder.")
+    # ---- 2. Remove the rule files from the assets folder ----
+    for src in _rules_srcs():
+        asset = _asset_file_for(src)
+        if asset.exists():
+            asset.unlink()
+            core.ok(f"Removed {asset}")
+        else:
+            core.ok(f"{asset.name} already absent from assets folder.")
     # ---- 3. Manual follow-ups ----
     core.ok("citrix-vdi uninstall complete. Remaining manual steps:")
     print("  1. Citrix Workspace -> Preferences -> Keyboard -> Keyboard input"
           " mode -> Automatic (then reconnect the VDI session).")
     print("  2. NuPhy: free to use any mode and connection again.")
-    print("  3. Optional, if Karabiner-Elements is otherwise unused: "
+    print("  3. Karabiner: delete the 'NuPhy Windows mode' / 'NuPhy Mac mode'"
+          " profiles if you no longer want them (Karabiner-Elements ->"
+          " Settings -> Profiles).")
+    print("  4. Optional, if Karabiner-Elements is otherwise unused: "
           "Karabiner-Elements -> Settings -> uninstall section, or "
           "brew uninstall --cask karabiner-elements")
 
 
 def _probe() -> bool:
-    t = _assets_file()
-    return t.exists() and filecmp.cmp(str(_rules_src()), str(t), shallow=False)
+    return all(
+        _asset_file_for(src).exists()
+        and filecmp.cmp(str(src), str(_asset_file_for(src)), shallow=False)
+        for src in _rules_srcs()
+    )
 
 
 TOOL = Tool(
