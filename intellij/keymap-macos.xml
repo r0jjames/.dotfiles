@@ -1,19 +1,38 @@
-<keymap version="1" name="Roj-Ffree" parent="Mac OS X 10.5+">
+<keymap version="1" name="roj-keymap" parent="Mac OS X 10.5+">
   <action id="ActivateTerminalToolWindow">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="t" />
+  </action>
+  <action id="Back">
+    <keyboard-shortcut first-keystroke="ctrl alt LEFT" />
   </action>
   <action id="ChangeSignature">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="c" />
   </action>
-  <action id="ChooseDebugConfiguration" />
-  <action id="ChooseRunConfiguration" />
+  <action id="ChooseDebugConfiguration">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift x" />
+  </action>
+  <action id="ChooseRunConfiguration">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift w" />
+  </action>
   <action id="CompileDirty">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="k" />
   </action>
   <action id="Console.History.Browse" />
+  <action id="Debug">
+    <keyboard-shortcut first-keystroke="ctrl alt x" />
+  </action>
   <action id="Diff.ApplyLeftSide" />
   <action id="EditSourceInNewWindow">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="o" />
+  </action>
+  <action id="EditorDeleteLine">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="BACK_SPACE" />
+  </action>
+  <action id="EditorSelectWord">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="UP" />
+  </action>
+  <action id="EditorUnSelectWord">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="DOWN" />
   </action>
   <action id="EvaluateExpression">
     <keyboard-shortcut first-keystroke="ctrl alt e" />
@@ -24,11 +43,29 @@
   <action id="FindUsages">
     <keyboard-shortcut first-keystroke="ctrl alt u" />
   </action>
+  <action id="Forward">
+    <keyboard-shortcut first-keystroke="ctrl alt RIGHT" />
+  </action>
+  <action id="Generate">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="g" />
+  </action>
+  <action id="GotoClass">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift c" />
+  </action>
+  <action id="GotoFile">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="f" />
+  </action>
   <action id="GotoNextError">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="e" />
   </action>
   <action id="GotoPreviousError">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift e" />
+  </action>
+  <action id="GotoSymbol">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="y" />
+  </action>
+  <action id="HideAllWindows">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="j" />
   </action>
   <action id="JumpToLastWindow">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="w" />
@@ -45,11 +82,22 @@
   <action id="QuickJavaDoc">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="d" />
   </action>
+  <action id="Refactorings.QuickListPopupAction">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="q" />
+  </action>
   <action id="RenameElement">
     <keyboard-shortcut first-keystroke="ctrl alt r" />
   </action>
+  <action id="SelectNextOccurrence">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="v" />
+  </action>
+  <action id="ResizeToolWindowLeft" />
+  <action id="ResizeToolWindowRight" />
   <action id="Resume">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="r" />
+  </action>
+  <action id="Run">
+    <keyboard-shortcut first-keystroke="ctrl alt w" />
   </action>
   <action id="RunToCursor">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="u" />

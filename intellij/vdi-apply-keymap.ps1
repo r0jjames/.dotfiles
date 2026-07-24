@@ -18,7 +18,7 @@
 param(
   [string]$Url = "https://raw.githubusercontent.com/r0jjames/.dotfiles/main/intellij/keymap-windows.xml",
   [string]$LocalPath = "",
-  [string]$KeymapName = "Roj-Ffree"
+  [string]$KeymapName = "roj-keymap"
 )
 $ErrorActionPreference = "Stop"
 

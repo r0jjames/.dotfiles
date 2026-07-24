@@ -56,12 +56,22 @@ def _unbound_ids(path: Path):
 KNOWN_CONFLICTS = [
     # (chord, action_id_to_unbind, "mac" | "windows" | "both")
     ("control alt R", "Diff.ApplyLeftSide", "both"),
-    ("control alt R", "ChooseRunConfiguration", "mac"),
     ("control alt D", "UsageGrouping.DirectoryStructure", "both"),
-    ("control alt D", "ChooseDebugConfiguration", "mac"),
     ("control alt Q", "ToggleRenderedDocPresentation", "both"),
     ("control alt E", "ToggleFindInSelection", "both"),
     ("control alt E", "Console.History.Browse", "both"),
+    # ChooseRunConfiguration/ChooseDebugConfiguration used to be mac-only
+    # unbinds here (they collided with Rename/ToggleLineBreakpoint on
+    # ctrl+alt+R/D) but now have a real leader-set chord instead - see
+    # keymap-macos.xml. Their old ctrl+alt+R/D bindings are retired simply
+    # by redeclaring the id with a new shortcut list, same as every other
+    # relocated action.
+    #
+    # ctrl+alt+Left/Right (Back/Forward) collide on macOS only with
+    # ResizeToolWindowLeft/Right (Mac OS X 10.5+.xml); $default has no such
+    # binding so Windows needs no unbind here.
+    ("control alt LEFT", "ResizeToolWindowLeft", "mac"),
+    ("control alt RIGHT", "ResizeToolWindowRight", "mac"),
 ]
 
 
@@ -70,9 +80,9 @@ class KeymapXmlTest(unittest.TestCase):
         for p in (_MAC, _WIN):
             ET.fromstring(p.read_text())  # raises on malformed
 
-    def test_keymap_name_is_roj_ffree(self):
+    def test_keymap_name_is_roj_keymap(self):
         for p in (_MAC, _WIN):
-            self.assertEqual(ET.fromstring(p.read_text()).get("name"), "Roj-Ffree")
+            self.assertEqual(ET.fromstring(p.read_text()).get("name"), "roj-keymap")
 
     def test_no_function_key_survives_anywhere(self):
         # The whole point: not a single relocated chord may use F1-F12.

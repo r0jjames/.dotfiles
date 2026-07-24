@@ -54,6 +54,7 @@ differs between OS (different letter/key, or is F-row on one side):
 | `EditorUnSelectWord` (Shrink Selection) | `alt DOWN` | `control shift W` | leader: `;` `Down` |
 | `Generate` | `meta N` | `alt INSERT` | leader: `;` `G` |
 | `Refactorings.QuickListPopupAction` (Refactor This) | `control T` | `control alt shift T` | leader: `;` `Q` |
+| `SelectNextOccurrence` (Multi-cursor next occurrence) | `control G` | `alt J` | leader: `;` `V` |
 | `ChooseRunConfiguration` (Run chooser) | `control alt R` (**currently unbound** — see Known regression below) | `alt shift F10` (F-row) | leader: `;` `Shift+W` |
 | `ChooseDebugConfiguration` (Debug chooser) | `control alt D` (**currently unbound**) | `alt shift F9` (F-row) | leader: `;` `Shift+X` |
 | `HideAllWindows` | `control shift F12` (inherited, F-row) | `control shift F12` (F-row) | leader: `;` `J` |
@@ -113,7 +114,7 @@ installing `roj-keymap.xml`; `_probe()`'s installed-check is unaffected
 
 ## Docs
 
-- README Part 1 ("Custom F-free overrides") gains the 15 new rows above.
+- README Part 1 ("Custom F-free overrides") gains the 16 new rows above.
 - README Part 2 loses the rows that moved into Part 1, keeping only the
   genuinely-native (modifier-swap-only) entries.
 - The "Verifying conflicts" section gains the `ResizeToolWindowLeft/Right`

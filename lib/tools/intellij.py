@@ -26,7 +26,11 @@ from lib.core import Tool
 
 # File dropped into each keymaps/ dir. Name matches the <keymap name="..."> so
 # the dropdown label and Settings Sync entry line up.
-_KEYMAP_TARGET = "Roj-Ffree.xml"
+_KEYMAP_TARGET = "roj-keymap.xml"
+
+# Filename used by installs from before the Roj-Ffree -> roj-keymap rename.
+# Cleaned up on install so both don't linger in the Keymap dropdown.
+_STALE_KEYMAP_TARGET = "Roj-Ffree.xml"
 
 # Config-dir name prefixes: Community = "IdeaIC<ver>", Ultimate = "IntelliJIdea<ver>".
 _PRODUCT_PREFIXES = ("IdeaIC", "IntelliJIdea")
@@ -86,14 +90,19 @@ def _post() -> None:
         return
     core.info(f"Applying F-free keymap to {len(dirs)} config dir(s) ({mode})...")
     for d in dirs:
-        target = d / "keymaps" / _KEYMAP_TARGET
-        target.parent.mkdir(parents=True, exist_ok=True)
+        keymaps_dir = d / "keymaps"
+        keymaps_dir.mkdir(parents=True, exist_ok=True)
+        stale = keymaps_dir / _STALE_KEYMAP_TARGET
+        if stale.exists() or stale.is_symlink():
+            stale.unlink()
+            core.info(f"Removed stale {stale} from a pre-rename install.")
+        target = keymaps_dir / _KEYMAP_TARGET
         if mode == "link":
             core.link_file(src, target)
         else:
             core.copy_file(src, target)
     core.ok("Keymap installed. One-time manual step: Settings -> Keymap -> "
-            "select 'Roj-Ffree'. See intellij/README.md (plugins, VDI sync, "
+            "select 'roj-keymap'. See intellij/README.md (plugins, VDI sync, "
             "cheatsheet).")
 
 
@@ -110,7 +119,7 @@ def _uninstall() -> None:
         else:
             core.uncopy_file(src, target)
     core.info("IntelliJ app left installed - remove via brew/Finder if unwanted.")
-    core.info("If 'Roj-Ffree' is still the active keymap, switch back in "
+    core.info("If 'roj-keymap' is still the active keymap, switch back in "
               "Settings -> Keymap.")
 
 

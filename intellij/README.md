@@ -9,7 +9,7 @@ F-row hardware story; those Karabiner rules stay in place for other apps.
 
 ## Why F-free
 
-The custom keymap `Roj-Ffree` redeclares every action IntelliJ maps to F1-F12
+The custom keymap `roj-keymap` redeclares every action IntelliJ maps to F1-F12
 onto **Ctrl / Alt / Shift chords only** (never Cmd/Win). Benefits:
 
 - Same physical keys on Mac and Windows → one muscle memory everywhere.
@@ -47,7 +47,7 @@ IntelliJ itself is assumed already installed on the Windows host. This
 
 Dropping the file makes the keymap **available**, not active. In IntelliJ:
 
-> **Settings → Keymap → dropdown → `Roj-Ffree`** → Apply.
+> **Settings → Keymap → dropdown → `roj-keymap`** → Apply.
 
 Then glance down the list for any red **conflict** marks and adjust if your
 plugins claim one of the chords (see [Verifying](#verifying-conflicts)).
@@ -57,7 +57,7 @@ plugins claim one of the chords (see [Verifying](#verifying-conflicts)).
 You asked for a VS Code feel too. `plugins.txt` lists the **VSCode Keymap**
 plugin (`com.intellij.plugins.vscodekeymap`). It's usually bundled — enable it
 in **Settings → Plugins**, then it appears as another entry in the Keymap
-dropdown. `Roj-Ffree` does **not** depend on it; it's a separate switchable
+dropdown. `roj-keymap` does **not** depend on it; it's a separate switchable
 keymap, not a base.
 
 ## The VDI (Citrix Windows) — how the keymap gets there
@@ -72,7 +72,7 @@ Keymaps sync **per-OS**, and both your work laptop and the VDI are Windows, so:
    only (avoids syncing unrelated settings between laptop and VDI).
 2. **VDI:** sign into the **same JetBrains account**.
 
-The `Roj-Ffree` keymap (and its active selection) lands in the VDI on its own.
+The `roj-keymap` keymap (and its active selection) lands in the VDI on its own.
 Keep your **personal Mac off Settings Sync** — dotfiles handles the Mac, and
 Mac↔Windows keymaps don't sync anyway (different modifiers).
 
@@ -86,7 +86,7 @@ powershell -ExecutionPolicy Bypass -File .\vdi-apply-keymap.ps1
 ```
 
 It downloads `keymap-windows.xml`, drops it into every IntelliJ config dir,
-then tells you to pick `Roj-Ffree` in Settings → Keymap. The dotfiles repo is
+then tells you to pick `roj-keymap` in Settings → Keymap. The dotfiles repo is
 private, so the raw URL needs a public/tokenised link — or copy the XML in by
 hand and pass `-LocalPath .\keymap-windows.xml`.
 
@@ -135,6 +135,29 @@ These replace the old F1-F12 shortcuts. Same chords on every machine.
 | Open Source in New Window | `Ctrl+Alt+;` `O` | ⇧F4 |
 | Smart Step Into | `Ctrl+Alt+;` `A` | ⇧F7 |
 | Show Error Description | `Ctrl+Alt+;` `Shift+D` | ⌘F1 / Ctrl+F1 |
+| Go to Class | `Ctrl+Alt+;` `Shift+C` | ⌘O (mac) / Ctrl+N (win) |
+| Go to File | `Ctrl+Alt+;` `F` | ⌘⇧O (mac) / Ctrl+Shift+N (win) |
+| Go to Symbol | `Ctrl+Alt+;` `Y` | ⌘⌥O (mac) / Ctrl+Alt+Shift+N (win) |
+| Delete Line | `Ctrl+Alt+;` `Backspace` | ⌘⌫ (mac) / Ctrl+Y (win) |
+| Extend Selection | `Ctrl+Alt+;` `↑` | ⌥↑ (mac) / Ctrl+W (win) |
+| Shrink Selection | `Ctrl+Alt+;` `↓` | ⌥↓ (mac) / Ctrl+Shift+W (win) |
+| Generate | `Ctrl+Alt+;` `G` | ⌘N (mac) / Alt+Insert (win) |
+| Refactor This | `Ctrl+Alt+;` `Q` | ⌃T (mac) / Ctrl+Alt+Shift+T (win) |
+| Run… (chooser) | `Ctrl+Alt+;` `Shift+W` | ⌃⌥R (mac) / Alt+Shift+F10 (win) |
+| Debug… (chooser) | `Ctrl+Alt+;` `Shift+X` | ⌃⌥D (mac) / Alt+Shift+F9 (win) |
+| Hide All Tool Windows | `Ctrl+Alt+;` `J` | ⌘⇧F12 / Ctrl+Shift+F12 |
+| Multi-cursor (next occurrence) | `Ctrl+Alt+;` `V` | ⌃G (mac) / Alt+J (win) |
+
+**Also promoted to the hot set** (highest-frequency actions, single chord —
+these differed by more than a Cmd↔Ctrl swap between Mac and Windows, so they
+moved here instead of staying native):
+
+| Action | Chord | Was |
+|---|---|---|
+| Run | `Ctrl+Alt+W` | ⌃R (mac) / Shift+F10 (win) |
+| Debug | `Ctrl+Alt+X` | ⌃D (mac) / Shift+F9 (win) |
+| Back | `Ctrl+Alt+←` | ⌘[ (mac) / Ctrl+Alt+← (win, unchanged) |
+| Forward | `Ctrl+Alt+→` | ⌘] (mac) / Ctrl+Alt+→ (win, unchanged) |
 
 ## Part 2 — Standard everyday shortcuts (unchanged defaults)
 
@@ -146,13 +169,9 @@ These are IntelliJ defaults, kept as-is. `⌘`=Cmd, `⌥`=Option/Alt, `⌃`=Ctrl
 |---|---|---|
 | Search Everywhere | `⇧⇧` (double Shift) | `Shift Shift` |
 | Find Action | `⌘⇧A` | `Ctrl+Shift+A` |
-| Go to Class | `⌘O` | `Ctrl+N` |
-| Go to File | `⌘⇧O` | `Ctrl+Shift+N` |
-| Go to Symbol | `⌘⌥O` | `Ctrl+Alt+Shift+N` |
 | Recent Files | `⌘E` | `Ctrl+E` |
 | Go to Declaration | `⌘B` | `Ctrl+B` |
 | Go to Implementation | `⌘⌥B` | `Ctrl+Alt+B` |
-| Back / Forward | `⌘[` / `⌘]` | `Ctrl+Alt+←` / `→` |
 | Find in Files | `⌘⇧F` | `Ctrl+Shift+F` |
 | Find / Replace | `⌘F` / `⌘R` | `Ctrl+F` / `Ctrl+R` |
 
@@ -165,36 +184,18 @@ These are IntelliJ defaults, kept as-is. `⌘`=Cmd, `⌥`=Option/Alt, `⌃`=Ctrl
 | Reformat Code | `⌘⌥L` | `Ctrl+Alt+L` |
 | Optimize Imports | `⌃⌥O` | `Ctrl+Alt+O` |
 | Duplicate Line | `⌘D` | `Ctrl+D` |
-| Delete Line | `⌘⌫` | `Ctrl+Y` |
 | Comment Line | `⌘/` | `Ctrl+/` |
 | Move Line Up / Down | `⌥⇧↑` / `↓` | `Alt+Shift+↑` / `↓` |
-| Extend / Shrink Selection | `⌥↑` / `⌥↓` | `Ctrl+W` / `Ctrl+Shift+W` |
-| Multi-cursor (next occurrence) | `⌃G` | `Alt+J` |
-| Generate | `⌘N` | `Alt+Insert` |
 | Surround With | `⌘⌥T` | `Ctrl+Alt+T` |
 
 ### Refactor (non-F defaults)
 
 | Action | macOS | Windows |
 |---|---|---|
-| Refactor This | `⌃T` | `Ctrl+Alt+Shift+T` |
 | Extract Variable | `⌘⌥V` | `Ctrl+Alt+V` |
 | Extract Method | `⌘⌥M` | `Ctrl+Alt+M` |
 | Extract Field | `⌘⌥F` | `Ctrl+Alt+F` |
 | Inline | `⌘⌥N` | `Ctrl+Alt+N` |
-
-### Run / debug (non-F defaults; F-based ones are in Part 1)
-
-| Action | macOS | Windows |
-|---|---|---|
-| Run | `⌃R` | `Shift+F10` → *rebind if needed* |
-| Debug | `⌃D` | `Shift+F9` → *rebind if needed* |
-| Run… (chooser) | `⌃⌥R` | `Alt+Shift+F10` |
-
-> Note: `Run`/`Debug` on Windows default to `Shift+F10`/`Shift+F9`. They're not
-> in the Part-1 list because on macOS they're `⌃R`/`⌃D` (no F-key). If the
-> Windows F-based Run/Debug bother you, add them to the keymap the same way —
-> suggested: `Ctrl+Alt+;` `Enter` (run) / `Ctrl+Alt+;` `Shift+Enter` (debug).
 
 ### Tool windows
 
@@ -202,7 +203,6 @@ These are IntelliJ defaults, kept as-is. `⌘`=Cmd, `⌥`=Option/Alt, `⌃`=Ctrl
 |---|---|---|
 | Project | `⌘1` | `Alt+1` |
 | Version Control | `⌘9` | `Alt+9` |
-| Hide all tool windows | `⌘⇧F12` → *see Part 1 note* | `Ctrl+Shift+F12` |
 
 ## Verifying conflicts
 
@@ -249,6 +249,17 @@ together. The OS-specific empty-action unbind entries are allowed to differ
 (mac needs 2 extra: conflicts that come from `Mac OS X 10.5+.xml` itself,
 which Windows never inherits).
 
+**Second pass (unifying everyday actions, same day):** adopting
+`Ctrl+Alt+Left`/`Right` for `Back`/`Forward` collided with
+`ResizeToolWindowLeft`/`ResizeToolWindowRight`, which `Mac OS X 10.5+.xml`
+binds to the same chord — Windows' `$default.xml` has no such binding, so
+that unbind is mac-only, same idiom as above. Separately,
+`ChooseRunConfiguration`/`ChooseDebugConfiguration` had been sitting fully
+unbound on Mac since the first pass (freed to make room for
+`Rename`/`ToggleLineBreakpoint`) — they now get a real leader-set chord
+instead of staying dead, restoring keyboard access to them on Mac rather
+than leaving that regression in place.
+
 ## Uninstall
 
 ```sh
@@ -257,5 +268,5 @@ which Windows never inherits).
 
 Removes the keymap file from every config dir. The IntelliJ app is left
 installed (remove via `brew uninstall --cask intellij-idea-ce` or Finder). If
-`Roj-Ffree` is still selected, switch back to a default keymap in Settings →
+`roj-keymap` is still selected, switch back to a default keymap in Settings →
 Keymap.

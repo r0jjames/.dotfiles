@@ -4,7 +4,7 @@
      Chords use only Ctrl/Alt/Shift (never Win) so they are byte-identical to the
      macOS file and survive Citrix Scancode mode. Do NOT hand-edit while the IDE
      is running - it will be overwritten on exit. See intellij/README.md. -->
-<keymap version="1" name="Roj-Ffree" parent="$default">
+<keymap version="1" name="roj-keymap" parent="$default">
   <!-- ===== HOT SET: single Ctrl+Alt+<letter> ===== -->
   <action id="RenameElement">
     <keyboard-shortcut first-keystroke="ctrl alt R" />
@@ -26,6 +26,18 @@
   </action>
   <action id="EvaluateExpression">
     <keyboard-shortcut first-keystroke="ctrl alt E" />
+  </action>
+  <action id="Run">
+    <keyboard-shortcut first-keystroke="ctrl alt W" />
+  </action>
+  <action id="Debug">
+    <keyboard-shortcut first-keystroke="ctrl alt X" />
+  </action>
+  <action id="Back">
+    <keyboard-shortcut first-keystroke="ctrl alt LEFT" />
+  </action>
+  <action id="Forward">
+    <keyboard-shortcut first-keystroke="ctrl alt RIGHT" />
   </action>
 
   <!-- ===== LEADER SET: Ctrl+Alt+; then a letter ===== -->
@@ -91,6 +103,42 @@
   </action>
   <action id="ShowErrorDescription">
     <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift D" />
+  </action>
+  <action id="GotoClass">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift C" />
+  </action>
+  <action id="GotoFile">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="F" />
+  </action>
+  <action id="GotoSymbol">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="Y" />
+  </action>
+  <action id="EditorDeleteLine">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="BACK_SPACE" />
+  </action>
+  <action id="EditorSelectWord">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="UP" />
+  </action>
+  <action id="EditorUnSelectWord">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="DOWN" />
+  </action>
+  <action id="Generate">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="G" />
+  </action>
+  <action id="Refactorings.QuickListPopupAction">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="Q" />
+  </action>
+  <action id="ChooseRunConfiguration">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift W" />
+  </action>
+  <action id="ChooseDebugConfiguration">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift X" />
+  </action>
+  <action id="HideAllWindows">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="J" />
+  </action>
+  <action id="SelectNextOccurrence">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="V" />
   </action>
 
   <!-- Empty self-closing <action id="X"/> = unbind: the real keymap-scheme
