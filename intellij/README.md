@@ -130,8 +130,8 @@ Three tiers, lightest first. Full rationale/verification:
 | Shrink Selection | `Alt+↓` |
 | New… (file/class/etc popup) | `Alt+N` |
 | Select In (reveal current file) | `Alt+I` |
-| Previous Tab | `Alt+H` |
-| Next Tab | `Alt+L` |
+| Previous Tab | `Alt+PageUp` |
+| Next Tab | `Alt+PageDown` |
 | Back | `Ctrl+Alt+←` *(kept 3-key — see below)* |
 | Forward | `Ctrl+Alt+→` *(kept 3-key — see below)* |
 
@@ -140,12 +140,13 @@ IntelliJ's own UI labels "Select Next/Previous Tab", "Activate next/previous
 tab" — the real editor-tab-strip cycle, shared with other tabbed-pane
 components). This redeclaration **replaces** their native shortcut list, so
 it intentionally drops Windows' native `Alt+←`/`Alt+→` and Mac's native
-`Ctrl+←`/`Ctrl+→` for this action — `Alt+H`/`Alt+L` is the one chord now, on
-both OS. **Not** `NextEditorTab`/`PreviousEditorTab` — those are a
-different, narrow action ("Select Next/Previous Tab **in Multi-Editor
-File**") that doesn't control the tab strip at all; an earlier pass of this
-project bound that id by mistake, which is why the original chords silently
-did nothing (see sixth pass below).
+`Ctrl+←`/`Ctrl+→` for this action — `Alt+PageUp`/`Alt+PageDown` is the one
+chord now, on both OS (not `Alt+H`/`Alt+L` — see eighth pass below for why).
+**Not** `NextEditorTab`/`PreviousEditorTab` — those are a different, narrow
+action ("Select Next/Previous Tab **in Multi-Editor File**") that doesn't
+control the tab strip at all; an earlier pass of this project bound that id
+by mistake, which is why the original chords silently did nothing (see
+sixth pass below).
 
 **Why Back/Forward stay 3-key:** bare `Alt+←`/`Alt+→` still collides with
 `EditorPreviousWord`/`EditorNextWord` (Mac — Option+Arrow word navigation,
@@ -154,8 +155,8 @@ regression for a 1-key saving.
 
 **Direct jump-to-tab-N** (the `Cmd+1`..`Cmd+9` browser convention) isn't a
 real IntelliJ action — verified against the full bundled action set, only
-`PreviousTab`/`NextTab` (cycle one at a time) exist. `Alt+H`/`Alt+L` above
-is the closest available substitute for cycling; see
+`PreviousTab`/`NextTab` (cycle one at a time) exist. `Alt+PageUp`/
+`Alt+PageDown` above is the closest available substitute for cycling; see
 [Find & jump between tabs](#find--jump-between-tabs)
 below for a real numbered-jump option via bookmarks.
 
@@ -184,7 +185,8 @@ sends the wrong modifier combo and the action won't fire).
 ## Find & jump between tabs
 
 **To cycle only through open editor tabs** (never landing on Commit,
-Project, Terminal, etc.): use `Alt+H`/`Alt+L` from Tier 1, repeatedly.
+Project, Terminal, etc.): use `Alt+PageUp`/`Alt+PageDown` from Tier 1,
+repeatedly.
 `PreviousTab`/`NextTab` operates on whichever tabbed pane currently has
 focus — with focus in the editor, repeated presses stay inside the editor
 tab strip, full stop. This is the answer to "keep pressing to cycle only
@@ -402,6 +404,22 @@ display-label match ("editor tab") is not proof of a semantic match —
 verify the actual bound action against the IDE's own Keymap settings panel
 (or its resource bundle) before trusting an id name, not just before
 trusting a chord.
+
+**Eighth pass (2026-07-24, same day — Alt+H/L retired):** `Alt+H` blocked
+typing `˙` (macOS's Option+H dead-key, dot-above accent) inside IntelliJ —
+once an action owns a chord, the IDE's action dispatcher claims it ahead of
+character composition, everywhere including editors. This is the same
+trade-off every other bare `Alt+<letter>` in Tier 1 already makes (`Alt+R`
+blocks `®`, `Alt+C` blocks `ç`, etc. — virtually every Option+letter on the
+US layout composes something), which is why it was never flagged before;
+Roj decided he actually needs to type the composed characters `Alt+H`/
+`Alt+L` were blocking, so — unlike the rest of Tier 1 — those two moved off
+letters entirely. Replaced with `Alt+PageUp`/`Alt+PageDown`: Page Up/Down
+aren't printable-character keys, so Option-modifying them composes nothing
+on macOS — no typing capability lost — and both are confirmed collision-free
+(zero hits, not even a component-scoped one) against `$default.xml`,
+`Mac OS X.xml`, and `Mac OS X 10.5+.xml`. Mnemonic bonus: matches browsers'
+`Ctrl+PageUp`/`Ctrl+PageDown` tab-cycle convention.
 
 ## Uninstall
 
