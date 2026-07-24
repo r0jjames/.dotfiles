@@ -5,9 +5,7 @@
   path is JetBrains Settings Sync (Path A) - see intellij/README.md - which
   needs no script. Use this only if you are not using account sync.
 
-  CLOSE IntelliJ before running (config is overwritten on IDE exit).
-
-  Usage (PowerShell in the VDI):
+Close IntelliJ before running. The config is overwritten when the IDE exits.  Usage (PowerShell in the VDI):
     powershell -ExecutionPolicy Bypass -File .\vdi-apply-keymap.ps1
 
   If the dotfiles repo is PRIVATE, raw.githubusercontent will 404. Either:
