@@ -55,23 +55,39 @@ def _unbound_ids(path: Path):
 # Rename silently did nothing - it was contending with ChooseRunConfiguration).
 KNOWN_CONFLICTS = [
     # (chord, action_id_to_unbind, "mac" | "windows" | "both")
-    ("control alt R", "Diff.ApplyLeftSide", "both"),
-    ("control alt D", "UsageGrouping.DirectoryStructure", "both"),
-    ("control alt Q", "ToggleRenderedDocPresentation", "both"),
-    ("control alt E", "ToggleFindInSelection", "both"),
-    ("control alt E", "Console.History.Browse", "both"),
-    # ChooseRunConfiguration/ChooseDebugConfiguration used to be mac-only
-    # unbinds here (they collided with Rename/ToggleLineBreakpoint on
-    # ctrl+alt+R/D) but now have a real leader-set chord instead - see
-    # keymap-macos.xml. Their old ctrl+alt+R/D bindings are retired simply
-    # by redeclaring the id with a new shortcut list, same as every other
-    # relocated action.
     #
-    # ctrl+alt+Left/Right (Back/Forward) collide on macOS only with
+    # ctrl+alt+Left/Right (Back/Forward, kept 3-key - see 2026-07-24
+    # two-key-simplification design doc) collide on macOS only with
     # ResizeToolWindowLeft/Right (Mac OS X 10.5+.xml); $default has no such
     # binding so Windows needs no unbind here.
     ("control alt LEFT", "ResizeToolWindowLeft", "mac"),
     ("control alt RIGHT", "ResizeToolWindowRight", "mac"),
+    # control B / control F collide on macOS only with the Emacs-style
+    # secondary bindings Mac OS X 10.5+.xml adds to EditorLeft/EditorRight
+    # (their primary LEFT/RIGHT arrow-key binding is untouched - only the
+    # Ctrl+B/Ctrl+F alternate is dropped). control F also ties with
+    # TodoViewGroupByFlattenPackage's mac-only "control F" assignment
+    # (Windows keeps its own unrelated "control alt C" for that action).
+    ("control F", "TodoViewGroupByFlattenPackage", "mac"),
+    #
+    # Two-key simplification (2026-07-24): the Ctrl+Alt+<letter> hot set and
+    # the Ctrl+Alt+; leader are retired in favor of bare Alt+<letter> plus a
+    # lighter Alt+Minus leader. The old hot-set's inherited-conflict unbinds
+    # (Diff.ApplyLeftSide, UsageGrouping.DirectoryStructure,
+    # ToggleRenderedDocPresentation, ToggleFindInSelection,
+    # Console.History.Browse) are gone from both files - those natives get
+    # their original Ctrl+Alt+<letter> bindings back since nothing of ours
+    # sits there anymore. New collisions from the Alt+<letter> promotion:
+    ("control W", "UsageFiltering.WriteAccess", "both"),
+    ("alt Q", "EditorContextInfo", "windows"),
+    ("alt UP", "MethodUp", "windows"),
+    ("alt UP", "MethodOverloadSwitchUp", "mac"),
+    ("alt UP", "List-selectFirstRow", "mac"),
+    ("alt DOWN", "MethodDown", "windows"),
+    ("alt DOWN", "ShowContent", "windows"),
+    ("alt DOWN", "ShowSearchHistory", "both"),
+    ("alt DOWN", "MethodOverloadSwitchDown", "mac"),
+    ("alt DOWN", "List-selectLastRow", "mac"),
 ]
 
 

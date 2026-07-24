@@ -94,115 +94,121 @@ hand and pass `-LocalPath .\keymap-windows.xml`.
 
 # Cheatsheet
 
-## Part 1 — Custom F-free overrides (identical on Mac + Windows)
+Three tiers, lightest first. Full rationale/verification:
+`docs/superpowers/specs/2026-07-24-roj-keymap-two-key-simplification-design.md`.
 
-These replace the old F1-F12 shortcuts. Same chords on every machine.
+## Tier 0 — Ctrl-based, already 2-key
 
-**Hot set** — single `Ctrl+Alt+<key>`:
+| Action | Chord |
+|---|---|
+| Go to Declaration | `Ctrl+B` |
+| Find | `Ctrl+F` |
+| Find in Path | `Ctrl+Shift+F` |
+| Close tab | `Ctrl+W` |
+| Project tool window | `Alt+1` |
+| VCS tool window | `Alt+9` |
 
-| Action | Chord | Was (default) |
-|---|---|---|
-| Rename | `Ctrl+Alt+R` | ⇧F6 |
-| Find Usages | `Ctrl+Alt+U` | ⌥F7 |
-| Toggle breakpoint | `Ctrl+Alt+K` | ⌘F8 / Ctrl+F8 |
-| Step Over | `Ctrl+Alt+D` | F8 |
-| Step Into | `Ctrl+Alt+G` | F7 |
-| Step Out | `Ctrl+Alt+Q` | ⇧F8 |
-| Evaluate Expression | `Ctrl+Alt+E` | ⌥F8 |
+## Tier 1 — bare `Alt+<key>`, 2-key, high frequency
 
-**Leader set** — `Ctrl+Alt+;` then a key:
+| Action | Chord |
+|---|---|
+| Rename | `Alt+R` |
+| Find Usages | `Alt+U` |
+| Toggle Breakpoint | `Alt+K` |
+| Step Over | `Alt+D` |
+| Step Into | `Alt+G` |
+| Step Out | `Alt+Q` |
+| Evaluate Expression | `Alt+E` |
+| Run | `Alt+W` |
+| Debug | `Alt+X` |
+| Go to Class | `Alt+C` |
+| Go to File | `Alt+F` |
+| Go to Symbol | `Alt+S` |
+| Terminal | `Alt+T` |
+| Build (CompileDirty) | `Alt+B` |
+| Extend Selection | `Alt+↑` |
+| Shrink Selection | `Alt+↓` |
+| New… (file/class/etc popup) | `Alt+N` |
+| Select In (reveal current file) | `Alt+I` |
+| Previous Editor Tab | `Alt+[` |
+| Next Editor Tab | `Alt+]` |
+| Back | `Ctrl+Alt+←` *(kept 3-key — see below)* |
+| Forward | `Ctrl+Alt+→` *(kept 3-key — see below)* |
 
-| Action | Chord | Was |
-|---|---|---|
-| Resume program | `Ctrl+Alt+;` `R` | F9 |
-| Move | `Ctrl+Alt+;` `M` | F6 |
-| Change Signature | `Ctrl+Alt+;` `C` | ⌘F6 / Ctrl+F6 |
-| Next error | `Ctrl+Alt+;` `E` | F2 |
-| Previous error | `Ctrl+Alt+;` `Shift+E` | ⇧F2 |
-| File Structure popup | `Ctrl+Alt+;` `S` | ⌘F12 / Ctrl+F12 |
-| Jump to Last Tool Window | `Ctrl+Alt+;` `W` | F12 |
-| Terminal | `Ctrl+Alt+;` `T` | ⌥F12 / Alt+F12 |
-| Toggle Bookmark | `Ctrl+Alt+;` `B` | F3 / F11 |
-| Show Bookmarks | `Ctrl+Alt+;` `Shift+B` | ⌘F3 / ⇧F11 |
-| Build Project | `Ctrl+Alt+;` `K` | ⌘F9 / Ctrl+F9 |
-| Stop | `Ctrl+Alt+;` `X` | ⌘F2 / Ctrl+F2 |
-| Run to Cursor | `Ctrl+Alt+;` `U` | ⌥F9 / Alt+F9 |
-| Quick Documentation | `Ctrl+Alt+;` `D` | F1 (mac) |
-| Show Execution Point | `Ctrl+Alt+;` `P` | ⌥F10 / Alt+F10 |
-| Select In | `Ctrl+Alt+;` `I` | ⌥F1 / Alt+F1 |
-| Next Difference (diff) | `Ctrl+Alt+;` `N` | F7 |
-| Previous Difference | `Ctrl+Alt+;` `Shift+N` | ⇧F7 |
-| Open Source in New Window | `Ctrl+Alt+;` `O` | ⇧F4 |
-| Smart Step Into | `Ctrl+Alt+;` `A` | ⇧F7 |
-| Show Error Description | `Ctrl+Alt+;` `Shift+D` | ⌘F1 / Ctrl+F1 |
-| Go to Class | `Ctrl+Alt+;` `Shift+C` | ⌘O (mac) / Ctrl+N (win) |
-| Go to File | `Ctrl+Alt+;` `F` | ⌘⇧O (mac) / Ctrl+Shift+N (win) |
-| Go to Symbol | `Ctrl+Alt+;` `Y` | ⌘⌥O (mac) / Ctrl+Alt+Shift+N (win) |
-| Delete Line | `Ctrl+Alt+;` `Backspace` | ⌘⌫ (mac) / Ctrl+Y (win) |
-| Extend Selection | `Ctrl+Alt+;` `↑` | ⌥↑ (mac) / Ctrl+W (win) |
-| Shrink Selection | `Ctrl+Alt+;` `↓` | ⌥↓ (mac) / Ctrl+Shift+W (win) |
-| Generate | `Ctrl+Alt+;` `G` | ⌘N (mac) / Alt+Insert (win) |
-| Refactor This | `Ctrl+Alt+;` `Q` | ⌃T (mac) / Ctrl+Alt+Shift+T (win) |
-| Run… (chooser) | `Ctrl+Alt+;` `Shift+W` | ⌃⌥R (mac) / Alt+Shift+F10 (win) |
-| Debug… (chooser) | `Ctrl+Alt+;` `Shift+X` | ⌃⌥D (mac) / Alt+Shift+F9 (win) |
-| Hide All Tool Windows | `Ctrl+Alt+;` `J` | ⌘⇧F12 / Ctrl+Shift+F12 |
-| Multi-cursor (next occurrence) | `Ctrl+Alt+;` `V` | ⌃G (mac) / Alt+J (win) |
+**Why Back/Forward stay 3-key:** bare `Alt+←`/`Alt+→` collides with
+`PreviousTab`/`NextTab` (Windows, heavily used) **and**
+`EditorPreviousWord`/`EditorNextWord` (Mac — Option+Arrow word navigation,
+a fundamental system-wide macOS text-editing convention). Not worth the
+regression for a 1-key saving.
 
-**Also promoted to the hot set** (highest-frequency actions, single chord —
-these differed by more than a Cmd↔Ctrl swap between Mac and Windows, so they
-moved here instead of staying native):
+**Direct jump-to-tab-N** (the `Cmd+1`..`Cmd+9` browser convention) isn't a
+real IntelliJ action — verified against the full bundled action set, only
+`NextEditorTab`/`PreviousEditorTab` (cycle one at a time) exist.
+`Alt+[`/`Alt+]` above is the closest available substitute.
 
-| Action | Chord | Was |
-|---|---|---|
-| Run | `Ctrl+Alt+W` | ⌃R (mac) / Shift+F10 (win) |
-| Debug | `Ctrl+Alt+X` | ⌃D (mac) / Shift+F9 (win) |
-| Back | `Ctrl+Alt+←` | ⌘[ (mac) / Ctrl+Alt+← (win, unchanged) |
-| Forward | `Ctrl+Alt+→` | ⌘] (mac) / Ctrl+Alt+→ (win, unchanged) |
+## Tier 2 — leader, `Alt+Minus` then a key
 
-## Part 2 — Standard everyday shortcuts (unchanged defaults)
+Lower-frequency actions. Press-release `Alt+Minus`, then press the second
+key **alone** (release Alt+Minus first — holding it through the second key
+sends the wrong modifier combo and the action won't fire).
 
-These are IntelliJ defaults, kept as-is. `⌘`=Cmd, `⌥`=Option/Alt, `⌃`=Ctrl, `⇧`=Shift.
+| Action | Chord | Action | Chord |
+|---|---|---|---|
+| Resume program | `Alt+-` `R` | Move | `Alt+-` `M` |
+| Change Signature | `Alt+-` `C` | Next error | `Alt+-` `E` |
+| Previous error | `Alt+-` `Shift+E` | File Structure popup | `Alt+-` `S` |
+| Jump to Last Tool Window | `Alt+-` `W` | Toggle Bookmark | `Alt+-` `B` |
+| Show Bookmarks | `Alt+-` `Shift+B` | Stop | `Alt+-` `X` |
+| Run to Cursor | `Alt+-` `U` | Quick Documentation | `Alt+-` `D` |
+| Show Execution Point | `Alt+-` `P` | Next Difference (diff) | `Alt+-` `N` |
+| Previous Difference | `Alt+-` `Shift+N` | Open Source in New Window | `Alt+-` `O` |
+| Smart Step Into | `Alt+-` `A` | Show Error Description | `Alt+-` `Shift+D` |
+| Delete Line | `Alt+-` `Backspace` | Generate | `Alt+-` `G` |
+| Refactor This | `Alt+-` `Q` | Run… (chooser) | `Alt+-` `Shift+W` |
+| Debug… (chooser) | `Alt+-` `Shift+X` | Hide All Tool Windows | `Alt+-` `J` |
+| Multi-cursor (next occurrence) | `Alt+-` `V` | | |
+
+## Unchanged defaults (already identical, no override needed)
+
+These are IntelliJ defaults, kept as-is — **already the same physical
+Ctrl/Alt chord on both OSes out of the box**, no keymap override needed.
+(An earlier version of this table showed some of these with `⌘` on macOS;
+that was wrong — decompiling the real bundled keymap confirmed macOS
+inherits the Ctrl/Alt chord from `$default` unchanged, since neither
+`Mac OS X.xml` nor `Mac OS X 10.5+.xml` overrides these actions. `⌥`=Option/Alt,
+`⌃`=Ctrl, `⇧`=Shift.)
 
 ### Search / navigate
 
-| Action | macOS | Windows |
-|---|---|---|
-| Search Everywhere | `⇧⇧` (double Shift) | `Shift Shift` |
-| Find Action | `⌘⇧A` | `Ctrl+Shift+A` |
-| Recent Files | `⌘E` | `Ctrl+E` |
-| Go to Declaration | `⌘B` | `Ctrl+B` |
-| Go to Implementation | `⌘⌥B` | `Ctrl+Alt+B` |
-| Find in Files | `⌘⇧F` | `Ctrl+Shift+F` |
-| Find / Replace | `⌘F` / `⌘R` | `Ctrl+F` / `Ctrl+R` |
+| Action | Chord |
+|---|---|
+| Search Everywhere | `Shift Shift` (double Shift) |
+| Find Action | `Ctrl+Shift+A` |
+| Recent Files | `Ctrl+E` |
+| Go to Implementation | `Ctrl+Alt+B` |
+| Replace | `Ctrl+R` |
 
 ### Edit / code
 
-| Action | macOS | Windows |
-|---|---|---|
-| Show Intentions / quick-fix | `⌥⏎` | `Alt+Enter` |
-| Code Completion | `⌃Space` | `Ctrl+Space` |
-| Reformat Code | `⌘⌥L` | `Ctrl+Alt+L` |
-| Optimize Imports | `⌃⌥O` | `Ctrl+Alt+O` |
-| Duplicate Line | `⌘D` | `Ctrl+D` |
-| Comment Line | `⌘/` | `Ctrl+/` |
-| Move Line Up / Down | `⌥⇧↑` / `↓` | `Alt+Shift+↑` / `↓` |
-| Surround With | `⌘⌥T` | `Ctrl+Alt+T` |
+| Action | Chord |
+|---|---|
+| Show Intentions / quick-fix | `Alt+Enter` |
+| Code Completion | `Ctrl+Space` |
+| Reformat Code | `Ctrl+Alt+L` |
+| Optimize Imports | `Ctrl+Alt+O` |
+| Duplicate Line | `Ctrl+D` |
+| Comment Line | `Ctrl+/` |
+| Move Line Up / Down | `Alt+Shift+↑` / `↓` |
+| Surround With | `Ctrl+Alt+T` |
 
 ### Refactor (non-F defaults)
 
-| Action | macOS | Windows |
-|---|---|---|
-| Extract Variable | `⌘⌥V` | `Ctrl+Alt+V` |
-| Extract Method | `⌘⌥M` | `Ctrl+Alt+M` |
-| Extract Field | `⌘⌥F` | `Ctrl+Alt+F` |
-| Inline | `⌘⌥N` | `Ctrl+Alt+N` |
-
-### Tool windows
-
-| Action | macOS | Windows |
-|---|---|---|
-| Project | `⌘1` | `Alt+1` |
-| Version Control | `⌘9` | `Alt+9` |
+| Action | Chord |
+|---|---|
+| Extract Variable | `Ctrl+Alt+V` |
+| Extract Method | `Ctrl+Alt+M` |
+| Extract Field | `Ctrl+Alt+F` |
+| Inline | `Ctrl+Alt+N` |
 
 ## Verifying conflicts
 
@@ -246,8 +252,11 @@ Because both `keymap-macos.xml` and `keymap-windows.xml` carry **identical**
 relocated chords (a test enforces this, case-insensitively — IntelliJ itself
 may re-save the file in lowercase), fix a relocated chord in both files
 together. The OS-specific empty-action unbind entries are allowed to differ
-(mac needs 2 extra: conflicts that come from `Mac OS X 10.5+.xml` itself,
-which Windows never inherits).
+— each file only unbinds the natives that actually collide with our chords
+*in that file's own parent chain* (`Mac OS X.xml`/`Mac OS X 10.5+.xml` vs
+`$default.xml`), so the two unbind lists rarely match exactly. `KNOWN_CONFLICTS`
+in `tests/test_intellij.py` is the source of truth for which id/chord/OS
+combination is expected.
 
 **Second pass (unifying everyday actions, same day):** adopting
 `Ctrl+Alt+Left`/`Right` for `Back`/`Forward` collided with
@@ -259,6 +268,62 @@ unbound on Mac since the first pass (freed to make room for
 `Rename`/`ToggleLineBreakpoint`) — they now get a real leader-set chord
 instead of staying dead, restoring keyboard access to them on Mac rather
 than leaving that regression in place.
+
+**Third pass (2026-07-24, Cmd-vs-Ctrl parity):** re-verified every Part 2 row
+against the real bundled `Mac OS X.xml`/`Mac OS X 10.5+.xml` (both extracted
+straight from `app-client.jar` — the only jar shipping `keymaps/*.xml`, no
+plugin jar contributes more). Only 5 actions genuinely override to Cmd on
+Mac (`GotoDeclaration`, `Find`, `FindInPath`,
+`ActivateProjectToolWindow`, `ActivateVersionControlToolWindow`); every other
+Part 2 row has **no** Mac-specific override at all, so it silently inherits
+`$default`'s Ctrl/Alt chord already — the README's old `⌘` labels for those
+were simply wrong.
+
+**Fourth pass (same day, real conflicts found in testing):** the first
+attempt at the fix above assumed porting Windows' chord onto Mac was always
+collision-free, since `$default` already owned that chord exclusively for
+that action. That check only looked at whether the target *action id* had a
+Mac override — it didn't check whether some *other* action already sat on
+that same physical chord in the Mac-only files, the exact bug class the
+F-row hot-set work already hit once. It had: `Mac OS X 10.5+.xml` secretly
+gives `EditorLeft`/`EditorRight` (arrow-key caret movement) a *second*,
+Emacs-style shortcut on `Ctrl+B`/`Ctrl+F`, invisible unless you diff every
+action in the file, not just the ones you're touching. Claiming `Ctrl+B` for
+`GotoDeclaration` and `Ctrl+F` for `Find` silently tied with those (plus
+`TodoViewGroupByFlattenPackage`, also mac-only on `Ctrl+F`) — symptom: Find
+and Go to Declaration didn't reliably fire. Fixed by re-declaring
+`EditorLeft`/`EditorRight` with **only** their arrow-key shortcut (dropping
+the Ctrl+B/F secondary; arrow-key navigation itself is unaffected) and fully
+unbinding `TodoViewGroupByFlattenPackage`'s mac-only `Ctrl+F` assignment —
+same empty-tag idiom as the F-row work. `Alt+1`/`Alt+9`/`Ctrl+Shift+F` had no
+such hidden collision, verified clean. **Lesson:** "the target action has no
+Mac override" is not the same question as "nothing else already owns this
+chord on Mac" — always reverse-index every actual keystroke in the Mac-only
+files against the new chord, not just look up the one action id you're
+touching. `keymap-windows.xml` gets the same `EditorLeft`/`EditorRight`
+entries redeclared for file symmetry (a no-op there — Windows never had a
+Ctrl+B/F secondary to begin with).
+
+**Fifth pass (2026-07-24, two-key simplification):** the `Ctrl+Alt+;`
+leader (3-key first stroke) and the `Ctrl+Alt+<letter>` hot set (3-key
+single chord) were retired after Roj reported finger strain and that the
+leader was easy to misuse — see
+`docs/superpowers/specs/2026-07-24-roj-keymap-two-key-simplification-design.md`
+for the full design. Replaced with bare `Alt+<letter>` (2-key) for
+high-frequency actions and a lighter `Alt+Minus` leader for the rest.
+Applying the lesson from the fourth pass up front this time — every new
+chord was reverse-indexed against the real bundled keymaps *before*
+writing any XML, which caught real collisions beyond the ones anticipated
+in the design doc (`Alt+Down` in particular contends with several
+component-scoped actions: search-history dropdowns, list-navigation,
+method-overload-switcher popups — all unbound for safety even though most
+are scoped to specific UI components and may not have truly conflicted in
+the editor). The old hot-set's inherited-conflict unbinds
+(`Diff.ApplyLeftSide`, `UsageGrouping.DirectoryStructure`,
+`ToggleRenderedDocPresentation`, `ToggleFindInSelection`,
+`Console.History.Browse`) were removed since nothing of ours sits on
+`Ctrl+Alt+<letter>` anymore except Back/Forward's arrows — those natives
+get their original bindings back rather than staying pointlessly unbound.
 
 ## Uninstall
 

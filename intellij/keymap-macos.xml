@@ -1,141 +1,176 @@
 <keymap version="1" name="roj-keymap" parent="Mac OS X 10.5+">
+  <action id="ActivateProjectToolWindow">
+    <keyboard-shortcut first-keystroke="alt 1" />
+  </action>
   <action id="ActivateTerminalToolWindow">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="t" />
+    <keyboard-shortcut first-keystroke="alt t" />
+  </action>
+  <action id="ActivateVersionControlToolWindow">
+    <keyboard-shortcut first-keystroke="alt 9" />
   </action>
   <action id="Back">
-    <keyboard-shortcut first-keystroke="ctrl alt LEFT" />
+    <keyboard-shortcut first-keystroke="ctrl alt left" />
   </action>
   <action id="ChangeSignature">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="c" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="c" />
   </action>
   <action id="ChooseDebugConfiguration">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift x" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift x" />
   </action>
   <action id="ChooseRunConfiguration">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift w" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift w" />
+  </action>
+  <action id="CloseContent">
+    <keyboard-shortcut first-keystroke="ctrl w" />
   </action>
   <action id="CompileDirty">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="k" />
+    <keyboard-shortcut first-keystroke="alt b" />
   </action>
-  <action id="Console.History.Browse" />
   <action id="Debug">
-    <keyboard-shortcut first-keystroke="ctrl alt x" />
+    <keyboard-shortcut first-keystroke="alt x" />
   </action>
-  <action id="Diff.ApplyLeftSide" />
   <action id="EditSourceInNewWindow">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="o" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="o" />
   </action>
   <action id="EditorDeleteLine">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="BACK_SPACE" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="back_space" />
+  </action>
+  <action id="EditorLeft">
+    <keyboard-shortcut first-keystroke="left" />
+  </action>
+  <action id="EditorRight">
+    <keyboard-shortcut first-keystroke="right" />
   </action>
   <action id="EditorSelectWord">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="UP" />
+    <keyboard-shortcut first-keystroke="alt up" />
   </action>
   <action id="EditorUnSelectWord">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="DOWN" />
+    <keyboard-shortcut first-keystroke="alt down" />
   </action>
   <action id="EvaluateExpression">
-    <keyboard-shortcut first-keystroke="ctrl alt e" />
+    <keyboard-shortcut first-keystroke="alt e" />
   </action>
   <action id="FileStructurePopup">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="s" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="s" />
+  </action>
+  <action id="Find">
+    <keyboard-shortcut first-keystroke="ctrl f" />
+  </action>
+  <action id="FindInPath">
+    <keyboard-shortcut first-keystroke="shift ctrl f" />
   </action>
   <action id="FindUsages">
-    <keyboard-shortcut first-keystroke="ctrl alt u" />
+    <keyboard-shortcut first-keystroke="alt u" />
   </action>
   <action id="Forward">
-    <keyboard-shortcut first-keystroke="ctrl alt RIGHT" />
+    <keyboard-shortcut first-keystroke="ctrl alt right" />
   </action>
   <action id="Generate">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="g" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="g" />
   </action>
   <action id="GotoClass">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift c" />
+    <keyboard-shortcut first-keystroke="alt c" />
+  </action>
+  <action id="GotoDeclaration">
+    <keyboard-shortcut first-keystroke="ctrl b" />
   </action>
   <action id="GotoFile">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="f" />
+    <keyboard-shortcut first-keystroke="alt f" />
   </action>
   <action id="GotoNextError">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="e" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="e" />
   </action>
   <action id="GotoPreviousError">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift e" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift e" />
   </action>
   <action id="GotoSymbol">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="y" />
+    <keyboard-shortcut first-keystroke="alt s" />
   </action>
   <action id="HideAllWindows">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="j" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="j" />
   </action>
   <action id="JumpToLastWindow">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="w" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="w" />
   </action>
+  <action id="List-selectFirstRow" />
+  <action id="List-selectLastRow" />
+  <action id="MethodOverloadSwitchDown" />
+  <action id="MethodOverloadSwitchUp" />
   <action id="Move">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="m" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="m" />
+  </action>
+  <action id="NewElement">
+    <keyboard-shortcut first-keystroke="alt n" />
   </action>
   <action id="NextDiff">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="n" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="n" />
+  </action>
+  <action id="NextEditorTab">
+    <keyboard-shortcut first-keystroke="alt close_bracket" />
   </action>
   <action id="PreviousDiff">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift n" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift n" />
+  </action>
+  <action id="PreviousEditorTab">
+    <keyboard-shortcut first-keystroke="alt open_bracket" />
   </action>
   <action id="QuickJavaDoc">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="d" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="d" />
   </action>
   <action id="Refactorings.QuickListPopupAction">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="q" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="q" />
   </action>
   <action id="RenameElement">
-    <keyboard-shortcut first-keystroke="ctrl alt r" />
-  </action>
-  <action id="SelectNextOccurrence">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="v" />
+    <keyboard-shortcut first-keystroke="alt r" />
   </action>
   <action id="ResizeToolWindowLeft" />
   <action id="ResizeToolWindowRight" />
   <action id="Resume">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="r" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="r" />
   </action>
   <action id="Run">
-    <keyboard-shortcut first-keystroke="ctrl alt w" />
+    <keyboard-shortcut first-keystroke="alt w" />
   </action>
   <action id="RunToCursor">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="u" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="u" />
   </action>
   <action id="SelectIn">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="i" />
+    <keyboard-shortcut first-keystroke="alt i" />
+  </action>
+  <action id="SelectNextOccurrence">
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="v" />
   </action>
   <action id="ShowBookmarks">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift b" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift b" />
   </action>
   <action id="ShowErrorDescription">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift d" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift d" />
   </action>
   <action id="ShowExecutionPoint">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="p" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="p" />
   </action>
+  <action id="ShowSearchHistory" />
   <action id="SmartStepInto">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="a" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="a" />
   </action>
   <action id="StepInto">
-    <keyboard-shortcut first-keystroke="ctrl alt g" />
+    <keyboard-shortcut first-keystroke="alt g" />
   </action>
   <action id="StepOut">
-    <keyboard-shortcut first-keystroke="ctrl alt q" />
+    <keyboard-shortcut first-keystroke="alt q" />
   </action>
   <action id="StepOver">
-    <keyboard-shortcut first-keystroke="ctrl alt d" />
+    <keyboard-shortcut first-keystroke="alt d" />
   </action>
   <action id="Stop">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="x" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="x" />
   </action>
+  <action id="TodoViewGroupByFlattenPackage" />
   <action id="ToggleBookmark">
-    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="b" />
+    <keyboard-shortcut first-keystroke="alt minus" second-keystroke="b" />
   </action>
-  <action id="ToggleFindInSelection" />
   <action id="ToggleLineBreakpoint">
-    <keyboard-shortcut first-keystroke="ctrl alt k" />
+    <keyboard-shortcut first-keystroke="alt k" />
   </action>
-  <action id="ToggleRenderedDocPresentation" />
-  <action id="UsageGrouping.DirectoryStructure" />
+  <action id="UsageFiltering.WriteAccess" />
 </keymap>
