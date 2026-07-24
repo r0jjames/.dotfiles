@@ -1,97 +1,111 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<!-- Roj F-free keymap (macOS). Parent: default macOS keymap.
-     Every action IntelliJ maps to F1-F12 is redeclared here onto non-F chords.
-     Chords use only Ctrl/Alt/Shift (never Cmd) so they are byte-identical to the
-     Windows file, do not clash with Cmd-based macOS defaults, and are unaffected
-     by the citrix-vdi Karabiner Cmd->Alt rule. Do NOT hand-edit while the IDE is
-     running - it will be overwritten on exit. See intellij/README.md.
-     If import warns the parent is missing, re-base to the macOS default keymap. -->
 <keymap version="1" name="Roj-Ffree" parent="Mac OS X 10.5+">
-  <!-- ===== HOT SET: single Ctrl+Alt+<letter> ===== -->
-  <action id="RenameElement">
-    <keyboard-shortcut first-keystroke="ctrl alt R" />
-  </action>
-  <action id="FindUsages">
-    <keyboard-shortcut first-keystroke="ctrl alt U" />
-  </action>
-  <action id="ToggleLineBreakpoint">
-    <keyboard-shortcut first-keystroke="ctrl alt K" />
-  </action>
-  <action id="StepOver">
-    <keyboard-shortcut first-keystroke="ctrl alt D" />
-  </action>
-  <action id="StepInto">
-    <keyboard-shortcut first-keystroke="ctrl alt G" />
-  </action>
-  <action id="StepOut">
-    <keyboard-shortcut first-keystroke="ctrl alt Q" />
-  </action>
-  <action id="EvaluateExpression">
-    <keyboard-shortcut first-keystroke="ctrl alt E" />
-  </action>
-
-  <!-- ===== LEADER SET: Ctrl+Alt+; then a letter ===== -->
-  <action id="Resume">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="R" />
-  </action>
-  <action id="Move">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="M" />
+  <action id="ActivateTerminalToolWindow">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="t" />
   </action>
   <action id="ChangeSignature">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="C" />
-  </action>
-  <action id="GotoNextError">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="E" />
-  </action>
-  <action id="GotoPreviousError">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift E" />
-  </action>
-  <action id="FileStructurePopup">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="S" />
-  </action>
-  <action id="JumpToLastWindow">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="W" />
-  </action>
-  <action id="ActivateTerminalToolWindow">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="T" />
-  </action>
-  <action id="ToggleBookmark">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="B" />
-  </action>
-  <action id="ShowBookmarks">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift B" />
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="c" />
   </action>
   <action id="CompileDirty">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="K" />
-  </action>
-  <action id="Stop">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="X" />
-  </action>
-  <action id="RunToCursor">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="U" />
-  </action>
-  <action id="QuickJavaDoc">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="D" />
-  </action>
-  <action id="ShowExecutionPoint">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="P" />
-  </action>
-  <action id="SelectIn">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="I" />
-  </action>
-  <action id="NextDiff">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="N" />
-  </action>
-  <action id="PreviousDiff">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift N" />
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="k" />
   </action>
   <action id="EditSourceInNewWindow">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="O" />
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="o" />
   </action>
-  <action id="SmartStepInto">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="A" />
+  <action id="EvaluateExpression">
+    <keyboard-shortcut first-keystroke="ctrl alt e" />
+  </action>
+  <action id="FileStructurePopup">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="s" />
+  </action>
+  <action id="FindUsages">
+    <keyboard-shortcut first-keystroke="ctrl alt u" />
+  </action>
+  <action id="GotoNextError">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="e" />
+  </action>
+  <action id="GotoPreviousError">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift e" />
+  </action>
+  <action id="JumpToLastWindow">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="w" />
+  </action>
+  <action id="Move">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="m" />
+  </action>
+  <action id="NextDiff">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="n" />
+  </action>
+  <action id="PreviousDiff">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift n" />
+  </action>
+  <action id="QuickJavaDoc">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="d" />
+  </action>
+  <action id="RenameElement">
+    <keyboard-shortcut first-keystroke="ctrl alt r" />
+  </action>
+  <action id="Resume">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="r" />
+  </action>
+  <action id="RunToCursor">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="u" />
+  </action>
+  <action id="SelectIn">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="i" />
+  </action>
+  <action id="ShowBookmarks">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift b" />
   </action>
   <action id="ShowErrorDescription">
-    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift D" />
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="shift d" />
+  </action>
+  <action id="ShowExecutionPoint">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="p" />
+  </action>
+  <action id="SmartStepInto">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="a" />
+  </action>
+  <action id="StepInto">
+    <keyboard-shortcut first-keystroke="ctrl alt g" />
+  </action>
+  <action id="StepOut">
+    <keyboard-shortcut first-keystroke="ctrl alt q" />
+  </action>
+  <action id="StepOver">
+    <keyboard-shortcut first-keystroke="ctrl alt d" />
+  </action>
+  <action id="Stop">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="x" />
+  </action>
+  <action id="ToggleBookmark">
+    <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="b" />
+  </action>
+  <action id="ToggleLineBreakpoint">
+    <keyboard-shortcut first-keystroke="ctrl alt k" />
+  </action>
+  <!-- Free up hot-set chords claimed by inherited Mac OS X 10.5+ / $default
+       bindings, verified against the bundled keymap jars (2025.2). Without
+       these, e.g. Ctrl+Alt+R silently ties between Rename and
+       ChooseRunConfiguration and Rename may lose. -->
+  <action id="ChooseRunConfiguration">
+    <keyboard-shortcut first-keystroke="control alt R" remove="true" />
+  </action>
+  <action id="Diff.ApplyLeftSide">
+    <keyboard-shortcut first-keystroke="control alt R" remove="true" />
+  </action>
+  <action id="ChooseDebugConfiguration">
+    <keyboard-shortcut first-keystroke="control alt D" remove="true" />
+  </action>
+  <action id="UsageGrouping.DirectoryStructure">
+    <keyboard-shortcut first-keystroke="control alt D" remove="true" />
+  </action>
+  <action id="ToggleRenderedDocPresentation">
+    <keyboard-shortcut first-keystroke="control alt Q" remove="true" />
+  </action>
+  <action id="ToggleFindInSelection">
+    <keyboard-shortcut first-keystroke="control alt E" remove="true" />
+  </action>
+  <action id="Console.History.Browse">
+    <keyboard-shortcut first-keystroke="control alt E" remove="true" />
   </action>
 </keymap>

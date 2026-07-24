@@ -206,17 +206,33 @@ These are IntelliJ defaults, kept as-is. `⌘`=Cmd, `⌥`=Option/Alt, `⌃`=Ctrl
 
 ## Verifying conflicts
 
-The Part-1 chords were chosen to avoid the default Ctrl+Alt+letter refactor
-shortcuts, but a plugin (or a future IDE version) could still claim one. After
-activating `Roj-Ffree`:
+Found on 2026-07-24: 4 of the 7 hot-set chords collided with pre-existing
+IntelliJ default bindings (verified against the bundled `Mac OS X 10.5+.xml`
+/ `$default.xml`), which is why **Rename silently did nothing** — it tied
+with `ChooseRunConfiguration`. Both XML files now carry `remove="true"`
+entries that free those chords (see the bottom of each file); a test
+(`test_known_inherited_conflicts_are_removed`) guards against regressing
+this. If IntelliJ resaves the file after you edit the keymap in-app, re-check
+for new red conflict markers — a future IDE version could reclaim a freed
+chord:
 
 1. Settings → Keymap → type an action name (e.g. "Step Over").
-2. Conflicting bindings show a red marker. Right-click → **Remove**/**Add
-   Keyboard Shortcut** to fix, then update this repo's XML + the cheatsheet so
-   every machine stays in sync.
+2. Conflicting bindings show a red marker. Right-click the *other* action →
+   **Remove Shortcut**, then mirror the fix as a `remove="true"` entry in
+   both `keymap-macos.xml` and `keymap-windows.xml` (only add it to
+   `keymap-macos.xml` too if the conflict is mac-only, e.g. it comes from
+   `Mac OS X 10.5+.xml` rather than `$default.xml`) so both machines and the
+   cheatsheet stay in sync.
+
+**After editing a keymap XML by hand:** close IntelliJ first — it overwrites
+the file with its own copy on exit, discarding hand-edits made while it was
+running. Re-open, and if the same keymap was already active it reloads your
+changes.
 
 Because both `keymap-macos.xml` and `keymap-windows.xml` carry **identical**
-chords (a test enforces this), fix a chord in both files together.
+relocated chords (a test enforces this, case-insensitively — IntelliJ itself
+may re-save the file in lowercase), fix a relocated chord in both files
+together. The OS-specific `remove="true"` blocks are allowed to differ.
 
 ## Uninstall
 
