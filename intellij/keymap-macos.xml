@@ -106,13 +106,13 @@
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="n" />
   </action>
   <action id="NextEditorTab">
-    <keyboard-shortcut first-keystroke="alt close_bracket" />
+    <keyboard-shortcut first-keystroke="alt l" />
   </action>
   <action id="PreviousDiff">
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift n" />
   </action>
   <action id="PreviousEditorTab">
-    <keyboard-shortcut first-keystroke="alt open_bracket" />
+    <keyboard-shortcut first-keystroke="alt h" />
   </action>
   <action id="QuickJavaDoc">
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="d" />
