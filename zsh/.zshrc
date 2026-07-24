@@ -33,6 +33,9 @@ alias vi='nvim'
 alias v='nvim'
 alias python="python3"
 alias pip="pip3"
+alias dev="cd $HOME/dev"
+alias dot="cd $HOME/dev/.dotfiles"
+alias projects="cd $HOME/dev/projects"
 
 # ---- Tool integrations ----
 command -v fzf &>/dev/null && eval "$(fzf --zsh)"

@@ -1,0 +1,39 @@
+# Ghostty config — theme + font reused from the iTerm2 dynamic profile
+# (iterm2/com.dotfiles.json). Tango palette on a custom purple background.
+# Keymaps are intentionally omitted: set them per-environment (e.g. Citrix VDI).
+
+# ---- Colors ----
+background = 300a24
+foreground = eeeeec
+cursor-color = bbbbbb
+cursor-text = 300a24
+selection-background = b5d5ff
+selection-foreground = eeeeec
+
+palette = 0=#2e3436
+palette = 1=#cc0000
+palette = 2=#4e9a06
+palette = 3=#c4a000
+palette = 4=#3465a4
+palette = 5=#75507b
+palette = 6=#06989a
+palette = 7=#d3d7cf
+palette = 8=#555753
+palette = 9=#ef2929
+palette = 10=#8ae234
+palette = 11=#fce94f
+palette = 12=#729fcf
+palette = 13=#ad7fa8
+palette = 14=#34e2e2
+palette = 15=#eeeeec
+
+# ---- Font (same cask as iTerm2: font-meslo-lg-nerd-font) ----
+font-family = MesloLGS Nerd Font
+font-size = 13
+
+# ---- Sane defaults ----
+window-padding-x = 8
+window-padding-y = 8
+cursor-style = block
+copy-on-select = false
+macos-titlebar-style = tabs
