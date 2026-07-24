@@ -130,8 +130,8 @@ Three tiers, lightest first. Full rationale/verification:
 | Shrink Selection | `Alt+↓` |
 | New… (file/class/etc popup) | `Alt+N` |
 | Select In (reveal current file) | `Alt+I` |
-| Previous Editor Tab | `Alt+[` |
-| Next Editor Tab | `Alt+]` |
+| Previous Editor Tab | `Alt+H` |
+| Next Editor Tab | `Alt+L` |
 | Back | `Ctrl+Alt+←` *(kept 3-key — see below)* |
 | Forward | `Ctrl+Alt+→` *(kept 3-key — see below)* |
 
@@ -144,7 +144,9 @@ regression for a 1-key saving.
 **Direct jump-to-tab-N** (the `Cmd+1`..`Cmd+9` browser convention) isn't a
 real IntelliJ action — verified against the full bundled action set, only
 `NextEditorTab`/`PreviousEditorTab` (cycle one at a time) exist.
-`Alt+[`/`Alt+]` above is the closest available substitute.
+`Alt+H`/`Alt+L` above is the closest available substitute for cycling; see
+[Find & jump between tabs](#find--jump-between-tabs-native-not-overridden)
+below for a real numbered-jump option via bookmarks.
 
 ## Tier 2 — leader, `Alt+Minus` then a key
 
@@ -167,6 +169,17 @@ sends the wrong modifier combo and the action won't fire).
 | Refactor This | `Alt+-` `Q` | Run… (chooser) | `Alt+-` `Shift+W` |
 | Debug… (chooser) | `Alt+-` `Shift+X` | Hide All Tool Windows | `Alt+-` `J` |
 | Multi-cursor (next occurrence) | `Alt+-` `V` | | |
+
+## Find & jump between tabs (native, not overridden)
+
+Neither of these needs a keymap edit — they're bundled IntelliJ defaults,
+already identical on both OS, and roj-keymap doesn't touch them.
+
+| Need | Chord | What it does |
+|---|---|---|
+| Find a file among open tabs | `Ctrl+Tab` (hold, tap `Tab` to cycle, release to jump) | Opens `Switcher`: a popup listing open editor tabs plus recent tool windows. `Ctrl+Shift+Tab` cycles it in reverse. |
+| Jump straight to a pinned file | `Ctrl+1` .. `Ctrl+9` (`Ctrl+0` too) | `GotoBookmarkN`: jumps directly to whichever file/line you've assigned to slot N. |
+| Pin a file to a numbered slot | `Ctrl+Shift+1` .. `Ctrl+Shift+9` | `ToggleBookmarkN`: assigns the current line/file to slot N (bookmarks are pinned by you — they don't track raw tab position, since IntelliJ has no "jump to tab position N" action at all). |
 
 ## Unchanged defaults (already identical, no override needed)
 
@@ -324,6 +337,21 @@ the editor). The old hot-set's inherited-conflict unbinds
 `Console.History.Browse`) were removed since nothing of ours sits on
 `Ctrl+Alt+<letter>` anymore except Back/Forward's arrows — those natives
 get their original bindings back rather than staying pointlessly unbound.
+
+**Sixth pass (2026-07-24, tab navigation):** `Alt+[`/`Alt+]`
+(Previous/Next Editor Tab) turned out unreliable on Mac — `Option+[` and
+`Option+]` are macOS input-method composition sequences (they normally type
+`"`/`'`), and punctuation keys held with Option can get consumed as
+character composition before reaching IntelliJ's shortcut dispatcher, even
+though the keymap itself is keycode-based and had no XML-level collision.
+Replaced with `Alt+H`/`Alt+L` (vim left/right), which sit outside the
+punctuation-key class and were confirmed collision-free against
+`$default.xml`/`Mac OS X.xml`/`Mac OS X 10.5+.xml`. Separately, "find a
+file among open tabs" and "jump to a numbered slot" turned out to already
+have native answers (`Switcher` on `Ctrl+Tab`, `GotoBookmarkN` on
+`Ctrl+1`-`9`) that roj-keymap had never touched — no XML change, just
+added to the cheatsheet. Full rationale:
+`docs/superpowers/specs/2026-07-24-tab-navigation-design.md`.
 
 ## Uninstall
 
