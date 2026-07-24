@@ -208,18 +208,31 @@ These are IntelliJ defaults, kept as-is. `⌘`=Cmd, `⌥`=Option/Alt, `⌃`=Ctrl
 
 Found on 2026-07-24: 4 of the 7 hot-set chords collided with pre-existing
 IntelliJ default bindings (verified against the bundled `Mac OS X 10.5+.xml`
-/ `$default.xml`), which is why **Rename silently did nothing** — it tied
-with `ChooseRunConfiguration`. Both XML files now carry `remove="true"`
-entries that free those chords (see the bottom of each file); a test
-(`test_known_inherited_conflicts_are_removed`) guards against regressing
-this. If IntelliJ resaves the file after you edit the keymap in-app, re-check
-for new red conflict markers — a future IDE version could reclaim a freed
-chord:
+/ `$default.xml`, and against `KeymapImpl`'s actual bytecode), which is why
+**Rename silently did nothing** — it tied with `ChooseRunConfiguration`.
+
+**The fix is an empty, self-closing `<action id="X"/>` tag — not a
+`remove="true"` attribute.** JetBrains' own docs describe `remove="true"` for
+a *different* XML dialect (plugin.xml action registration); the keymap
+scheme-file reader (`keymaps/*.xml`, what these files are) never checks for
+it — an early attempt using `remove="true"` here was silently ignored and
+IntelliJ resaved the file with the shortcut re-added as a plain duplicate.
+The real mechanism, confirmed by decompiling `KeymapImpl.readExternal` /
+`getShortcutList`: each `<action id="X">` element in a keymap file **replaces**
+that id's entire shortcut list for this keymap, and if the element has zero
+`<keyboard-shortcut>` children the list is empty — which `getShortcutList`
+returns as-is, without falling back to the parent keymap. The bundled `Mac OS
+X 10.5+.xml` itself uses this exact idiom (17 empty `<action id="X"/>` tags).
+Both our XML files now carry these at the bottom; tests
+(`test_known_inherited_conflicts_are_unbound`, `test_unbound_actions_carry_no_shortcut`)
+guard against regressing this. If IntelliJ resaves the file after you edit
+the keymap in-app, re-check for new red conflict markers — a future IDE
+version could reclaim a freed chord:
 
 1. Settings → Keymap → type an action name (e.g. "Step Over").
 2. Conflicting bindings show a red marker. Right-click the *other* action →
-   **Remove Shortcut**, then mirror the fix as a `remove="true"` entry in
-   both `keymap-macos.xml` and `keymap-windows.xml` (only add it to
+   **Remove Shortcut**, then mirror the fix as an empty `<action id="TheOtherAction"/>`
+   tag in both `keymap-macos.xml` and `keymap-windows.xml` (only add it to
    `keymap-macos.xml` too if the conflict is mac-only, e.g. it comes from
    `Mac OS X 10.5+.xml` rather than `$default.xml`) so both machines and the
    cheatsheet stay in sync.
@@ -232,7 +245,9 @@ changes.
 Because both `keymap-macos.xml` and `keymap-windows.xml` carry **identical**
 relocated chords (a test enforces this, case-insensitively — IntelliJ itself
 may re-save the file in lowercase), fix a relocated chord in both files
-together. The OS-specific `remove="true"` blocks are allowed to differ.
+together. The OS-specific empty-action unbind entries are allowed to differ
+(mac needs 2 extra: conflicts that come from `Mac OS X 10.5+.xml` itself,
+which Windows never inherits).
 
 ## Uninstall
 

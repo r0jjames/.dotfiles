@@ -5,9 +5,21 @@
   <action id="ChangeSignature">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="c" />
   </action>
+  <!-- Empty self-closing <action id="X"/> = unbind: the real keymap-scheme
+       XML dialect (keymaps/*.xml) has no remove="true" attribute - each
+       <action> element here REPLACES that id's whole shortcut list for
+       this keymap; empty list = fully unbound, verified against
+       KeymapImpl.readExternal/getShortcutList bytecode (IntelliJ CE 2025.2)
+       and the 17 empty <action id="X"/> tags already used this way in the
+       bundled Mac OS X 10.5+.xml itself. Frees hot-set chords these
+       actions already owned. -->
+  <action id="ChooseDebugConfiguration"/>
+  <action id="ChooseRunConfiguration"/>
   <action id="CompileDirty">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="k" />
   </action>
+  <action id="Console.History.Browse"/>
+  <action id="Diff.ApplyLeftSide"/>
   <action id="EditSourceInNewWindow">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="o" />
   </action>
@@ -80,32 +92,10 @@
   <action id="ToggleBookmark">
     <keyboard-shortcut first-keystroke="ctrl alt semicolon" second-keystroke="b" />
   </action>
+  <action id="ToggleFindInSelection"/>
   <action id="ToggleLineBreakpoint">
     <keyboard-shortcut first-keystroke="ctrl alt k" />
   </action>
-  <!-- Free up hot-set chords claimed by inherited Mac OS X 10.5+ / $default
-       bindings, verified against the bundled keymap jars (2025.2). Without
-       these, e.g. Ctrl+Alt+R silently ties between Rename and
-       ChooseRunConfiguration and Rename may lose. -->
-  <action id="ChooseRunConfiguration">
-    <keyboard-shortcut first-keystroke="control alt R" remove="true" />
-  </action>
-  <action id="Diff.ApplyLeftSide">
-    <keyboard-shortcut first-keystroke="control alt R" remove="true" />
-  </action>
-  <action id="ChooseDebugConfiguration">
-    <keyboard-shortcut first-keystroke="control alt D" remove="true" />
-  </action>
-  <action id="UsageGrouping.DirectoryStructure">
-    <keyboard-shortcut first-keystroke="control alt D" remove="true" />
-  </action>
-  <action id="ToggleRenderedDocPresentation">
-    <keyboard-shortcut first-keystroke="control alt Q" remove="true" />
-  </action>
-  <action id="ToggleFindInSelection">
-    <keyboard-shortcut first-keystroke="control alt E" remove="true" />
-  </action>
-  <action id="Console.History.Browse">
-    <keyboard-shortcut first-keystroke="control alt E" remove="true" />
-  </action>
+  <action id="ToggleRenderedDocPresentation"/>
+  <action id="UsageGrouping.DirectoryStructure"/>
 </keymap>

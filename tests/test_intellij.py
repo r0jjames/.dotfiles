@@ -16,33 +16,45 @@ _WIN = _INTELLIJ / "keymap-windows.xml"
 _F_KEY = re.compile(r"\bF(?:[1-9]|1[0-2])\b")  # F1..F12 as a whole token
 
 
-def _shortcuts(path: Path, removed: bool = False):
-    """(action_id, first, second) for keyboard-shortcuts in a keymap.
-
-    removed=False (default): our own relocated F-free bindings.
-    removed=True: remove="true" entries that free a chord an inherited
-    keymap (Mac OS X 10.5+ / $default) already claimed for another action.
-    """
+def _shortcuts(path: Path):
+    """(action_id, first, second) for our own relocated bindings - only
+    <action> elements that carry a <keyboard-shortcut> child."""
     root = ET.fromstring(path.read_text())
     out = []
     for action in root.findall("action"):
         for sc in action.findall("keyboard-shortcut"):
-            is_remove = sc.get("remove") == "true"
-            if is_remove != removed:
-                continue
             out.append((action.get("id"),
                         sc.get("first-keystroke"),
                         sc.get("second-keystroke")))
     return out
 
 
+def _unbound_ids(path: Path):
+    """Action ids fully unbound via an empty <action id="X"/> element.
+
+    keymaps/*.xml has no remove="true" attribute (that only exists in a
+    different XML dialect - plugin.xml action registration - and is
+    silently ignored by the scheme-file reader). Each <action> element
+    REPLACES that id's whole shortcut list for this keymap; zero
+    <keyboard-shortcut> children means the list is empty, which
+    KeymapImpl.getShortcutList returns as-is without falling back to the
+    parent keymap - i.e. a real, working unbind. Verified against
+    KeymapImpl.readExternal/getShortcutList bytecode (IntelliJ CE 2025.2)
+    and the empty <action id="X"/> tags already used this way in bundled
+    keymaps (e.g. Mac OS X 10.5+.xml has 17 of them).
+    """
+    root = ET.fromstring(path.read_text())
+    return {a.get("id") for a in root.findall("action")
+            if not list(a)}
+
+
 # Conflicts discovered 2026-07-24 by diffing our keymaps against the actual
 # bundled Mac OS X 10.5+.xml / $default.xml (IntelliJ CE 2025.2): these
 # actions already own the same chord we relocated onto, so our XML must
-# remove="true" them or the two actions tie (symptom: Rename silently did
-# nothing - it was contending with ChooseRunConfiguration).
+# unbind them (empty <action id="X"/>) or the two actions tie (symptom:
+# Rename silently did nothing - it was contending with ChooseRunConfiguration).
 KNOWN_CONFLICTS = [
-    # (chord, action_id_to_remove, "mac" | "windows" | "both")
+    # (chord, action_id_to_unbind, "mac" | "windows" | "both")
     ("control alt R", "Diff.ApplyLeftSide", "both"),
     ("control alt R", "ChooseRunConfiguration", "mac"),
     ("control alt D", "UsageGrouping.DirectoryStructure", "both"),
@@ -65,7 +77,7 @@ class KeymapXmlTest(unittest.TestCase):
     def test_no_function_key_survives_anywhere(self):
         # The whole point: not a single relocated chord may use F1-F12.
         for p in (_MAC, _WIN):
-            for action_id, first, second in _shortcuts(p) + _shortcuts(p, removed=True):
+            for action_id, first, second in _shortcuts(p):
                 for stroke in (first, second):
                     if stroke:
                         self.assertIsNone(
@@ -79,10 +91,10 @@ class KeymapXmlTest(unittest.TestCase):
 
     def test_mac_and_windows_bindings_are_identical(self):
         # Same logical keymap on both OSes - only the parent/header (and the
-        # OS-specific remove="true" conflict fixes) differ. Case-insensitive:
-        # IntelliJ itself resaves keymap files in whatever case it likes
-        # (e.g. it lowercased keymap-macos.xml on import) and key-letter case
-        # is not semantically meaningful to the keymap parser.
+        # OS-specific unbind entries) differ. Case-insensitive: IntelliJ
+        # itself resaves keymap files in whatever case it likes (e.g. it
+        # lowercased keymap-macos.xml on import) and key-letter case is not
+        # semantically meaningful to the keymap parser.
         def lower(shortcuts):
             return sorted((i, (f or "").lower(), (s or "").lower())
                           for i, f, s in shortcuts)
@@ -93,26 +105,31 @@ class KeymapXmlTest(unittest.TestCase):
         self.assertIn("Mac", ET.fromstring(_MAC.read_text()).get("parent"))
 
     def test_no_duplicate_chord_within_a_file(self):
-        # Only our own relocated bindings must be chord-unique; multiple
-        # remove="true" entries are allowed to target the same inherited
-        # chord (e.g. both ToggleFindInSelection and Console.History.Browse
-        # sat on "control alt E" in the bundled keymaps).
+        # Only our own relocated bindings must be chord-unique.
         for p in (_MAC, _WIN):
             chords = [(f, s) for _, f, s in _shortcuts(p)]
             self.assertEqual(len(chords), len(set(chords)),
                              f"{p.name} has a duplicated chord")
 
-    def test_known_inherited_conflicts_are_removed(self):
-        mac_removed = set(_shortcuts(_MAC, removed=True))
-        win_removed = set(_shortcuts(_WIN, removed=True))
-        for chord, action_id, applies_to in KNOWN_CONFLICTS:
-            entry = (action_id, chord, None)
+    def test_unbound_actions_carry_no_shortcut(self):
+        # An unbind entry must be a genuinely empty <action id="X"/> - if it
+        # somehow gained a <keyboard-shortcut> child it would stop unbinding
+        # and start re-adding, silently resurrecting the collision.
+        for p in (_MAC, _WIN):
+            assigned_ids = {i for i, _, _ in _shortcuts(p)}
+            self.assertEqual(assigned_ids & _unbound_ids(p), set(),
+                             f"{p.name}: an action is both unbound and assigned")
+
+    def test_known_inherited_conflicts_are_unbound(self):
+        mac_unbound = _unbound_ids(_MAC)
+        win_unbound = _unbound_ids(_WIN)
+        for _, action_id, applies_to in KNOWN_CONFLICTS:
             if applies_to in ("both", "mac"):
-                self.assertIn(entry, mac_removed,
-                             f"keymap-macos.xml missing remove for {entry}")
+                self.assertIn(action_id, mac_unbound,
+                             f"keymap-macos.xml doesn't unbind {action_id}")
             if applies_to in ("both", "windows"):
-                self.assertIn(entry, win_removed,
-                             f"keymap-windows.xml missing remove for {entry}")
+                self.assertIn(action_id, win_unbound,
+                             f"keymap-windows.xml doesn't unbind {action_id}")
 
     def test_documented_conflicts_are_real_hot_set_chords(self):
         # Every documented conflict must target a chord we actually use on a
