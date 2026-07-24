@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Roj F-free keymap (Windows / Linux / VDI). Parent: default Win/Linux keymap.
+     Every action IntelliJ maps to F1-F12 is redeclared here onto non-F chords.
+     Chords use only Ctrl/Alt/Shift (never Win) so they are byte-identical to the
+     macOS file and survive Citrix Scancode mode. Do NOT hand-edit while the IDE
+     is running - it will be overwritten on exit. See intellij/README.md. -->
+<keymap version="1" name="Roj-Ffree" parent="$default">
+  <!-- ===== HOT SET: single Ctrl+Alt+<letter> ===== -->
+  <action id="RenameElement">
+    <keyboard-shortcut first-keystroke="ctrl alt R" />
+  </action>
+  <action id="FindUsages">
+    <keyboard-shortcut first-keystroke="ctrl alt U" />
+  </action>
+  <action id="ToggleLineBreakpoint">
+    <keyboard-shortcut first-keystroke="ctrl alt K" />
+  </action>
+  <action id="StepOver">
+    <keyboard-shortcut first-keystroke="ctrl alt D" />
+  </action>
+  <action id="StepInto">
+    <keyboard-shortcut first-keystroke="ctrl alt G" />
+  </action>
+  <action id="StepOut">
+    <keyboard-shortcut first-keystroke="ctrl alt Q" />
+  </action>
+  <action id="EvaluateExpression">
+    <keyboard-shortcut first-keystroke="ctrl alt E" />
+  </action>
+
+  <!-- ===== LEADER SET: Ctrl+Alt+; then a letter ===== -->
+  <action id="Resume">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="R" />
+  </action>
+  <action id="Move">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="M" />
+  </action>
+  <action id="ChangeSignature">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="C" />
+  </action>
+  <action id="GotoNextError">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="E" />
+  </action>
+  <action id="GotoPreviousError">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift E" />
+  </action>
+  <action id="FileStructurePopup">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="S" />
+  </action>
+  <action id="JumpToLastWindow">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="W" />
+  </action>
+  <action id="ActivateTerminalToolWindow">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="T" />
+  </action>
+  <action id="ToggleBookmark">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="B" />
+  </action>
+  <action id="ShowBookmarks">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift B" />
+  </action>
+  <action id="CompileDirty">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="K" />
+  </action>
+  <action id="Stop">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="X" />
+  </action>
+  <action id="RunToCursor">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="U" />
+  </action>
+  <action id="QuickJavaDoc">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="D" />
+  </action>
+  <action id="ShowExecutionPoint">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="P" />
+  </action>
+  <action id="SelectIn">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="I" />
+  </action>
+  <action id="NextDiff">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="N" />
+  </action>
+  <action id="PreviousDiff">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift N" />
+  </action>
+  <action id="EditSourceInNewWindow">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="O" />
+  </action>
+  <action id="SmartStepInto">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="A" />
+  </action>
+  <action id="ShowErrorDescription">
+    <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" second-keystroke="shift D" />
+  </action>
+</keymap>

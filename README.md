@@ -61,6 +61,7 @@ are left installed — the summary lists them for manual removal.
 | [`nvim/`](nvim/README.md) | Neovim DevOps IDE (k8s, Helm, Docker, Python, Ansible, Terraform) | macOS, WSL |
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
+| [`intellij/`](intellij/README.md) | IntelliJ IDEA CE + F-free cross-OS keymap (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
 | [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, WSL |
 | `maven` | Maven build tool, via SDKMAN | macOS, WSL |
 | [`terminal-macos/`](terminal-macos/README.md) | Terminal.app themes + font | macOS only |

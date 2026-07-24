@@ -1,0 +1,7 @@
+# IntelliJ plugins to install manually (no reliable CLI for IDE-CE).
+# Format: <plugin-id> [@macos|@windows]  # comment
+# Untagged = install on every platform. Install via:
+#   Settings -> Plugins -> Marketplace -> search -> Install
+# (most are bundled and only need enabling).
+
+com.intellij.plugins.vscodekeymap   # VSCode Keymap - optional VS Code muscle-memory layer, switchable in Settings -> Keymap
