@@ -106,13 +106,13 @@
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="n" />
   </action>
   <action id="NextTab">
-    <keyboard-shortcut first-keystroke="alt PAGE_DOWN" />
+    <keyboard-shortcut first-keystroke="alt page_down" />
   </action>
   <action id="PreviousDiff">
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift n" />
   </action>
   <action id="PreviousTab">
-    <keyboard-shortcut first-keystroke="alt PAGE_UP" />
+    <keyboard-shortcut first-keystroke="alt page_up" />
   </action>
   <action id="QuickJavaDoc">
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="d" />
