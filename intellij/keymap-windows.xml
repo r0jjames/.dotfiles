@@ -70,10 +70,10 @@
   <action id="NewElement">
     <keyboard-shortcut first-keystroke="alt N" />
   </action>
-  <action id="NextEditorTab">
+  <action id="NextTab">
     <keyboard-shortcut first-keystroke="alt L" />
   </action>
-  <action id="PreviousEditorTab">
+  <action id="PreviousTab">
     <keyboard-shortcut first-keystroke="alt H" />
   </action>
   <action id="RenameElement">

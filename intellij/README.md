@@ -130,21 +130,32 @@ Three tiers, lightest first. Full rationale/verification:
 | Shrink Selection | `Alt+↓` |
 | New… (file/class/etc popup) | `Alt+N` |
 | Select In (reveal current file) | `Alt+I` |
-| Previous Editor Tab | `Alt+H` |
-| Next Editor Tab | `Alt+L` |
+| Previous Tab | `Alt+H` |
+| Next Tab | `Alt+L` |
 | Back | `Ctrl+Alt+←` *(kept 3-key — see below)* |
 | Forward | `Ctrl+Alt+→` *(kept 3-key — see below)* |
 
-**Why Back/Forward stay 3-key:** bare `Alt+←`/`Alt+→` collides with
-`PreviousTab`/`NextTab` (Windows, heavily used) **and**
+**Previous/Next Tab uses action ids `PreviousTab`/`NextTab`** (the ones
+IntelliJ's own UI labels "Select Next/Previous Tab", "Activate next/previous
+tab" — the real editor-tab-strip cycle, shared with other tabbed-pane
+components). This redeclaration **replaces** their native shortcut list, so
+it intentionally drops Windows' native `Alt+←`/`Alt+→` and Mac's native
+`Ctrl+←`/`Ctrl+→` for this action — `Alt+H`/`Alt+L` is the one chord now, on
+both OS. **Not** `NextEditorTab`/`PreviousEditorTab` — those are a
+different, narrow action ("Select Next/Previous Tab **in Multi-Editor
+File**") that doesn't control the tab strip at all; an earlier pass of this
+project bound that id by mistake, which is why the original chords silently
+did nothing (see sixth pass below).
+
+**Why Back/Forward stay 3-key:** bare `Alt+←`/`Alt+→` still collides with
 `EditorPreviousWord`/`EditorNextWord` (Mac — Option+Arrow word navigation,
 a fundamental system-wide macOS text-editing convention). Not worth the
 regression for a 1-key saving.
 
 **Direct jump-to-tab-N** (the `Cmd+1`..`Cmd+9` browser convention) isn't a
 real IntelliJ action — verified against the full bundled action set, only
-`NextEditorTab`/`PreviousEditorTab` (cycle one at a time) exist.
-`Alt+H`/`Alt+L` above is the closest available substitute for cycling; see
+`PreviousTab`/`NextTab` (cycle one at a time) exist. `Alt+H`/`Alt+L` above
+is the closest available substitute for cycling; see
 [Find & jump between tabs](#find--jump-between-tabs-native-not-overridden)
 below for a real numbered-jump option via bookmarks.
 
@@ -339,19 +350,44 @@ the editor). The old hot-set's inherited-conflict unbinds
 get their original bindings back rather than staying pointlessly unbound.
 
 **Sixth pass (2026-07-24, tab navigation):** `Alt+[`/`Alt+]`
-(Previous/Next Editor Tab) turned out unreliable on Mac — `Option+[` and
-`Option+]` are macOS input-method composition sequences (they normally type
-`"`/`'`), and punctuation keys held with Option can get consumed as
-character composition before reaching IntelliJ's shortcut dispatcher, even
-though the keymap itself is keycode-based and had no XML-level collision.
-Replaced with `Alt+H`/`Alt+L` (vim left/right), which sit outside the
-punctuation-key class and were confirmed collision-free against
-`$default.xml`/`Mac OS X.xml`/`Mac OS X 10.5+.xml`. Separately, "find a
-file among open tabs" and "jump to a numbered slot" turned out to already
-have native answers (`Switcher` on `Ctrl+Tab`, `GotoBookmarkN` on
-`Ctrl+1`-`9`) that roj-keymap had never touched — no XML change, just
-added to the cheatsheet. Full rationale:
+(Previous/Next Editor Tab) were reported dead on Mac. First hypothesis was
+that `Option+[`/`Option+]` are macOS input-method composition sequences
+(they normally type `"`/`'`), and punctuation keys held with Option can get
+consumed as character composition before reaching IntelliJ's shortcut
+dispatcher. Replaced with `Alt+H`/`Alt+L` (vim left/right) to sidestep the
+punctuation-key class entirely, plus documented the already-native
+`Switcher` (`Ctrl+Tab`) and `GotoBookmarkN` (`Ctrl+1`-`9`) as answers to
+"find a file among open tabs" / "jump to a numbered slot". Full rationale:
 `docs/superpowers/specs/2026-07-24-tab-navigation-design.md`.
+
+**Seventh pass (2026-07-24, same day — real root cause found):** `Alt+H`/
+`Alt+L` *also* did nothing on real hardware, which ruled out the
+punctuation-composition theory (that was specific to bracket keys and never
+actually confirmed — the real cause turned out to make it irrelevant).
+Checking Settings → Keymap → search "Next Editor Tab" in the running IDE
+showed the chord correctly attached to an action called **"Select Next Tab
+in Multi-Editor File"** — not the actual editor tab strip. Confirmed against
+IntelliJ's own `ActionsBundle.properties` (extracted from `app-client.jar`):
+`action.NextEditorTab.text=Select Next Tab in Multi-Editor File` (a narrow
+feature for split/multi-file editors — a no-op for an ordinary code tab)
+versus `action.NextTab.text=Select Ne_xt Tab` /
+`action.NextTab.description=Activate next tab` — the real one, already
+inherited from `Alt+←`/`Alt+→` (Windows) or `Ctrl+←`/`Ctrl+→` (Mac) before
+this fix. **Every tab-cycle chord in this project's history — including the
+original `Alt+[`/`Alt+]` from the fifth pass — bound `NextEditorTab`/
+`PreviousEditorTab` (wrong action) instead of `NextTab`/`PreviousTab`
+(right action).** Fixed by rebinding `Alt+H`/`Alt+L` onto `PreviousTab`/
+`NextTab` and removing the `NextEditorTab`/`PreviousEditorTab` overrides
+entirely (that rare feature reverts to its native default, untouched).
+Since redeclaring an action replaces its whole shortcut list, this also
+drops `PreviousTab`/`NextTab`'s native OS-specific arrow-key chord (Windows'
+`Alt+←`/`Alt+→`, Mac's `Ctrl+←`/`Ctrl+→`) in favor of the one unified
+`Alt+H`/`Alt+L` on both OS — intentional, consistent with this project's
+core rule of identical chords over OS-native convention. **Lesson:** a
+display-label match ("editor tab") is not proof of a semantic match —
+verify the actual bound action against the IDE's own Keymap settings panel
+(or its resource bundle) before trusting an id name, not just before
+trusting a chord.
 
 ## Uninstall
 

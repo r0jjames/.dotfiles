@@ -105,13 +105,13 @@
   <action id="NextDiff">
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="n" />
   </action>
-  <action id="NextEditorTab">
+  <action id="NextTab">
     <keyboard-shortcut first-keystroke="alt l" />
   </action>
   <action id="PreviousDiff">
     <keyboard-shortcut first-keystroke="alt minus" second-keystroke="shift n" />
   </action>
-  <action id="PreviousEditorTab">
+  <action id="PreviousTab">
     <keyboard-shortcut first-keystroke="alt h" />
   </action>
   <action id="QuickJavaDoc">
