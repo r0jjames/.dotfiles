@@ -156,7 +156,7 @@ regression for a 1-key saving.
 real IntelliJ action — verified against the full bundled action set, only
 `PreviousTab`/`NextTab` (cycle one at a time) exist. `Alt+H`/`Alt+L` above
 is the closest available substitute for cycling; see
-[Find & jump between tabs](#find--jump-between-tabs-native-not-overridden)
+[Find & jump between tabs](#find--jump-between-tabs)
 below for a real numbered-jump option via bookmarks.
 
 ## Tier 2 — leader, `Alt+Minus` then a key
@@ -181,16 +181,30 @@ sends the wrong modifier combo and the action won't fire).
 | Debug… (chooser) | `Alt+-` `Shift+X` | Hide All Tool Windows | `Alt+-` `J` |
 | Multi-cursor (next occurrence) | `Alt+-` `V` | | |
 
-## Find & jump between tabs (native, not overridden)
+## Find & jump between tabs
 
-Neither of these needs a keymap edit — they're bundled IntelliJ defaults,
-already identical on both OS, and roj-keymap doesn't touch them.
+**To cycle only through open editor tabs** (never landing on Commit,
+Project, Terminal, etc.): use `Alt+H`/`Alt+L` from Tier 1, repeatedly.
+`PreviousTab`/`NextTab` operates on whichever tabbed pane currently has
+focus — with focus in the editor, repeated presses stay inside the editor
+tab strip, full stop. This is the answer to "keep pressing to cycle only
+in the files."
+
+**`Ctrl+Tab` is a different tool, not that one.** It opens `Switcher` — a
+popup listing open editor tabs *plus* recently used tool windows (Commit,
+Project, Terminal, etc. all show up in it by design; there's no way to
+scope it to editor tabs only). Useful when you want to jump straight to
+something by typing part of its name, not for a same-list-only cycle.
+`Ctrl+Shift+Tab` cycles it in reverse. Native default, not overridden by
+roj-keymap.
+
+The rest of this section is native IntelliJ defaults too — no keymap edit,
+already identical on both OS:
 
 | Need | Chord | What it does |
 |---|---|---|
-| Find a file among open tabs | `Ctrl+Tab` (hold, tap `Tab` to cycle, release to jump) | Opens `Switcher`: a popup listing open editor tabs plus recent tool windows. `Ctrl+Shift+Tab` cycles it in reverse. |
 | Jump straight to a pinned file | `Ctrl+1` .. `Ctrl+9` (`Ctrl+0` too) | `GotoBookmarkN`: jumps directly to whichever file/line you've assigned to slot N. |
-| Pin a file to a numbered slot | `Ctrl+Shift+1` .. `Ctrl+Shift+9` | `ToggleBookmarkN`: assigns the current line/file to slot N (bookmarks are pinned by you — they don't track raw tab position, since IntelliJ has no "jump to tab position N" action at all). |
+| Pin a file to a numbered slot | `Ctrl+Shift+1` .. `Ctrl+Shift+9` | `ToggleBookmarkN`: assigns the current line/file to slot N (bookmarks are pinned by you — they don't track raw tab position, since IntelliJ has no "jump to tab position N" action at all). Requires real caret focus in an editor to register. |
 
 ## Unchanged defaults (already identical, no override needed)
 
