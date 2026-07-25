@@ -9,3 +9,6 @@
   `.claude/settings.json` `enabledPlugins` (see `worship-lineup` for the pattern).
 - The `MCP_DOCKER` MCP server only connects when Rancher Desktop is
   running; a failed connection there is expected, not a config bug.
+- Commits to ANY repository use Roj's git identity ONLY. Never add Claude as an
+  author, co-author, or trailer (no `Co-Authored-By`, no `Claude-Session`, no
+  "Generated with Claude" footers) in commit messages or PR bodies.
