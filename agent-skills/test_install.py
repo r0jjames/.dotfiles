@@ -141,6 +141,63 @@ class TestInstallSymlink(TempDirTest):
         self.assertFalse(dest.exists())
 
 
+class TestSymlinkFallback(TempDirTest):
+    """Windows/Git Bash: symlinks need Developer Mode or admin."""
+
+    def setUp(self):
+        super().setUp()
+        install._SYMLINK_SUPPORT.clear()
+        self.addCleanup(install._SYMLINK_SUPPORT.clear)
+
+    def no_symlinks(self):
+        return mock.patch.object(Path, "symlink_to",
+                                 side_effect=OSError("WinError 1314"))
+
+    def test_falls_back_to_copy(self):
+        src = self.make_skill("src")
+        dest = self.tmp / "dest" / "skill-a"
+        with self.no_symlinks():
+            status = install.install_symlink(src, dest, dry_run=False)
+        self.assertEqual(status, "installed (copy fallback)")
+        self.assertFalse(dest.is_symlink())
+        self.assertEqual((dest / "SKILL.md").read_text(), "hello")
+
+    def test_second_run_is_up_to_date_without_backup(self):
+        src = self.make_skill("src")
+        dest = self.tmp / "dest" / "skill-a"
+        with self.no_symlinks():
+            install.install_symlink(src, dest, dry_run=False)
+            status = install.install_symlink(src, dest, dry_run=False)
+        self.assertEqual(status, "up to date (copy fallback)")
+        self.assertFalse((dest.parent / "skill-a.bak").exists())
+
+    def test_edited_skill_refreshes_copy(self):
+        src = self.make_skill("src")
+        dest = self.tmp / "dest" / "skill-a"
+        with self.no_symlinks():
+            install.install_symlink(src, dest, dry_run=False)
+            (src / "SKILL.md").write_text("edited")
+            status = install.install_symlink(src, dest, dry_run=False)
+        self.assertEqual(status, "updated (copy fallback)")
+        self.assertEqual((dest / "SKILL.md").read_text(), "edited")
+
+    def test_probe_is_cached_and_leaves_nothing_behind(self):
+        dest_dir = self.tmp / "dest"
+        with self.no_symlinks() as patched:
+            self.assertFalse(install.symlinks_supported(dest_dir))
+            self.assertFalse(install.symlinks_supported(dest_dir))
+            self.assertEqual(patched.call_count, 1)
+        self.assertEqual(list(dest_dir.iterdir()), [])
+
+    def test_dry_run_skips_probe(self):
+        src = self.make_skill("src")
+        dest = self.tmp / "dest" / "skill-a"
+        with self.no_symlinks():
+            status = install.install_symlink(src, dest, dry_run=True)
+        self.assertEqual(status, "linked")
+        self.assertFalse(dest.parent.exists())
+
+
 class TestPickTargets(unittest.TestCase):
     def test_explicit_targets(self):
         self.assertEqual(install.pick_targets("copilot"), ["copilot"])
@@ -452,6 +509,14 @@ class TestStatus(TempDirTest):
         _, warnings = install.gather_status(
             "claude", dest, {"explain-logic"}, {})
         self.assertIn("claude: explain-logic is a broken symlink", warnings)
+
+    def test_leftover_backup_warns(self):
+        dest = self.make_dest()
+        (dest / "explain-logic.bak").mkdir()
+        _, warnings = install.gather_status(
+            "claude", dest, {"explain-logic"}, {})
+        self.assertTrue(any("explain-logic.bak" in w and "delete it" in w
+                            for w in warnings))
 
     def test_wrong_target_warns(self):
         dest = self.make_dest()

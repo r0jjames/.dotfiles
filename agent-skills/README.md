@@ -17,7 +17,8 @@ installer. One `SKILL.md` format serves both platforms.
 - `prompts/` — Copilot/VS Code `.prompt.md` slash commands
   (`/explain-code`, `/explain-and-review`, `/create-sb`, `/implement-sb`,
   `/create-implement-sb`). Not used by Claude.
-- `install.py` — cross-platform installer (Python >= 3.8, stdlib only).
+- `install.py` — installer for macOS, Linux and Windows/Git Bash
+  (Python >= 3.8, stdlib only).
 
 ## Install
 
@@ -57,18 +58,36 @@ in place (missing = install, present = update, unchanged = up to date):
   ci-cd-and-automation, security-and-hardening, deprecation-and-migration.
 - From `anthropics/skills`: pdf, docx, pptx, xlsx.
 
-`./install.py install agent-skills` from the repo root runs the Claude
-install (custom skills only) as part of normal dotfiles setup.
+`./install.py install agent-skills` from the repo root runs the custom-skill
+install (no community fetch) as part of normal dotfiles setup — Claude only on
+macOS/Linux, **both** Claude and Copilot on Windows (Git Bash).
 
 ## Work VDI (Windows, Git Bash)
 
+Run everything with `python` (Git Bash has no `python3` unless you alias it).
+
 1. Copy this folder over (or clone the repo).
-2. `python3 install.py --target copilot --dry-run` — sanity-check paths.
-3. `python3 install.py --status` — check what's currently installed.
-4. `python3 install.py --target copilot`
-5. `python3 install.py --status` — verify new installs.
+2. `python install.py --target both --dry-run` — sanity-check paths.
+3. `python install.py --status` — check what's currently installed.
+4. `python install.py --target both` — or `python install.py` for the
+   interactive picker (recommended: it also offers the community skills and
+   the VS Code prompt files).
+5. `python install.py --status` — verify new installs.
 6. If the proxy blocks the clone, follow the printed ZIP fallback, or use
    `--skills-only`.
+
+From the repo root, `python install.py install agent-skills` does steps 1–4
+for the custom skills only.
+
+**Symlinks on Windows** need Developer Mode or an admin shell. Without them the
+installer detects this up front, prints `symlinks unsupported in <dir> —
+installing copies`, and installs copies to both targets instead. Copies are
+snapshots: **re-run the installer after editing a skill** to refresh them.
+`--status` flags any leftover `<skill>.bak` directory from an older run — delete
+those, the agents load them as extra skills.
+
+Paths on Windows resolve under `%USERPROFILE%`: `~/.claude/skills`,
+`~/.copilot/skills`, and `%APPDATA%\Code\User\prompts`.
 
 Team distribution per repo: copy `skills/*` into the repo's
 `.github/skills/` and `prompts/*` into `.github/prompts/`, then PR.

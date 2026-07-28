@@ -40,6 +40,7 @@ Non-interactive:
 4. On the **Windows side** (not WSL):
    - Install a Nerd Font ([MesloLGS NF](https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf) or any from [nerdfonts.com](https://www.nerdfonts.com/)) — download, right-click → *Install for all users* — and set it as the font in Windows Terminal (Settings → Ubuntu profile → Appearance).
    - VS Code settings: run `./install.py install vscode` from **Git Bash** (see [vscode/README.md](vscode/README.md)).
+   - Claude Code + agent skills for Copilot and Claude: run `./install.py install claude agent-skills` from **Git Bash** (see [claude/README.md](claude/README.md), [agent-skills/README.md](agent-skills/README.md)). Both copy instead of symlinking there — re-run after editing a config or skill.
    - Optional: WezTerm instead of Windows Terminal (see [wezterm/README.md](wezterm/README.md)).
 
 ## Uninstall
@@ -62,7 +63,8 @@ are left installed — the summary lists them for manual removal.
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
 | [`intellij/`](intellij/README.md) | IntelliJ IDEA CE + F-free cross-OS keymap (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
-| [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, WSL |
+| [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, WSL, Windows (Git Bash) |
+| [`agent-skills/`](agent-skills/README.md) | Custom agent skills for Claude Code and GitHub Copilot | macOS, WSL, Windows (Git Bash) |
 | `maven` | Maven build tool, via SDKMAN | macOS, WSL |
 | [`terminal-macos/`](terminal-macos/README.md) | Terminal.app themes + font | macOS only |
 | [`iterm2/`](iterm2/README.md) | iTerm2 + theme profile + shell integration | macOS only |
@@ -74,6 +76,6 @@ are left installed — the summary lists them for manual removal.
 
 ## How configs are applied
 
-Configs are **symlinked** from this repo into `$HOME` (e.g. `~/.zshrc → ~/Dev/.dotfiles/zsh/.zshrc`). Edit here, commit, `git pull` on other machines — changes are live immediately. Any pre-existing real file is backed up as `<name>.bak-YYYY-MM-DD` before linking. Exception: VS Code on Windows copies instead of linking (symlinks there need admin rights).
+Configs are **symlinked** from this repo into `$HOME` (e.g. `~/.zshrc → ~/Dev/.dotfiles/zsh/.zshrc`). Edit here, commit, `git pull` on other machines — changes are live immediately. Any pre-existing real file is backed up as `<name>.bak-YYYY-MM-DD` before linking. Exception: on Windows (Git Bash) `vscode`, `intellij`, `claude` and `agent-skills` copy instead of linking (symlinks there need admin rights or Developer Mode) — re-run the installer after editing to refresh the copies.
 
 Machine-local shell tweaks that shouldn't be in git go in `~/.zshrc.local`.

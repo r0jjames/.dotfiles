@@ -170,10 +170,38 @@ def install_copy(src, dest, dry_run):
     return "updated"
 
 
+_SYMLINK_SUPPORT = {}
+
+
+def symlinks_supported(directory):
+    """Cached probe: can we create a symlink inside `directory`? Windows
+    needs Developer Mode or admin, so this is False on most work machines.
+    Probing up front avoids the backup-then-fail-then-copy cycle, which
+    otherwise left a stale <skill>.bak dir behind on every run."""
+    directory = Path(directory)
+    key = str(directory)
+    if key not in _SYMLINK_SUPPORT:
+        directory.mkdir(parents=True, exist_ok=True)
+        probe = directory / ".symlink-probe"
+        try:
+            if probe.is_symlink() or probe.exists():
+                probe.unlink()
+            probe.symlink_to(directory, target_is_directory=True)
+            probe.unlink()
+            _SYMLINK_SUPPORT[key] = True
+        except OSError:
+            warn(f"symlinks unsupported in {directory} — installing copies "
+                 "(re-run install.py after editing a skill to refresh)")
+            _SYMLINK_SUPPORT[key] = False
+    return _SYMLINK_SUPPORT[key]
+
+
 def install_symlink(src, dest, dry_run):
     """Symlink dest -> src. Returns 'linked'|'already linked' or a copy
     status suffixed with ' (copy fallback)' when symlinks are unsupported."""
     src, dest = Path(src), Path(dest)
+    if not dry_run and not symlinks_supported(dest.parent):
+        return install_copy(src, dest, dry_run) + " (copy fallback)"
     if dest.is_symlink():
         if dest.resolve() == src.resolve():
             return "already linked"
@@ -480,6 +508,9 @@ def gather_status(target, dest_root, custom_names, plugin_map):
         if not (entry.is_dir() or entry.is_symlink()):
             continue
         name = entry.name
+        if name.endswith(".bak"):
+            warnings.append(f"{target}: {name} is a leftover backup — agents"
+                            f" load it as a skill; delete it")
         if name in custom_names:
             kind = "custom"
         elif name in reg:

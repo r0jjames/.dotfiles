@@ -9,12 +9,12 @@ plus an inventory of every installed plugin/skill and how to invoke it.
 ./install.py install claude
 ```
 
-1. Installs the Claude Code CLI if missing (official native installer,
-   lands in `~/.local/bin/claude`).
-2. Symlinks `claude/settings.json` → `~/.claude/settings.json`.
-3. Symlinks `claude/statusline-command.sh` → `~/.claude/statusline-command.sh`.
-4. Symlinks `claude/CLAUDE.md` → `~/.claude/CLAUDE.md` (global memory, loaded
+1. Links `claude/settings.json` → `~/.claude/settings.json`.
+2. Links `claude/statusline-command.sh` → `~/.claude/statusline-command.sh`.
+3. Links `claude/CLAUDE.md` → `~/.claude/CLAUDE.md` (global memory, loaded
    into every session — keep it short).
+4. Installs the Claude Code CLI if missing (official native installer,
+   lands in `~/.local/bin/claude`).
 
 Plugins are **not** installed by the installer: `settings.json` carries
 `enabledPlugins` and `extraKnownMarketplaces`, so Claude Code fetches the
@@ -27,6 +27,24 @@ tool — it is listed in `vscode/extensions.txt` along with
 Because `~/.claude/settings.json` is a symlink into this repo, runtime
 changes (theme toggle, enabling a plugin) show up as a git diff here.
 Review them: commit to keep, checkout to revert.
+
+## Windows (Git Bash)
+
+Same command, two differences:
+
+- Symlinks need admin rights, so the three config files are **copied** into
+  `~/.claude` (i.e. `%USERPROFILE%\.claude`). Copies are snapshots — re-run
+  `./install.py install claude` after editing one, and runtime changes made
+  inside Claude Code will **not** show up as a git diff here.
+- The CLI comes from the PowerShell installer
+  (`irm https://claude.ai/install.ps1 | iex`), driven via `powershell` from
+  Git Bash. On a locked-down VDI (execution policy, proxy) that can fail —
+  the installer warns and prints the manual command plus the
+  `npm install -g @anthropic-ai/claude-code` alternative instead of aborting
+  the run.
+
+`statusLine.command` uses `$HOME` rather than an absolute path so the same
+`settings.json` works on macOS, WSL and Windows.
 
 ## Not managed by this repo
 
