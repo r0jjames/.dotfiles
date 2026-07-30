@@ -1,17 +1,23 @@
 # lib/tools/intellij.py
-"""IntelliJ IDEA Community: install + F-free cross-OS custom keymap.
+"""JetBrains IDEs: the F-free cross-OS roj-keymap, distributed to all of them.
 
-  macOS   — brew cask intellij-idea-ce, then SYMLINK keymap-macos.xml into
-            every ~/Library/Application Support/JetBrains/<IdeaIC*>/keymaps/
-  Windows — (Git Bash) COPY keymap-windows.xml into every
-            %APPDATA%/JetBrains/<IntelliJIdea*|IdeaIC*>/keymaps/ (symlinks
-            need admin). Assumes IntelliJ already installed on the host.
+  macOS   - SYMLINK keymap-macos.xml into every
+            ~/Library/Application Support/JetBrains/<product>/keymaps/
+  Windows - (Git Bash) COPY keymap-windows.xml into every
+            %APPDATA%/JetBrains/<product>/keymaps/ (symlinks need admin).
 
-JetBrains config dirs are version-stamped (IdeaIC2026.1, ...), unlike VS
-Code's stable Code/User - so we glob every matching dir and place the keymap
-in each. If none exist yet, the IDE has never launched: we warn to open it
+<product> is any dir named for a JetBrains IDE family - IntelliJ Community or
+Ultimate, PyCharm (incl. CE/Edu), GoLand. This tool does NOT install IDEs: you
+install them yourself via Toolbox or brew, and it distributes the keymap to
+whichever ones are present. That keeps install idempotent across machines with
+different IDE sets, and sidesteps the deprecated intellij-idea-ce cask
+(disabled upstream 2026-12-08).
+
+JetBrains config dirs are version-stamped (IdeaIC2026.1, PyCharm2025.3, ...),
+unlike VS Code's stable Code/User - so we glob every matching dir and place the
+keymap in each. If none exist yet, no IDE has ever launched: we warn to open one
 once and re-run. The keymap only becomes *active* after you pick it in
-Settings -> Keymap (see intellij/README.md). The VDI is not reachable here -
+Settings -> Keymap (see jetbrains/README.md). The VDI is not reachable here -
 it gets the keymap via Settings Sync (Path A) or vdi-apply-keymap.ps1.
 """
 from __future__ import annotations
@@ -37,14 +43,6 @@ _STALE_KEYMAP_TARGET = "Roj-Ffree.xml"
 # Non-IDE siblings in the JetBrains base (consentOptions, Toolbox, the bl/crl
 # files) match none of these.
 _PRODUCT_PREFIXES = ("IdeaIC", "IntelliJIdea", "PyCharm", "GoLand")
-
-# NOTE: the `intellij-idea-ce` cask is deprecated upstream (disabled
-# 2026-12-08) - JetBrains folded Community into the unified `intellij-idea`
-# distribution's free tier. When CE stops installing, switch _CASK to
-# "intellij-idea" and _APP to "/Applications/IntelliJ IDEA.app".
-_CASK = "intellij-idea-ce"
-_APP = Path("/Applications/IntelliJ IDEA CE.app")
-
 
 def _jetbrains_dir() -> Tuple[Path, str, str]:
     """Return (JetBrains config base, keymap source filename, mode)."""
@@ -77,14 +75,7 @@ def _post() -> None:
     base, src_name, mode = _jetbrains_dir()
     src = _src(src_name)
 
-    # 1. Install the app (macOS only; Windows host assumed to have it).
-    if core.detect_os() == "macos":
-        if _APP.is_dir():
-            core.ok("IntelliJ IDEA CE already installed.")
-        else:
-            core.brew_install(_CASK, cask=True)
-
-    # 2. Place the keymap into every existing config dir.
+    # Place the keymap into every existing config dir.
     dirs = find_config_dirs(base)
     if not dirs:
         core.warn(f"No IntelliJ config dir under {base}.")
@@ -121,7 +112,7 @@ def _uninstall() -> None:
             core.unlink_file(src, target)
         else:
             core.uncopy_file(src, target)
-    core.info("IntelliJ app left installed - remove via brew/Finder if unwanted.")
+    core.info("JetBrains IDEs are installed outside dotfiles - none were touched.")
     core.info("If 'roj-keymap' is still the active keymap, switch back in "
               "Settings -> Keymap.")
 
