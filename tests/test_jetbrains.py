@@ -193,5 +193,48 @@ class PluginsFileTest(unittest.TestCase):
         self.assertIn("com.intellij.plugins.vscodekeymap", text)
 
 
+class MigrationTest(unittest.TestCase):
+    """Symlinks from a pre-rename (intellij/) install dangle after the move."""
+
+    def test_drops_symlink_into_old_intellij_dir(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            old_src = Path(tmp) / "intellij" / "keymap-macos.xml"
+            old_src.parent.mkdir(parents=True)
+            old_src.write_text("<keymap/>")
+            target = Path(tmp) / "keymaps" / "roj-keymap.xml"
+            target.parent.mkdir(parents=True)
+            target.symlink_to(old_src)
+
+            self.assertTrue(jetbrains._drop_pre_rename_link(target))
+            self.assertFalse(target.exists() or target.is_symlink())
+
+    def test_drops_it_even_when_the_old_path_is_gone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "roj-keymap.xml"
+            target.symlink_to(Path(tmp) / "intellij" / "keymap-macos.xml")
+
+            self.assertTrue(jetbrains._drop_pre_rename_link(target))
+            self.assertFalse(target.is_symlink())
+
+    def test_keeps_a_current_symlink(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            src = Path(tmp) / "jetbrains" / "keymap-macos.xml"
+            src.parent.mkdir(parents=True)
+            src.write_text("<keymap/>")
+            target = Path(tmp) / "roj-keymap.xml"
+            target.symlink_to(src)
+
+            self.assertFalse(jetbrains._drop_pre_rename_link(target))
+            self.assertTrue(target.is_symlink())
+
+    def test_keeps_a_real_file(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            target = Path(tmp) / "roj-keymap.xml"
+            target.write_text("<keymap/>")
+
+            self.assertFalse(jetbrains._drop_pre_rename_link(target))
+            self.assertTrue(target.is_file())
+
+
 if __name__ == "__main__":
     unittest.main()

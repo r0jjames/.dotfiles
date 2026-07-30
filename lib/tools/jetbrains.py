@@ -38,6 +38,12 @@ _KEYMAP_TARGET = "roj-keymap.xml"
 # Cleaned up on install so both don't linger in the Keymap dropdown.
 _STALE_KEYMAP_TARGET = "Roj-Ffree.xml"
 
+# Repo dir this tool used before the intellij -> jetbrains rename. Symlinks
+# from a pre-rename install point into it and now dangle; we delete them
+# rather than let link_file back them up, since unlink_file would later
+# "restore" a broken link as if it were the user's own file.
+_STALE_SRC_DIR = "intellij"
+
 # Config-dir name prefixes, one per JetBrains product family. "PyCharm" as a
 # str.startswith prefix also covers PyCharmCE* (Community) and PyCharmEdu*.
 # Non-IDE siblings in the JetBrains base (consentOptions, Toolbox, the bl/crl
@@ -71,6 +77,22 @@ def _src(filename: str) -> Path:
     return core.REPO_ROOT / "jetbrains" / filename
 
 
+def _drop_pre_rename_link(target: Path) -> bool:
+    """Delete target when it is a symlink into the pre-rename intellij/ dir.
+
+    Uses readlink, not resolve(): after the rename the link is broken, so the
+    destination cannot be stat'ed. Returns True when something was removed.
+    """
+    if not target.is_symlink():
+        return False
+    dest = Path(os.readlink(target))
+    if _STALE_SRC_DIR not in dest.parts:
+        return False
+    target.unlink()
+    core.info(f"Removed {target} from a pre-rename (intellij/) install.")
+    return True
+
+
 def _post() -> None:
     base, src_name, mode = _jetbrains_dir()
     src = _src(src_name)
@@ -91,6 +113,7 @@ def _post() -> None:
             stale.unlink()
             core.info(f"Removed stale {stale} from a pre-rename install.")
         target = keymaps_dir / _KEYMAP_TARGET
+        _drop_pre_rename_link(target)
         if mode == "link":
             core.link_file(src, target)
         else:
