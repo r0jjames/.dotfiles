@@ -1,51 +1,72 @@
-# intellij — IntelliJ IDEA Community + F-free cross-OS keymap
+# jetbrains — one F-free keymap for every JetBrains IDE
 
-Installs IntelliJ IDEA Community (macOS) and a **custom keymap that uses no
-F1-F12 keys**, identical on macOS and Windows, so shortcuts behave the same on
+Distributes a **custom keymap that uses no F1-F12 keys**, identical on macOS
+and Windows, to every JetBrains IDE installed on the machine — IntelliJ IDEA
+(Community or Ultimate), PyCharm (incl. CE/Edu) and GoLand. Same shortcuts on
 your personal Mac, your work Windows laptop, and the Citrix Windows VDI —
 without depending on the F-row (which the NuPhy Win/Mac switch and Citrix
 mangle). See [`../citrix-vdi/README.md`](../citrix-vdi/README.md) for the
 F-row hardware story; those Karabiner rules stay in place for other apps.
 
+**This tool does not install IDEs.** Install them yourself (JetBrains Toolbox
+or brew); the installer distributes the keymap to whichever ones it finds.
+
 ## Why F-free
 
-The custom keymap `roj-keymap` redeclares every action IntelliJ maps to F1-F12
-onto **Ctrl / Alt / Shift chords only** (never Cmd/Win). Benefits:
+The custom keymap `roj-keymap` redeclares every action JetBrains IDEs map to
+F1-F12 onto **Ctrl / Alt / Shift chords only** (never Cmd/Win). Benefits:
 
 - Same physical keys on Mac and Windows → one muscle memory everywhere.
 - Ctrl/Alt/Shift pass cleanly through Citrix **Scancode** input mode.
 - Unaffected by the `citrix-vdi` Karabiner *Left-Cmd → Alt* rule (we avoid Cmd).
 - No reliance on the F-row at all — the mode-switch / brightness-key problem
-  disappears for IntelliJ.
+  disappears for every JetBrains IDE.
 
 ## Install
 
 ### macOS (personal) — *run on: Mac*
 
 ```sh
-./install.py install intellij
+./install.py install jetbrains
 ```
 
-Installs the `intellij-idea-ce` cask (if missing), then **symlinks**
-`keymap-macos.xml` into every `~/Library/Application Support/JetBrains/IdeaIC*/keymaps/`.
+**Symlinks** `keymap-macos.xml` into every
+`~/Library/Application Support/JetBrains/<product>/keymaps/`.
 
 ### Work Windows laptop — *run from: Git Bash*
 
 ```sh
-./install.py install intellij
+./install.py install jetbrains
 ```
 
-IntelliJ itself is assumed already installed on the Windows host. This
-**copies** `keymap-windows.xml` into every
-`%APPDATA%\JetBrains\{IntelliJIdea*,IdeaIC*}\keymaps\` (symlinks need admin).
+The IDEs are assumed already installed on the Windows host. This **copies**
+`keymap-windows.xml` into every
+`%APPDATA%\JetBrains\{IntelliJIdea*,IdeaIC*,PyCharm*,GoLand*}\keymaps\`
+(symlinks need admin).
 
-> **If it says "No IntelliJ config dir":** the IDE has never launched, so its
-> version-stamped config folder doesn't exist yet. Open IntelliJ once, then
-> re-run `./install.py install intellij`.
+> **If it says "No JetBrains config dir":** no IDE has ever launched, so its
+> version-stamped config folder doesn't exist yet. Open one once, then
+> re-run `./install.py install jetbrains`.
+
+## Product coverage
+
+Config dirs are matched by name prefix: `IdeaIC`, `IntelliJIdea`, `PyCharm`
+(also catches `PyCharmCE`/`PyCharmEdu`), `GoLand`. A new JetBrains IDE
+(WebStorm, DataGrip, RustRover) needs one line added to `_PRODUCT_PREFIXES`
+in `lib/tools/jetbrains.py`.
+
+One shared keymap serves every product. All 65 action ids in the keymap were
+checked against PyCharm 2025.3's own action registrations (`Contents/lib/*.jar`
+plus `Contents/plugins/*/lib/*.jar`) — none are missing, `CompileDirty`
+included. Registered is not the same as useful, though: `Alt+B`
+(`CompileDirty`) has nothing to compile in a pure-Python project, so treat it
+as inert there. GoLand was not available to sweep. An id an IDE does not know
+is ignored silently by the keymap reader — the chord is simply dead in that
+product, nothing breaks and no warning appears.
 
 ### Activate it (one time, every install)
 
-Dropping the file makes the keymap **available**, not active. In IntelliJ:
+Dropping the file makes the keymap **available**, not active. In the IDE:
 
 > **Settings → Keymap → dropdown → `roj-keymap`** → Apply.
 
@@ -79,13 +100,13 @@ Mac↔Windows keymaps don't sync anyway (different modifiers).
 ### Path B — one-shot script (fallback / instant seed)
 
 If you'd rather not use account sync, run [`vdi-apply-keymap.ps1`](vdi-apply-keymap.ps1)
-**inside the VDI** (close IntelliJ first):
+**inside the VDI** (close the IDE first):
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\vdi-apply-keymap.ps1
 ```
 
-It downloads `keymap-windows.xml`, drops it into every IntelliJ config dir,
+It downloads `keymap-windows.xml`, drops it into every JetBrains config dir,
 then tells you to pick `roj-keymap` in Settings → Keymap. The dotfiles repo is
 private, so the raw URL needs a public/tokenised link — or copy the XML in by
 hand and pass `-LocalPath .\keymap-windows.xml`.
@@ -425,10 +446,9 @@ on macOS — no typing capability lost — and both are confirmed collision-free
 ## Uninstall
 
 ```sh
-./install.py uninstall intellij
+./install.py uninstall jetbrains
 ```
 
-Removes the keymap file from every config dir. The IntelliJ app is left
-installed (remove via `brew uninstall --cask intellij-idea-ce` or Finder). If
-`roj-keymap` is still selected, switch back to a default keymap in Settings →
-Keymap.
+Removes the keymap file from every JetBrains config dir. The IDEs themselves
+are installed outside dotfiles and are never touched. If `roj-keymap` is still
+selected, switch back to a default keymap in Settings → Keymap.

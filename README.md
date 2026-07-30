@@ -62,7 +62,7 @@ are left installed — the summary lists them for manual removal.
 | [`nvim/`](nvim/README.md) | Neovim DevOps IDE (k8s, Helm, Docker, Python, Ansible, Terraform) | macOS, WSL |
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
-| [`intellij/`](intellij/README.md) | IntelliJ IDEA CE + F-free cross-OS keymap (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
+| [`jetbrains/`](jetbrains/README.md) | F-free cross-OS keymap for every JetBrains IDE — IntelliJ, PyCharm, GoLand (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
 | [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, WSL, Windows (Git Bash) |
 | [`agent-skills/`](agent-skills/README.md) | Custom agent skills for Claude Code and GitHub Copilot | macOS, WSL, Windows (Git Bash) |
 | `maven` | Maven build tool, via SDKMAN | macOS, WSL |
@@ -76,6 +76,6 @@ are left installed — the summary lists them for manual removal.
 
 ## How configs are applied
 
-Configs are **symlinked** from this repo into `$HOME` (e.g. `~/.zshrc → ~/Dev/.dotfiles/zsh/.zshrc`). Edit here, commit, `git pull` on other machines — changes are live immediately. Any pre-existing real file is backed up as `<name>.bak-YYYY-MM-DD` before linking. Exception: on Windows (Git Bash) `vscode`, `intellij`, `claude` and `agent-skills` copy instead of linking (symlinks there need admin rights or Developer Mode) — re-run the installer after editing to refresh the copies.
+Configs are **symlinked** from this repo into `$HOME` (e.g. `~/.zshrc → ~/Dev/.dotfiles/zsh/.zshrc`). Edit here, commit, `git pull` on other machines — changes are live immediately. Any pre-existing real file is backed up as `<name>.bak-YYYY-MM-DD` before linking. Exception: on Windows (Git Bash) `vscode`, `jetbrains`, `claude` and `agent-skills` copy instead of linking (symlinks there need admin rights or Developer Mode) — re-run the installer after editing to refresh the copies.
 
 Machine-local shell tweaks that shouldn't be in git go in `~/.zshrc.local`.
