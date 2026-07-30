@@ -172,17 +172,16 @@ class KeymapXmlTest(unittest.TestCase):
 
 
 class FindConfigDirsTest(unittest.TestCase):
-    def test_matches_community_and_ultimate_ignores_others(self):
+    def test_matches_every_jetbrains_ide_ignores_non_ide_dirs(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp)
-            for name in ("IdeaIC2026.1", "IntelliJIdea2025.3", "PyCharm2026.1",
-                         "consentOptions", "somefile.txt"):
-                if "." in name and name.endswith(".txt"):
-                    (base / name).write_text("x")
-                else:
-                    (base / name).mkdir()
+            ide_dirs = ["GoLand2025.2", "IdeaIC2026.1", "IntelliJIdea2025.3",
+                        "PyCharm2025.3", "PyCharmCE2024.1"]
+            for name in ide_dirs + ["consentOptions", "Toolbox"]:
+                (base / name).mkdir()
+            (base / "somefile.txt").write_text("x")
             found = [d.name for d in intellij.find_config_dirs(base)]
-            self.assertEqual(found, ["IdeaIC2026.1", "IntelliJIdea2025.3"])
+            self.assertEqual(found, sorted(ide_dirs))
 
     def test_missing_base_returns_empty(self):
         self.assertEqual(intellij.find_config_dirs(Path("/no/such/dir")), [])

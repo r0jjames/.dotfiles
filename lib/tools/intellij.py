@@ -32,8 +32,11 @@ _KEYMAP_TARGET = "roj-keymap.xml"
 # Cleaned up on install so both don't linger in the Keymap dropdown.
 _STALE_KEYMAP_TARGET = "Roj-Ffree.xml"
 
-# Config-dir name prefixes: Community = "IdeaIC<ver>", Ultimate = "IntelliJIdea<ver>".
-_PRODUCT_PREFIXES = ("IdeaIC", "IntelliJIdea")
+# Config-dir name prefixes, one per JetBrains product family. "PyCharm" as a
+# str.startswith prefix also covers PyCharmCE* (Community) and PyCharmEdu*.
+# Non-IDE siblings in the JetBrains base (consentOptions, Toolbox, the bl/crl
+# files) match none of these.
+_PRODUCT_PREFIXES = ("IdeaIC", "IntelliJIdea", "PyCharm", "GoLand")
 
 # NOTE: the `intellij-idea-ce` cask is deprecated upstream (disabled
 # 2026-12-08) - JetBrains folded Community into the unified `intellij-idea`
