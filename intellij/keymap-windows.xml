@@ -46,6 +46,9 @@
   <action id="EditorSelectWord">
     <keyboard-shortcut first-keystroke="alt UP" />
   </action>
+  <action id="EditorToggleUseSoftWraps">
+    <keyboard-shortcut first-keystroke="alt Z" />
+  </action>
   <action id="EditorUnSelectWord">
     <keyboard-shortcut first-keystroke="alt DOWN" />
   </action>

@@ -126,6 +126,7 @@ Three tiers, lightest first. Full rationale/verification:
 | Go to Symbol | `Alt+S` |
 | Terminal | `Alt+T` |
 | Build (CompileDirty) | `Alt+B` |
+| Toggle Soft-Wrap | `Alt+Z` |
 | Extend Selection | `Alt+↑` |
 | Shrink Selection | `Alt+↓` |
 | New… (file/class/etc popup) | `Alt+N` |
