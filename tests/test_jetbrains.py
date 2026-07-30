@@ -1,4 +1,4 @@
-# tests/test_intellij.py
+# tests/test_jetbrains.py
 from __future__ import annotations
 
 import re
@@ -8,11 +8,11 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 from lib import core
-from lib.tools import intellij
+from lib.tools import jetbrains
 
-_INTELLIJ = core.REPO_ROOT / "intellij"
-_MAC = _INTELLIJ / "keymap-macos.xml"
-_WIN = _INTELLIJ / "keymap-windows.xml"
+_JETBRAINS = core.REPO_ROOT / "jetbrains"
+_MAC = _JETBRAINS / "keymap-macos.xml"
+_WIN = _JETBRAINS / "keymap-windows.xml"
 _F_KEY = re.compile(r"\bF(?:[1-9]|1[0-2])\b")  # F1..F12 as a whole token
 
 
@@ -180,16 +180,16 @@ class FindConfigDirsTest(unittest.TestCase):
             for name in ide_dirs + ["consentOptions", "Toolbox"]:
                 (base / name).mkdir()
             (base / "somefile.txt").write_text("x")
-            found = [d.name for d in intellij.find_config_dirs(base)]
+            found = [d.name for d in jetbrains.find_config_dirs(base)]
             self.assertEqual(found, sorted(ide_dirs))
 
     def test_missing_base_returns_empty(self):
-        self.assertEqual(intellij.find_config_dirs(Path("/no/such/dir")), [])
+        self.assertEqual(jetbrains.find_config_dirs(Path("/no/such/dir")), [])
 
 
 class PluginsFileTest(unittest.TestCase):
     def test_vscode_keymap_plugin_listed(self):
-        text = (_INTELLIJ / "plugins.txt").read_text()
+        text = (_JETBRAINS / "plugins.txt").read_text()
         self.assertIn("com.intellij.plugins.vscodekeymap", text)
 
 

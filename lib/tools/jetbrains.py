@@ -1,4 +1,4 @@
-# lib/tools/intellij.py
+# lib/tools/jetbrains.py
 """JetBrains IDEs: the F-free cross-OS roj-keymap, distributed to all of them.
 
   macOS   - SYMLINK keymap-macos.xml into every
@@ -55,11 +55,11 @@ def _jetbrains_dir() -> Tuple[Path, str, str]:
         if not appdata:
             raise core.DotfilesError("APPDATA not set; cannot locate JetBrains dir.")
         return Path(appdata) / "JetBrains", "keymap-windows.xml", "copy"
-    raise core.DotfilesError("intellij: unsupported platform (macOS/Git Bash only).")
+    raise core.DotfilesError("jetbrains: unsupported platform (macOS/Git Bash only).")
 
 
 def find_config_dirs(base: Path) -> list[Path]:
-    """Existing IntelliJ config dirs under the JetBrains base, newest last."""
+    """Existing JetBrains IDE config dirs under the JetBrains base, newest last."""
     if not base.is_dir():
         return []
     dirs = [d for d in base.iterdir()
@@ -68,7 +68,7 @@ def find_config_dirs(base: Path) -> list[Path]:
 
 
 def _src(filename: str) -> Path:
-    return core.REPO_ROOT / "intellij" / filename
+    return core.REPO_ROOT / "jetbrains" / filename
 
 
 def _post() -> None:
@@ -78,9 +78,9 @@ def _post() -> None:
     # Place the keymap into every existing config dir.
     dirs = find_config_dirs(base)
     if not dirs:
-        core.warn(f"No IntelliJ config dir under {base}.")
-        core.warn("Launch IntelliJ once (so it creates its config), then "
-                  "re-run: ./install.py install intellij")
+        core.warn(f"No JetBrains config dir under {base}.")
+        core.warn("Launch a JetBrains IDE once (so it creates its config), "
+                  "then re-run: ./install.py install jetbrains")
         return
     core.info(f"Applying F-free keymap to {len(dirs)} config dir(s) ({mode})...")
     for d in dirs:
@@ -96,7 +96,7 @@ def _post() -> None:
         else:
             core.copy_file(src, target)
     core.ok("Keymap installed. One-time manual step: Settings -> Keymap -> "
-            "select 'roj-keymap'. See intellij/README.md (plugins, VDI sync, "
+            "select 'roj-keymap'. See jetbrains/README.md (plugins, VDI sync, "
             "cheatsheet).")
 
 
@@ -105,7 +105,7 @@ def _uninstall() -> None:
     src = _src("keymap-macos.xml" if mode == "link" else "keymap-windows.xml")
     dirs = find_config_dirs(base)
     if not dirs:
-        core.skip(f"No IntelliJ config dir under {base} - nothing to remove.")
+        core.skip(f"No JetBrains config dir under {base} - nothing to remove.")
     for d in dirs:
         target = d / "keymaps" / _KEYMAP_TARGET
         if mode == "link":
@@ -140,8 +140,8 @@ def _probe() -> bool:
 
 
 TOOL = Tool(
-    name="intellij",
-    doc="IntelliJ IDEA CE + F-free cross-OS keymap",
+    name="jetbrains",
+    doc="roj-keymap for every JetBrains IDE (IntelliJ, PyCharm, GoLand)",
     platforms=frozenset({"macos", "gitbash"}),
     post_install=_post,
     extra_uninstall=_uninstall,
