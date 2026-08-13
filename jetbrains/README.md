@@ -11,6 +11,10 @@ F-row hardware story; those Karabiner rules stay in place for other apps.
 **This tool does not install IDEs.** Install them yourself (JetBrains Toolbox
 or brew); the installer distributes the keymap to whichever ones it finds.
 
+Copilot agent skills and prompt files in these IDEs (including why
+`/create-sb` needs a seeded repo) →
+[`../agent-skills/README.md`](../agent-skills/README.md#jetbrains-intellij--pycharm--goland).
+
 ## Why F-free
 
 The custom keymap `roj-keymap` redeclares every action JetBrains IDEs map to

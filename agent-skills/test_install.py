@@ -238,7 +238,8 @@ class TestInstallPrompts(TempDirTest):
              mock.patch("install.vscode_prompts_dir",
                         return_value=user_dir / "prompts"):
             results = install.install_prompts(dry_run=False)
-        self.assertEqual(results, [("copilot", "prompt:explain-code.prompt", "installed")])
+        self.assertEqual(results,
+                         [("copilot", "prompt:explain-code", "installed")])
         self.assertEqual((user_dir / "prompts" / "explain-code.prompt.md").read_text(),
                          "prompt body")
 
@@ -379,7 +380,7 @@ class TestInstallPromptsFilter(TempDirTest):
                         return_value=user_dir / "prompts"):
             results = install.install_prompts(dry_run=False,
                                               names={"b.prompt.md"})
-        self.assertEqual([r[1] for r in results], ["prompt:b.prompt"])
+        self.assertEqual([r[1] for r in results], ["prompt:b"])
         self.assertFalse((user_dir / "prompts" / "a.prompt.md").exists())
 
 
@@ -668,6 +669,202 @@ class TestUninstall(TempDirTest):
             dry_run=True)
         self.assertEqual(results, [("claude", "code-tour", "removed")])
         self.assertTrue((dest / "code-tour").exists())
+
+
+class TestResolveRepo(TempDirTest):
+    def test_missing_dir_exits(self):
+        with self.assertRaises(SystemExit):
+            install.resolve_repo(self.tmp / "nope")
+
+    def test_file_path_exits(self):
+        f = self.tmp / "a-file"
+        f.write_text("x")
+        with self.assertRaises(SystemExit):
+            install.resolve_repo(f)
+
+    def test_git_dir_does_not_warn(self):
+        (self.tmp / ".git").mkdir()
+        with mock.patch("install.warn") as warned:
+            self.assertEqual(install.resolve_repo(self.tmp),
+                             self.tmp.resolve())
+        warned.assert_not_called()
+
+    def test_git_file_worktree_does_not_warn(self):
+        (self.tmp / ".git").write_text("gitdir: /elsewhere")
+        with mock.patch("install.warn") as warned:
+            install.resolve_repo(self.tmp)
+        warned.assert_not_called()
+
+    def test_plain_dir_warns_but_returns_path(self):
+        with mock.patch("install.warn") as warned:
+            self.assertEqual(install.resolve_repo(self.tmp),
+                             self.tmp.resolve())
+        warned.assert_called_once()
+
+
+class TestTargetRootRepo(TempDirTest):
+    def test_repo_root_is_dot_github_skills(self):
+        self.assertEqual(install.target_root("repo", repo=self.tmp),
+                         self.tmp / ".github" / "skills")
+
+    def test_home_targets_unchanged(self):
+        with mock.patch("install.Path.home", return_value=self.tmp):
+            self.assertEqual(install.target_root("copilot"),
+                             self.tmp / ".copilot" / "skills")
+            self.assertEqual(install.target_root("claude"),
+                             self.tmp / ".claude" / "skills")
+
+
+class TestPickTargetsRepo(TempDirTest):
+    def test_repo_only_skips_menu(self):
+        # No input mock: a prompt here would raise OSError, not hang.
+        self.assertEqual(install.pick_targets(None, repo=self.tmp), ["repo"])
+
+    def test_repo_appended_to_explicit_target(self):
+        self.assertEqual(install.pick_targets("copilot", repo=self.tmp),
+                         ["copilot", "repo"])
+        self.assertEqual(install.pick_targets("both", repo=self.tmp),
+                         ["copilot", "claude", "repo"])
+
+
+class TestStatusTargets(TempDirTest):
+    def test_table(self):
+        cases = [
+            ((None, None), ["copilot", "claude"]),
+            ((None, self.tmp), ["repo"]),
+            (("both", self.tmp), ["copilot", "claude", "repo"]),
+            (("claude", None), ["claude"]),
+            (("copilot", self.tmp), ["copilot", "repo"]),
+        ]
+        for (target, repo), expected in cases:
+            with self.subTest(target=target, repo=bool(repo)):
+                self.assertEqual(install.status_targets(target, repo),
+                                 expected)
+
+
+class TestPromptsDirFor(TempDirTest):
+    def test_repo_dir(self):
+        self.assertEqual(install.prompts_dir_for("repo", repo=self.tmp),
+                         self.tmp / ".github" / "prompts")
+
+    def test_copilot_delegates_to_vscode_dir(self):
+        with mock.patch("install.vscode_prompts_dir",
+                        return_value=self.tmp / "prompts"):
+            self.assertEqual(install.prompts_dir_for("copilot"),
+                             self.tmp / "prompts")
+
+    def test_claude_is_none(self):
+        self.assertIsNone(install.prompts_dir_for("claude"))
+
+
+class TestInstallPromptsRepo(TempDirTest):
+    def setUp(self):
+        super().setUp()
+        self.prompts_src = self.tmp / "prompts"
+        self.prompts_src.mkdir()
+        (self.prompts_src / "create-sb.prompt.md").write_text("sb body")
+        self.repo = self.tmp / "work-repo"
+        self.repo.mkdir()
+
+    def install(self, dry_run=False):
+        with mock.patch("install.PROMPTS_SRC", self.prompts_src):
+            return install.install_prompts(dry_run, target="repo",
+                                           repo=self.repo)
+
+    def test_writes_into_dot_github_prompts(self):
+        results = self.install()
+        self.assertEqual(results,
+                         [("repo", "prompt:create-sb", "installed")])
+        dest = self.repo / ".github" / "prompts" / "create-sb.prompt.md"
+        self.assertEqual(dest.read_text(), "sb body")
+
+    def test_dry_run_creates_nothing(self):
+        self.install(dry_run=True)
+        self.assertFalse((self.repo / ".github").exists())
+
+    def test_second_run_up_to_date(self):
+        self.install()
+        self.assertEqual(self.install()[0][2], "up to date")
+
+
+class TestUninstallPrompts(TempDirTest):
+    def setUp(self):
+        super().setUp()
+        self.pdir = self.tmp / ".github" / "prompts"
+        self.pdir.mkdir(parents=True)
+        self.f = self.pdir / "create-sb.prompt.md"
+        self.f.write_text("body")
+
+    def test_removes_existing(self):
+        results = install.uninstall_prompts(["prompt:create-sb"], "repo",
+                                            self.pdir, dry_run=False)
+        self.assertEqual(results, [("repo", "prompt:create-sb", "removed")])
+        self.assertFalse(self.f.exists())
+
+    def test_skips_non_prompt_names(self):
+        self.assertEqual(
+            install.uninstall_prompts(["explain-logic"], "repo", self.pdir,
+                                      dry_run=False), [])
+
+    def test_not_installed(self):
+        results = install.uninstall_prompts(["prompt:ghost"], "repo",
+                                            self.pdir, dry_run=False)
+        self.assertEqual(results,
+                         [("repo", "prompt:ghost", "not installed")])
+
+    def test_missing_prompts_dir_reports_not_installed(self):
+        results = install.uninstall_prompts(["prompt:create-sb"], "copilot",
+                                            None, dry_run=False)
+        self.assertEqual(results,
+                         [("copilot", "prompt:create-sb", "not installed")])
+
+    def test_dry_run_keeps_file(self):
+        results = install.uninstall_prompts(["prompt:create-sb"], "repo",
+                                            self.pdir, dry_run=True)
+        self.assertEqual(results, [("repo", "prompt:create-sb", "removed")])
+        self.assertTrue(self.f.exists())
+
+
+class TestCommunityRepoPolicy(TestInstallCommunityForTarget):
+    def test_repo_skipped_without_the_personal_scope_note(self):
+        dest = self.tmp / "dest"
+        with mock.patch("install.SOURCES", self.fake_sources()):
+            results = install.install_community_for_target(
+                "repo", dest, {"cop-only"}, dry_run=False)
+        self.assertEqual(results,
+                         [("repo", "cop-only", "skipped (not for repo)")])
+
+    def test_repo_installs_when_eligible(self):
+        sources = self.fake_sources()
+        sources[0]["skills"]["tool-x"]["targets"] = install.ANY
+        dest = self.tmp / "dest"
+        with mock.patch("install.SOURCES", sources):
+            results = install.install_community_for_target(
+                "repo", dest, {"tool-x"}, dry_run=False)
+        self.assertEqual(results, [("repo", "tool-x", "installed")])
+        self.assertTrue((dest / "tool-x" / "SKILL.md").is_file())
+
+
+class TestPromptFrontmatter(unittest.TestCase):
+    """'mode:' is the documented key; 'agent:' is silently ignored."""
+
+    def test_every_prompt_declares_mode_agent(self):
+        files = sorted(install.PROMPTS_SRC.glob("*.prompt.md"))
+        self.assertTrue(files)
+        for f in files:
+            with self.subTest(prompt=f.name):
+                head = f.read_text().split("---")[1].splitlines()
+                keys = [line.split(":", 1)[0] for line in head if ":" in line]
+                self.assertIn("mode", keys)
+                self.assertNotIn("agent", keys)
+
+
+class TestPromptStem(unittest.TestCase):
+    def test_strips_both_suffixes(self):
+        self.assertEqual(install.prompt_stem("create-sb.prompt.md"),
+                         "create-sb")
+        self.assertEqual(install.prompt_stem(Path("/x/explain-code.prompt.md")),
+                         "explain-code")
 
 
 if __name__ == "__main__":

@@ -7,12 +7,14 @@ lens (Java / Python / Go / shell / Bamboo API).
 ## Commands per platform
 
 VS Code gets the `/explain-code` and `/explain-and-review` slash commands
-(from `prompts/`). IntelliJ has no prompt files — use the plain-English
-prompts; the skill triggers on the phrasing. If a skill doesn't trigger,
-name it once ("Use the explain-logic skill to ...") — after one explicit
-use it picks up reliably. Claude Code triggers on the same phrasing.
+(from `prompts/`) everywhere. JetBrains gets the same two, but only in a repo
+seeded with `install.py --repo .` — prompt files are repo-scoped there. In an
+unseeded project use the plain-English prompts; the skill triggers on the
+phrasing. If a skill doesn't trigger, name it once ("Use the explain-logic
+skill to ...") — after one explicit use it picks up reliably. Claude Code
+triggers on the same phrasing.
 
-| Goal | VS Code | IntelliJ / Claude Code |
+| Goal | VS Code / JetBrains (seeded repo) | Plain chat / Claude Code |
 |---|---|---|
 | Understand a feature branch | `/explain-code the changes in this branch vs main` | `Use the explain-logic skill: walk me through the changes in this branch vs main` |
 | Understand a PR | `/explain-code PR #142` | `Use the explain-logic skill: explain PR #142` |

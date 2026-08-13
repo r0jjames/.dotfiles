@@ -8,6 +8,11 @@ skill fetching and the Copilot target).
                 Windows symlinks need Developer Mode or admin, so the
                 installer falls back to copies there; re-run after editing
                 a skill to refresh them.
+
+~/.copilot/skills is personal scope: it serves Copilot in JetBrains IDEs as
+well as VS Code. Prompt files (the /create-sb-style slash commands) are not
+part of this step — they are repo-scoped for JetBrains, seeded per project
+with `agent-skills/install.py --repo <path>`.
 """
 from __future__ import annotations
 

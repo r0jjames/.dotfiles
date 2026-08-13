@@ -14,7 +14,11 @@ manually.
 
 ## Commands per platform
 
-| Flow | VS Code Copilot (slash) | IntelliJ Copilot / any chat | Claude Code |
+Slash commands work in VS Code everywhere, and in JetBrains (IntelliJ,
+PyCharm, GoLand) inside a repo seeded with `install.py --repo .` — prompt
+files are repo-scoped there. Anywhere else, name the skill in plain English.
+
+| Flow | VS Code / JetBrains (seeded repo) | Any chat, unseeded | Claude Code |
 |---|---|---|---|
 | Create SB | `/create-sb LISA-110278.md` | `Use the soundboarding skill: create an SB from LISA-110278.md` | `create an SB document from LISA-110278.md` |
 | Implement SB | `/implement-sb SB-LISA-110278` | `Use the soundboarding skill: implement SB-LISA-110278` | `implement SB-LISA-110278` |

@@ -1,5 +1,5 @@
 ---
-agent: agent
+mode: agent
 description: Generate a soundboarding (SB) document from a user story, with codebase-investigated core tasks
 ---
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install agent skills globally for GitHub Copilot and/or Claude Code.
+"""Install agent skills for GitHub Copilot and/or Claude Code.
 
 Usage:
   python3 install.py --target claude
@@ -7,11 +7,18 @@ Usage:
   python3 install.py --target both --dry-run
   python3 install.py                # interactive: pick target + items
   python3 install.py --target claude --skills-only   # skip community fetch
+  python3 install.py --repo .       # seed .github/skills + .github/prompts
 
 Python >= 3.8, standard library only.
 Copilot gets copies; Claude gets per-skill symlinks (edit the repo, changes
 are live). On filesystems without symlink support the installer falls back
 to copying.
+
+Two scopes. Personal scope (--target) writes to ~/.copilot/skills and
+~/.claude/skills and, for Copilot, the VS Code user prompts dir. Repo scope
+(--repo) writes copies into <repo>/.github/{skills,prompts} — the only scope
+JetBrains Copilot reads prompt files from, so it is what gives IntelliJ,
+PyCharm and GoLand the /create-sb-style slash commands.
 """
 import argparse
 import filecmp
@@ -35,6 +42,11 @@ ADDY_REPO_URL = "https://github.com/addyosmani/agent-skills.git"
 ADDY_BRANCH = "main"
 
 BOTH = ("copilot", "claude")
+# Also safe to vendor into a repo's .github/ for the whole team.
+ANY = BOTH + ("repo",)
+
+REPO_SKILLS_SUBDIR = Path(".github") / "skills"
+REPO_PROMPTS_SUBDIR = Path(".github") / "prompts"
 
 # Community sources. Per skill: targets it may install to, whether it is
 # pre-selected (default) or an explicit cherry-pick, and an optional note
@@ -47,12 +59,12 @@ SOURCES = [
         "cache": "awesome-copilot",
         "fallback": ZIP_FALLBACK_URL,
         "skills": {
-            "code-tour": {"targets": BOTH, "default": True},
-            "acquire-codebase-knowledge": {"targets": BOTH, "default": True},
-            "context-map": {"targets": BOTH, "default": True},
-            "architecture-blueprint-generator": {"targets": BOTH,
+            "code-tour": {"targets": ANY, "default": True},
+            "acquire-codebase-knowledge": {"targets": ANY, "default": True},
+            "context-map": {"targets": ANY, "default": True},
+            "architecture-blueprint-generator": {"targets": ANY,
                                                  "default": True},
-            "add-educational-comments": {"targets": BOTH, "default": True},
+            "add-educational-comments": {"targets": ANY, "default": True},
         },
     },
     {
@@ -228,25 +240,55 @@ def install_symlink(src, dest, dry_run):
         return install_copy(src, dest, dry_run=False) + " (copy fallback)"
 
 
-def target_root(target):
+def resolve_repo(path):
+    """Validate a --repo value. Exits when it is not a directory; warns but
+    proceeds when it has no .git (a worktree's .git is a file, not a dir)."""
+    repo = Path(path).expanduser().resolve()
+    if not repo.is_dir():
+        sys.exit(f"--repo {path}: not a directory")
+    if repo == REPO_ROOT or repo == REPO_ROOT.parent:
+        warn(f"{repo} is the dotfiles repo itself — seeding it anyway")
+    elif not (repo / ".git").exists():
+        warn(f"{repo} has no .git — seeding .github/ there anyway")
+    return repo
+
+
+def target_root(target, repo=None):
+    if target == "repo":
+        return Path(repo) / REPO_SKILLS_SUBDIR
     return Path.home() / (".copilot" if target == "copilot"
                           else ".claude") / "skills"
 
 
-def pick_targets(arg_target):
-    """Resolve --target value (or interactive menu) to a list of targets."""
+def pick_targets(arg_target, repo=None):
+    """Resolve --target value (or interactive menu) to a list of targets.
+    --repo appends the 'repo' pseudo-target and suppresses the menu."""
+    targets = []
     if arg_target:
-        return ["copilot", "claude"] if arg_target == "both" else [arg_target]
-    print("Install skills for:")
-    print("  1) GitHub Copilot   (~/.copilot/skills + VS Code prompts)")
-    print("  2) Claude Code      (~/.claude/skills, symlinked)")
-    print("  3) Both")
-    choice = input("Choice [1-3]: ").strip()
-    targets = {"1": ["copilot"], "2": ["claude"],
-               "3": ["copilot", "claude"]}.get(choice)
-    if not targets:
-        sys.exit("Invalid choice — run again or pass --target.")
+        targets = (["copilot", "claude"] if arg_target == "both"
+                   else [arg_target])
+    elif not repo:
+        print("Install skills for:")
+        print("  1) GitHub Copilot   (~/.copilot/skills + VS Code prompts)")
+        print("  2) Claude Code      (~/.claude/skills, symlinked)")
+        print("  3) Both")
+        choice = input("Choice [1-3]: ").strip()
+        targets = {"1": ["copilot"], "2": ["claude"],
+                   "3": ["copilot", "claude"]}.get(choice)
+        if not targets:
+            sys.exit("Invalid choice — run again or pass --target.")
+    if repo:
+        targets = targets + ["repo"]
     return targets
+
+
+def status_targets(arg_target, repo):
+    """Target list for --status. Never prompts."""
+    if arg_target:
+        base = ["copilot", "claude"] if arg_target == "both" else [arg_target]
+    else:
+        base = [] if repo else ["copilot", "claude"]
+    return base + (["repo"] if repo else [])
 
 
 def build_items(custom_skills, prompt_files):
@@ -332,14 +374,30 @@ def vscode_prompts_dir():
     return None
 
 
-def install_prompts(dry_run, names=None):
-    """Copy prompts/*.prompt.md into the VS Code user prompts dir.
+def prompt_stem(path):
+    """'create-sb.prompt.md' -> 'create-sb' (the slash command, and the
+    name --uninstall prompt:<stem> expects)."""
+    return Path(Path(path).stem).stem
+
+
+def prompts_dir_for(target, repo=None):
+    """Where *.prompt.md go for a target, or None when it has no prompts."""
+    if target == "repo":
+        return Path(repo) / REPO_PROMPTS_SUBDIR
+    if target == "copilot":
+        return vscode_prompts_dir()
+    return None                      # claude does not use prompt files
+
+
+def install_prompts(dry_run, names=None, target="copilot", repo=None):
+    """Copy prompts/*.prompt.md into the target's prompts dir.
     names: optional set of file names to install; None = all."""
     results = []
-    user_dir = vscode_prompts_dir()
+    user_dir = prompts_dir_for(target, repo)
     if user_dir is None:
         warn("VS Code user dir not found — prompt files not installed.")
-        warn("Per-repo alternative: copy prompts/*.prompt.md into .github/prompts/")
+        warn("Per-repo alternative: install.py --repo <path> writes them "
+             "into .github/prompts/")
         return results
     if not dry_run:
         user_dir.mkdir(parents=True, exist_ok=True)
@@ -353,7 +411,24 @@ def install_prompts(dry_run, names=None):
             status = "updated" if dest.exists() else "installed"
             if not dry_run:
                 shutil.copy2(p, dest)
-        results.append(("copilot", f"prompt:{p.stem}", status))
+        results.append((target, f"prompt:{prompt_stem(p)}", status))
+    return results
+
+
+def uninstall_prompts(names, target, prompts_dir, dry_run):
+    """Remove 'prompt:<stem>' entries from a target's prompts dir."""
+    results = []
+    for n in names:
+        if not n.startswith("prompt:"):
+            continue
+        stem = n[len("prompt:"):]
+        f = prompts_dir / f"{stem}.prompt.md" if prompts_dir else None
+        if f and f.is_file():
+            if not dry_run:
+                f.unlink()
+            results.append((target, n, "removed"))
+        else:
+            results.append((target, n, "not installed"))
     return results
 
 
@@ -451,8 +526,11 @@ def install_community_for_target(target, dest_root, sel_community, dry_run):
             if name not in sel_community:
                 continue
             if target not in meta["targets"]:
-                note = meta.get("note", "not for " + target)
-                results.append((target, name, f"skipped ({note})"))
+                # The per-skill note explains a personal-scope exclusion; for
+                # repo scope it would be misleading.
+                note = (meta.get("note") if target in BOTH else None)
+                results.append((target, name,
+                                f"skipped ({note or 'not for ' + target})"))
                 continue
             if not cache:
                 continue
@@ -532,19 +610,24 @@ def gather_status(target, dest_root, custom_names, plugin_map):
     return rows, warnings
 
 
-def show_status(targets):
+def show_status(targets, repo=None):
     custom_names = {p.name for p in SKILLS_SRC.iterdir() if p.is_dir()}
     plugin_map = plugin_skills()
     all_warnings = []
     for target in targets:
-        dest_root = target_root(target)
+        dest_root = target_root(target, repo)
         print(f"\n{target}: {dest_root}")
         rows, warnings = gather_status(target, dest_root, custom_names,
                                        plugin_map)
-        if not rows:
+        prompts_dir = prompts_dir_for(target, repo)
+        prompts = (sorted(prompts_dir.glob("*.prompt.md"))
+                   if prompts_dir and prompts_dir.is_dir() else [])
+        if not rows and not prompts:
             print("  (nothing installed)")
         for name, kind, mech in rows:
             print(f"  {name:35} {kind:32} {mech}")
+        for p in prompts:
+            print(f"  {prompt_stem(p):35} {'prompt file':32} copy")
         all_warnings.extend(warnings)
     print()
     if all_warnings:
@@ -588,6 +671,11 @@ def print_summary(results, targets, dry_run):
     if "claude" in targets:
         log("Verify Claude:   ask 'what skills are available?' in a new "
             "claude session")
+    if "repo" in targets:
+        log("Verify JetBrains: reopen the project, Copilot Chat -> Agent "
+            "mode, type '/' — the prompt files list as slash commands")
+        log("These files are tracked by git — PR them for the team, or keep "
+            "them local with: echo .github/ >> .git/info/exclude")
 
 
 def main():
@@ -606,15 +694,19 @@ def main():
     ap.add_argument("--force", action="store_true",
                     help="allow --uninstall of names the installer does "
                          "not know")
+    ap.add_argument("--repo", metavar="PATH",
+                    help="also seed <PATH>/.github/skills and "
+                         "<PATH>/.github/prompts (repo scope — the only "
+                         "scope JetBrains Copilot reads prompt files from)")
     args = ap.parse_args()
+    repo = resolve_repo(args.repo) if args.repo else None
 
     if args.status:
-        show_status(["copilot", "claude"] if args.target in (None, "both")
-                    else [args.target])
+        show_status(status_targets(args.target, repo), repo)
         return
 
     if args.uninstall:
-        targets = pick_targets(args.target)
+        targets = pick_targets(args.target, repo)
         names = [n.strip() for n in args.uninstall.split(",") if n.strip()]
         known = ({p.name for p in SKILLS_SRC.iterdir() if p.is_dir()}
                  | all_community_names())
@@ -622,27 +714,17 @@ def main():
         for target in targets:
             skills = [n for n in names if not n.startswith("prompt:")]
             results.extend(uninstall_skills(
-                skills, target, target_root(target), known,
+                skills, target, target_root(target, repo), known,
                 args.force, args.dry_run))
-            if target == "copilot":
-                prompts_dir = vscode_prompts_dir()
-                for n in names:
-                    if not n.startswith("prompt:"):
-                        continue
-                    stem = n[len("prompt:"):]
-                    f = (prompts_dir / f"{stem}.prompt.md"
-                         if prompts_dir else None)
-                    if f and f.is_file():
-                        if not args.dry_run:
-                            f.unlink()
-                        results.append((target, n, "removed"))
-                    else:
-                        results.append((target, n, "not installed"))
+            if target in ("copilot", "repo"):
+                results.extend(uninstall_prompts(
+                    names, target, prompts_dir_for(target, repo),
+                    args.dry_run))
         print_summary(results, targets, args.dry_run)
         return
 
-    interactive = args.target is None
-    targets = pick_targets(args.target)
+    interactive = args.target is None and repo is None
+    targets = pick_targets(args.target, repo)
     custom = sorted(p for p in SKILLS_SRC.iterdir() if p.is_dir())
     if not custom:
         sys.exit(f"No skills found in {SKILLS_SRC}")
@@ -679,7 +761,7 @@ def main():
 
     results = []
     for target in targets:
-        dest_root = target_root(target)
+        dest_root = target_root(target, repo)
         log(f"Target {target}: {dest_root}")
         if not args.dry_run:
             dest_root.mkdir(parents=True, exist_ok=True)
@@ -693,8 +775,9 @@ def main():
             results.append((target, skill.name, status))
         results.extend(install_community_for_target(
             target, dest_root, sel_community, args.dry_run))
-        if target == "copilot":
-            results.extend(install_prompts(args.dry_run, names=sel_prompts))
+        if target in ("copilot", "repo"):
+            results.extend(install_prompts(args.dry_run, names=sel_prompts,
+                                           target=target, repo=repo))
 
     print_summary(results, targets, args.dry_run)
 
