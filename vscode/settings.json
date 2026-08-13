@@ -34,7 +34,5 @@
     },
     "[python]": {
         "editor.formatOnSave": true
-    },
-    "editor.acceptSuggestionOnEnter": "off",
-    "editor.inlineSuggest.suppressSuggestions": true
+    }
 }
