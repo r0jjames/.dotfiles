@@ -57,6 +57,11 @@ golang.go
 # ---- JS ----
 dbaeumer.vscode-eslint
 
+# ---- Docs / walkthroughs ----
+# Opens the .tours/ files the walkthrough skills write (explain-logic,
+# investigate-issue, soundboarding, acquire-codebase-knowledge).
+vsls-contrib.codetour
+
 # ---- Markdown ----
 bierner.github-markdown-preview
 bierner.markdown-preview-github-styles

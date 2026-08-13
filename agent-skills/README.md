@@ -20,6 +20,13 @@ installer. One `SKILL.md` format serves both platforms.
 - `install.py` — installer for macOS, Linux and Windows/Git Bash
   (Python >= 3.8, stdlib only).
 
+`explain-logic`, `soundboarding` and `investigate-issue` each end a run by
+writing a CodeTour file into `.tours/` in the repo they worked on (chaining to
+the community `code-tour` skill), skipping only trivial single-file cases. The
+[`git`](../git/README.md) tool keeps `.tours/` out of every repository, and
+`vsls-contrib.codetour` in [`vscode/extensions.txt`](../vscode/extensions.txt)
+opens the files.
+
 ## Install
 
 ```bash

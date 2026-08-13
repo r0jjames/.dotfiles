@@ -83,6 +83,8 @@ story.
    and ask before overwriting.
 6. **Report.** End with a short summary: repositories investigated, findings
    verified vs assumed, and the open questions for team refinement.
+7. **Tour.** Write the tour of the code the core tasks will touch (see Tour
+   output) — it makes the investigation reviewable in the editor.
 
 See `examples/LISA-110278.md` (story) and `examples/sb-LISA-110278.md`
 (resulting SB) for the expected shape.
@@ -125,6 +127,8 @@ Multiple matches: list them and ask which. No match: STOP and ask.
 6. **Wrap-up.** Update the SB file (checkboxes, Testing table, add learnings
    to Notes). Report a per-repository list of changed files for manual
    review and commit, plus the manual tasks still open.
+7. **Tour.** Refresh the tour (see Tour output) so it walks the code as
+   implemented, not as planned.
 
 ## Flow 3: Create + implement in one run
 
@@ -137,3 +141,33 @@ is skipped.
    If declined, stop; the SB file stays as created.
 3. On confirmation, run Flow 2 on the SB file just created — including every
    per-task review stop and the no-git rule.
+
+## Tour output
+
+Both flows end with a replayable CodeTour of the affected code, so the SB is
+reviewable in the editor and not only as prose.
+
+- **Path**: `.tours/sb-<LISA-id>.tour` in the primary target repository
+  (`SB-LISA-110278.md` → `.tours/sb-LISA-110278.tour`). Tasks spanning
+  repositories: one tour per repository, same name.
+- **Persona**: `contributor`.
+- **Steps**: Flow 1 — the `file:line` findings behind the core tasks, in the
+  order the tasks are listed. Flow 2 — the same tour refreshed to the code as
+  implemented, one step per changed location. Never investigate a second time
+  to build the tour.
+- **How**: chain to the `code-tour` skill. Missing? Write the tour inline —
+  a JSON object with `$schema`, `title`, `description` and `steps` of
+  `{file, line, description}` is enough for CodeTour to open it.
+- **Validate**: `code-tour` ships `scripts/validate_tour.py`. Resolve it from
+  the code-tour skill directory that is actually installed
+  (`~/.claude/skills/code-tour/`, or `~/.copilot/skills/code-tour/`) — its
+  SKILL.md documents a `~/.agents/...` path that does not exist here.
+
+Skip the tour only when ALL hold: one file, no cross-file flow, under ~3
+steps. Then say so in one line with the reason. The user asking for a tour
+overrides a skip; "no tour" overrides the default. An SB with only non-code
+tasks has nothing to walk: skip it and say so.
+
+`.tours/` is in the global git ignore, so tours stay local — never add them
+to the repo's `.gitignore` or commit them. This does not weaken the no-git
+rule: writing a tour file is not a git operation.

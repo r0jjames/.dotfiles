@@ -79,12 +79,37 @@ Never jump straight to line-by-line.
 |---|---|
 | context-map | fuzzy scope: map all relevant files before explaining |
 | acquire-codebase-knowledge | new repo or repo-wide question: build the codebase map first |
-| code-tour | after any walkthrough, offer a replayable `.tours/*.tour` |
+| code-tour | always — writes the `.tour` (see Tour output below) |
 | architecture-blueprint-generator | change touches system structure: refresh the architecture doc |
 | add-educational-comments | offer AFTER the walkthrough; never add comments without asking |
 | caveman | user asks terse/brief/save tokens: apply it to the output |
 
-Chain: context-map → acquire-codebase-knowledge → this skill → code-tour (optional).
+Chain: context-map → acquire-codebase-knowledge → this skill → code-tour.
+
+## Tour output
+
+Every walkthrough ends with a replayable CodeTour file, so the explanation
+outlives the session.
+
+- **Path**: `.tours/explain-<branch-or-file>.tour` in the repo being explained.
+- **Persona**: `pr-reviewer` for a PR/branch, `new-joiner` for a file/function.
+- **Steps**: the Flow section from step 3, in execution order — one step per
+  `file:line` already quoted. Never re-investigate the repo to build the tour.
+- **How**: chain to the `code-tour` skill. Missing? Write the tour inline —
+  a JSON object with `$schema`, `title`, `description` and `steps` of
+  `{file, line, description}` is enough for CodeTour to open it.
+- **Validate**: `code-tour` ships `scripts/validate_tour.py`. Resolve it from
+  the code-tour skill directory that is actually installed
+  (`~/.claude/skills/code-tour/`, or `~/.copilot/skills/code-tour/`) — its
+  SKILL.md documents a `~/.agents/...` path that does not exist here.
+
+Skip the tour only when ALL hold: one file, no cross-file flow, under ~3
+steps. Then say so in one line with the reason — "No tour — single function,
+the walkthrough covers it." The user asking for a tour overrides a skip;
+"no tour" overrides the default.
+
+`.tours/` is in the global git ignore, so tours stay local — never add them
+to the repo's `.gitignore` or commit them unless asked.
 
 ## Explain-and-review mode
 

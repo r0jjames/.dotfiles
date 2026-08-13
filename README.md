@@ -59,6 +59,7 @@ are left installed — the summary lists them for manual removal.
 |---|---|---|
 | [`zsh/`](zsh/README.md) | zsh, CLI tools (bat, eza, fzf, zoxide, ripgrep, fd, htop), plugins, `~/.zshrc` | macOS, WSL |
 | [`starship/`](starship/README.md) | Starship prompt + config | macOS, WSL |
+| [`git/`](git/README.md) | Global git ignore (`.tours/`, agent leftovers) + `core.excludesFile` | macOS, WSL, Windows (Git Bash) |
 | [`nvim/`](nvim/README.md) | Neovim DevOps IDE (k8s, Helm, Docker, Python, Ansible, Terraform) | macOS, WSL |
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |

@@ -6,7 +6,7 @@ VS Code settings, keybindings, and a curated extension list — same editor on p
 
 - [`settings.json`](settings.json) — Solarized Light, vscode-icons, MesloLGS Nerd Font (editor + terminal), autosave, git smart-commit/autofetch, per-language format-on-save
 - [`keybindings.json`](keybindings.json) — custom terminal/file-tree/navigation keybindings
-- [`extensions.txt`](extensions.txt) — curated extension ids, grouped by purpose (DevOps, Remote/WSL, Python, Java, Go, Markdown, AI, utilities)
+- [`extensions.txt`](extensions.txt) — curated extension ids, grouped by purpose (DevOps, Remote/WSL, Python, Java, Go, Markdown, AI, docs/walkthroughs, utilities)
 
 ### Platform tags in extensions.txt
 

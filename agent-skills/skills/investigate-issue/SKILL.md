@@ -128,3 +128,31 @@ the Solution and note that a matching awesome-copilot
 - **Manual fix** (Bamboo admin, agent host, capabilities, env): the
   numbered instructions in the report are the deliverable. Never attempt
   to apply these.
+
+## Phase 7 — Tour
+
+Write a replayable CodeTour walking the failure path, so the next person
+hitting this bug can step through the evidence instead of rereading prose.
+
+- **Path**: `.tours/rca-<problem-name>.tour` — same stem as the report, so
+  `LISA-123.md` gives `LISA-123-investigation.md` and `.tours/rca-LISA-123.tour`.
+- **Persona**: `bug-fixer`.
+- **Steps**: the report's Evidence section, in failure order — one step per
+  `file:line` finding, ending at the fix location. Each description says what
+  this line contributes to the failure. Never re-investigate to build the tour.
+- **How**: chain to the `code-tour` skill. Missing? Write the tour inline —
+  a JSON object with `$schema`, `title`, `description` and `steps` of
+  `{file, line, description}` is enough for CodeTour to open it.
+- **Validate**: `code-tour` ships `scripts/validate_tour.py`. Resolve it from
+  the code-tour skill directory that is actually installed
+  (`~/.claude/skills/code-tour/`, or `~/.copilot/skills/code-tour/`) — its
+  SKILL.md documents a `~/.agents/...` path that does not exist here.
+
+Skip the tour only when ALL hold: one file, no cross-file flow, under ~3
+steps. Then say so in one line with the reason — "No tour — one-line fix in a
+single script." The user asking for a tour overrides a skip; "no tour"
+overrides the default. A root cause outside the repo (Bamboo config, agent
+host) has no code path to walk: skip it and say so.
+
+`.tours/` is in the global git ignore, so tours stay local — never add them
+to the repo's `.gitignore` or commit them unless asked.

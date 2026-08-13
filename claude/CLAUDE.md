@@ -10,6 +10,14 @@
   `.claude/settings.json` `enabledPlugins` (see `worship-lineup` for the pattern).
 - The `MCP_DOCKER` MCP server only connects when Rancher Desktop is
   running; a failed connection there is expected, not a config bug.
+- Walkthrough skills (`explain-logic`, `investigate-issue`, `soundboarding`,
+  `acquire-codebase-knowledge`) end by writing a CodeTour file into `.tours/`
+  in the repo being worked on — chain to the `code-tour` skill, built from
+  evidence already gathered, no second investigation pass. Skip it only when
+  all of: one file, no cross-file flow, under ~3 steps — then say so in one
+  line with the reason. "make a tour" overrides a skip, "no tour" overrides
+  the default. `.tours/` is in the global git ignore (`git/ignore`), so tours
+  stay local.
 - Commits to ANY repository use Roj's git identity ONLY. Never add Claude as an
   author, co-author, or trailer (no `Co-Authored-By`, no `Claude-Session`, no
   "Generated with Claude" footers) in commit messages or PR bodies.

@@ -9,6 +9,16 @@ Creates CodeTour `.tour` walkthroughs through a repo, PR, or bug.
 - `Create a code tour of the auth flow for a new joiner`
 - `Make an RCA tour for the bug fixed in PR #97`
 
+`explain-logic`, `investigate-issue` and `soundboarding` chain to this skill
+at the end of a run and fall back to writing a minimal `.tour` inline when it
+is absent.
+
+Upstream gotcha: its `SKILL.md` documents the bundled scripts at
+`~/.agents/skills/code-tour/scripts/`, a path this installer never creates —
+skills land in `~/.claude/skills/` and `~/.copilot/skills/`. Resolve
+`validate_tour.py` from the installed skill directory instead. The community
+copy is deliberately not patched; a re-fetch would overwrite the change.
+
 ## acquire-codebase-knowledge
 Maps and documents an existing codebase for onboarding.
 - `Map this codebase and create onboarding docs`
