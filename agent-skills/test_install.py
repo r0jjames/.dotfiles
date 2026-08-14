@@ -1,3 +1,4 @@
+import json
 import os
 import shutil
 import subprocess
@@ -857,6 +858,135 @@ class TestPromptFrontmatter(unittest.TestCase):
                 keys = [line.split(":", 1)[0] for line in head if ":" in line]
                 self.assertIn("mode", keys)
                 self.assertNotIn("agent", keys)
+
+
+class TestParsePrompt(TempDirTest):
+    def write(self, text):
+        p = self.tmp / "create-sb.prompt.md"
+        p.write_text(text, encoding="utf-8")
+        return p
+
+    def test_reads_description_and_body(self):
+        p = self.write("---\nmode: agent\ndescription: Make an SB\n---\n\n"
+                       "Body line.\n")
+        self.assertEqual(install.parse_prompt(p), ("Make an SB", "Body line."))
+
+    def test_strips_quotes_around_description(self):
+        p = self.write("---\ndescription: 'Quoted: with colon'\n---\nBody\n")
+        self.assertEqual(install.parse_prompt(p)[0], "Quoted: with colon")
+
+    def test_no_frontmatter_falls_back_to_stem(self):
+        p = self.write("Just a body\n")
+        self.assertEqual(install.parse_prompt(p), ("create-sb", "Just a body"))
+
+    def test_unterminated_frontmatter_falls_back_to_stem(self):
+        p = self.write("---\ndescription: dangling\nBody\n")
+        self.assertEqual(install.parse_prompt(p)[0], "create-sb")
+
+    def test_empty_description_falls_back_to_stem(self):
+        p = self.write("---\ndescription:   \n---\nBody\n")
+        self.assertEqual(install.parse_prompt(p)[0], "create-sb")
+
+
+class TestPromptSkillText(TempDirTest):
+    def build(self, description="Make an SB"):
+        p = self.tmp / "create-sb.prompt.md"
+        p.write_text(f"---\nmode: agent\ndescription: {description}\n---\n\n"
+                     "Body line.\n", encoding="utf-8")
+        return install.prompt_skill_text(p)
+
+    def test_frontmatter_names_the_skill(self):
+        self.assertIn("name: create-sb", self.build())
+
+    def test_description_is_valid_quoted_yaml_with_triggers(self):
+        line = [l for l in self.build().splitlines()
+                if l.startswith("description:")][0]
+        value = json.loads(line[len("description: "):])
+        self.assertTrue(value.startswith("Make an SB."))
+        self.assertIn('"/create-sb"', value)
+        self.assertIn('"/skill:create-sb"', value)
+
+    def test_description_with_quotes_stays_parseable(self):
+        line = [l for l in self.build('Say "hi" then go').splitlines()
+                if l.startswith("description:")][0]
+        json.loads(line[len("description: "):])   # must not raise
+
+    def test_body_and_provenance_marker(self):
+        text = self.build()
+        self.assertIn("Body line.", text)
+        self.assertIn("Generated from prompts/create-sb.prompt.md", text)
+
+
+class TestInstallPromptSkills(TempDirTest):
+    def setUp(self):
+        super().setUp()
+        self.src = self.tmp / "prompts"
+        self.src.mkdir()
+        (self.src / "create-sb.prompt.md").write_text(
+            "---\ndescription: Make an SB\n---\n\nBody\n", encoding="utf-8")
+        (self.src / "explain-code.prompt.md").write_text(
+            "---\ndescription: Explain\n---\n\nBody\n", encoding="utf-8")
+        self.dest = self.tmp / "skills"
+
+    def run_install(self, dry_run=False, names=None):
+        with mock.patch("install.PROMPTS_SRC", self.src):
+            return install.install_prompt_skills(self.dest, dry_run,
+                                                 names=names)
+
+    def test_one_skill_dir_per_prompt(self):
+        results = self.run_install()
+        self.assertEqual(results,
+                         [("copilot", "create-sb", "installed"),
+                          ("copilot", "explain-code", "installed")])
+        self.assertTrue((self.dest / "create-sb" / "SKILL.md").is_file())
+
+    def test_dry_run_writes_nothing(self):
+        self.run_install(dry_run=True)
+        self.assertFalse(self.dest.exists())
+
+    def test_second_run_up_to_date(self):
+        self.run_install()
+        self.assertEqual([r[2] for r in self.run_install()],
+                         ["up to date", "up to date"])
+
+    def test_edited_prompt_reports_updated(self):
+        self.run_install()
+        (self.src / "create-sb.prompt.md").write_text(
+            "---\ndescription: Make an SB\n---\n\nNew body\n",
+            encoding="utf-8")
+        statuses = dict((r[1], r[2]) for r in self.run_install())
+        self.assertEqual(statuses["create-sb"], "updated")
+        self.assertEqual(statuses["explain-code"], "up to date")
+        self.assertIn("New body",
+                      (self.dest / "create-sb" / "SKILL.md").read_text())
+
+    def test_names_filter(self):
+        results = self.run_install(names={"explain-code.prompt.md"})
+        self.assertEqual([r[1] for r in results], ["explain-code"])
+        self.assertFalse((self.dest / "create-sb").exists())
+
+
+class TestPromptSkillNames(TempDirTest):
+    def test_names_are_the_stems(self):
+        src = self.tmp / "prompts"
+        src.mkdir()
+        (src / "create-sb.prompt.md").write_text("x")
+        (src / "implement-sb.prompt.md").write_text("x")
+        with mock.patch("install.PROMPTS_SRC", src):
+            self.assertEqual(install.prompt_skill_names(),
+                             {"create-sb", "implement-sb"})
+
+
+class TestGatherStatusGenerated(TempDirTest):
+    def test_generated_skills_are_not_unknown(self):
+        dest = self.tmp / "skills"
+        (dest / "create-sb").mkdir(parents=True)
+        (dest / "soundboarding").mkdir()
+        rows, _ = install.gather_status("copilot", dest, {"soundboarding"},
+                                        {}, {"create-sb"})
+        self.assertEqual([(n, k) for n, k, _ in rows],
+                         [("create-sb", "custom (from prompt)"),
+                          ("soundboarding", "custom")])
 
 
 class TestPromptStem(unittest.TestCase):

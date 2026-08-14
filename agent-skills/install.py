@@ -380,6 +380,71 @@ def prompt_stem(path):
     return Path(Path(path).stem).stem
 
 
+def parse_prompt(path):
+    """Split a .prompt.md into (description, body). Description falls back
+    to the stem when the frontmatter has none or is malformed."""
+    text = Path(path).read_text(encoding="utf-8")
+    stem = prompt_stem(path)
+    if not text.startswith("---"):
+        return stem, text.strip()
+    _, _, rest = text.partition("---")
+    front, sep, body = rest.partition("---")
+    if not sep:
+        return stem, text.strip()
+    description = stem
+    for line in front.splitlines():
+        key, _, value = line.partition(":")
+        if key.strip() == "description":
+            description = value.strip().strip("'\"") or stem
+            break
+    return description, body.strip()
+
+
+def prompt_skill_text(path):
+    """SKILL.md body for the skill generated from a prompt file. Copilot
+    reads personal-scope skills from every project, so this is how a
+    /create-sb-style command reaches JetBrains without seeding each repo."""
+    stem = prompt_stem(path)
+    description, body = parse_prompt(path)
+    if not description.endswith("."):
+        description += "."
+    description += (f' Use when the user types "/{stem}", "/skill:{stem}",'
+                    f' or asks for the {stem} workflow by name.')
+    return (
+        "---\n"
+        f"name: {stem}\n"
+        f"description: {json.dumps(description)}\n"
+        "---\n\n"
+        f"{body}\n\n"
+        f"<!-- Generated from prompts/{Path(path).name} by install.py."
+        " Edit the prompt file, not this copy. -->\n"
+    )
+
+
+def prompt_skill_names():
+    return {prompt_stem(p) for p in PROMPTS_SRC.glob("*.prompt.md")}
+
+
+def install_prompt_skills(dest_root, dry_run, names=None):
+    """Write one generated skill per prompt file into dest_root.
+    names: optional set of prompt *file* names; None = all."""
+    results = []
+    for p in sorted(PROMPTS_SRC.glob("*.prompt.md")):
+        if names is not None and p.name not in names:
+            continue
+        dest = dest_root / prompt_stem(p) / "SKILL.md"
+        text = prompt_skill_text(p)
+        if dest.is_file() and dest.read_text(encoding="utf-8") == text:
+            status = "up to date"
+        else:
+            status = "updated" if dest.exists() else "installed"
+            if not dry_run:
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                dest.write_text(text, encoding="utf-8")
+        results.append(("copilot", prompt_stem(p), status))
+    return results
+
+
 def prompts_dir_for(target, repo=None):
     """Where *.prompt.md go for a target, or None when it has no prompts."""
     if target == "repo":
@@ -575,7 +640,8 @@ def plugin_skills(cache_root=None, settings_path=None):
     return out
 
 
-def gather_status(target, dest_root, custom_names, plugin_map):
+def gather_status(target, dest_root, custom_names, plugin_map,
+                  generated_names=frozenset()):
     """Classify installed skills in dest_root. Returns (rows, warnings);
     row = (name, kind, mechanism)."""
     reg = registry()
@@ -589,7 +655,9 @@ def gather_status(target, dest_root, custom_names, plugin_map):
         if name.endswith(".bak"):
             warnings.append(f"{target}: {name} is a leftover backup — agents"
                             f" load it as a skill; delete it")
-        if name in custom_names:
+        if name in generated_names:
+            kind = "custom (from prompt)"
+        elif name in custom_names:
             kind = "custom"
         elif name in reg:
             kind = f"community ({reg[name][0]['label']})"
@@ -612,13 +680,14 @@ def gather_status(target, dest_root, custom_names, plugin_map):
 
 def show_status(targets, repo=None):
     custom_names = {p.name for p in SKILLS_SRC.iterdir() if p.is_dir()}
+    generated = prompt_skill_names()
     plugin_map = plugin_skills()
     all_warnings = []
     for target in targets:
         dest_root = target_root(target, repo)
         print(f"\n{target}: {dest_root}")
         rows, warnings = gather_status(target, dest_root, custom_names,
-                                       plugin_map)
+                                       plugin_map, generated)
         prompts_dir = prompts_dir_for(target, repo)
         prompts = (sorted(prompts_dir.glob("*.prompt.md"))
                    if prompts_dir and prompts_dir.is_dir() else [])
@@ -709,7 +778,7 @@ def main():
         targets = pick_targets(args.target, repo)
         names = [n.strip() for n in args.uninstall.split(",") if n.strip()]
         known = ({p.name for p in SKILLS_SRC.iterdir() if p.is_dir()}
-                 | all_community_names())
+                 | all_community_names() | prompt_skill_names())
         results = []
         for target in targets:
             skills = [n for n in names if not n.startswith("prompt:")]
@@ -775,6 +844,11 @@ def main():
             results.append((target, skill.name, status))
         results.extend(install_community_for_target(
             target, dest_root, sel_community, args.dry_run))
+        if target == "copilot":
+            # Personal scope reaches every project; JetBrains has no global
+            # prompts dir, so the prompts also ship as generated skills.
+            results.extend(install_prompt_skills(dest_root, args.dry_run,
+                                                 names=sel_prompts))
         if target in ("copilot", "repo"):
             results.extend(install_prompts(args.dry_run, names=sel_prompts,
                                            target=target, repo=repo))

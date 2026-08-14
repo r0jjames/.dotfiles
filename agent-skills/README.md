@@ -17,9 +17,11 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
 - `prompts/` — Copilot `.prompt.md` slash commands (`/explain-code`,
   `/explain-and-review`, `/create-sb`, `/implement-sb`,
   `/create-implement-sb`). Prompt files are **repo-scoped**: Copilot reads
-  them from `<repo>/.github/prompts/`, which is the only place JetBrains
-  looks. VS Code additionally reads a user-profile copy, which is why the
-  slash commands appear there without seeding a repo. Not used by Claude.
+  them from `<repo>/.github/prompts/`. VS Code additionally reads a
+  user-profile copy, which is why the slash commands appear there without
+  seeding a repo. For JetBrains, where no such personal scope exists, the
+  installer generates an equivalent skill per prompt — see
+  [JetBrains](#jetbrains-intellij--pycharm--goland). Not used by Claude.
 - `install.py` — installer for macOS, Linux and Windows/Git Bash
   (Python >= 3.8, stdlib only).
 
@@ -127,18 +129,38 @@ everywhere.
 
 ## JetBrains (IntelliJ / PyCharm / GoLand)
 
-Copilot reads the two customization kinds from different scopes, which is why
-skills and slash commands do not arrive together:
+Copilot reads the two customization kinds from different scopes:
 
 | Kind | Personal scope | Repo scope | JetBrains |
 | --- | --- | --- | --- |
 | Skills (`SKILL.md`) | `~/.copilot/skills` | `.github/skills/` | both work |
 | Prompt files (`.prompt.md`) | VS Code profile only | `.github/prompts/` | repo scope only |
 
-So `~/.copilot/skills` already covers every JetBrains project, but a slash
-command like `/create-sb` only exists in a repo that has been seeded. Skills
-are also never invoked as `/name` — Copilot loads them from their
-`description` when the phrasing matches, so ask for them in plain English.
+Prompt files have no personal scope outside VS Code — JetBrains drives its
+chat through the Copilot CLI harness, which reads no global prompts
+directory. A bare `/create-sb` therefore only exists in a repo that has been
+seeded, which is per-project by construction.
+
+To get the same commands in **every** project, `--target copilot` also
+generates one skill per prompt file into `~/.copilot/skills/<stem>/SKILL.md`,
+carrying the prompt body verbatim plus a description that triggers on the
+command name. Skills are personal scope, so those reach every project with no
+seeding. JetBrains namespaces them, so you type:
+
+| | VS Code | JetBrains, any project |
+| --- | --- | --- |
+| Soundboarding | `/create-sb LISA-110278.md` | `/skill:create-sb LISA-110278.md` |
+| Explain | `/explain-code PR #142` | `/skill:explain-code PR #142` |
+
+The generated skills are derived, never edited by hand — each ends with a
+`Generated from prompts/<file>` marker, and re-running the installer
+refreshes them after a prompt changes. `--status` lists them as
+`custom (from prompt)`; `--uninstall <stem>` removes one.
+
+Note that the filter text differs: typing `/create-s` matches nothing,
+because the skill picker filters on the namespaced name. Type `/skill:` to
+list everything, and remember that skills still trigger from their
+`description` in plain English.
 
 Setup checklist:
 
@@ -146,17 +168,18 @@ Setup checklist:
    date, signed in.
 2. **Settings → Languages & Frameworks → GitHub Copilot → Chat → Agent** —
    enable agent mode. Restart the IDE if the toggle has just appeared.
-3. Copilot Chat panel → settings gear → **Customizations**. Personal-scope
-   skills from `~/.copilot/skills` should be listed. If not, run
-   `python install.py --target copilot --skills-only` and reopen the panel.
-4. `python install.py --repo . --skills-only --dry-run` in the project, then
-   the same without `--dry-run`.
-5. Reopen the project. In Copilot Chat **in agent mode**, type `/` — all five
-   prompts list as slash commands.
+3. `python install.py --target copilot --skills-only`.
+4. Reopen the IDE. In agent-mode chat type `/skill:` — the four custom skills
+   and the five generated from prompts should all list.
+5. Optional, per repo: `python install.py --repo .` also seeds
+   `.github/prompts/`, which restores the bare `/create-sb` spelling in that
+   project and shares both with teammates.
 
-Nothing shows up: confirm the files are at `<project root>/.github/prompts/`
-(the folder open in the IDE, not a submodule), that their frontmatter says
-`mode: agent`, that chat is in agent mode, and that the plugin is current.
+Nothing shows up: confirm chat is in agent mode, that the plugin is current,
+and that `install.py --status` lists the skills under `~/.copilot/skills`.
+For the repo-scoped spelling, check the files are at
+`<project root>/.github/prompts/` — the folder open in the IDE, not a
+submodule — and that their frontmatter says `mode: agent`.
 
 One caveat: `${selection}` in `explain-code.prompt.md` and
 `explain-and-review.prompt.md` is a VS Code prompt variable and is not

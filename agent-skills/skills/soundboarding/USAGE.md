@@ -17,6 +17,9 @@ manually.
 Slash commands work in VS Code everywhere, and in JetBrains (IntelliJ,
 PyCharm, GoLand) inside a repo seeded with `install.py --repo .` — prompt
 files are repo-scoped there. Anywhere else, name the skill in plain English.
+In JetBrains the same three flows arrive as generated skills in every
+project, no seeding: `/skill:create-sb`, `/skill:implement-sb`,
+`/skill:create-implement-sb`. The skill itself is `/skill:soundboarding`.
 
 | Flow | VS Code / JetBrains (seeded repo) | Any chat, unseeded | Claude Code |
 |---|---|---|---|

@@ -10,9 +10,11 @@ skill fetching and the Copilot target).
                 a skill to refresh them.
 
 ~/.copilot/skills is personal scope: it serves Copilot in JetBrains IDEs as
-well as VS Code. Prompt files (the /create-sb-style slash commands) are not
-part of this step — they are repo-scoped for JetBrains, seeded per project
-with `agent-skills/install.py --repo <path>`.
+well as VS Code. The Copilot target also generates one skill per prompt file
+into that directory, so the /create-sb-style commands reach every JetBrains
+project as /skill:create-sb — prompt files themselves have no personal scope
+outside VS Code and would otherwise need per-repo seeding
+(`agent-skills/install.py --repo <path>`).
 """
 from __future__ import annotations
 

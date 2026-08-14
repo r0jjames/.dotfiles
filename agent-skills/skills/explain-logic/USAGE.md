@@ -11,8 +11,10 @@ VS Code gets the `/explain-code` and `/explain-and-review` slash commands
 seeded with `install.py --repo .` — prompt files are repo-scoped there. In an
 unseeded project use the plain-English prompts; the skill triggers on the
 phrasing. If a skill doesn't trigger, name it once ("Use the explain-logic
-skill to ...") — after one explicit use it picks up reliably. Claude Code
-triggers on the same phrasing.
+skill to ...") — after one explicit use it picks up reliably. In JetBrains
+both commands arrive as generated skills in every project, no seeding:
+`/skill:explain-code` and `/skill:explain-and-review` (the skill itself is
+`/skill:explain-logic`). Claude Code triggers on the same phrasing.
 
 | Goal | VS Code / JetBrains (seeded repo) | Plain chat / Claude Code |
 |---|---|---|
