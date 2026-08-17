@@ -989,6 +989,141 @@ class TestGatherStatusGenerated(TempDirTest):
                           ("soundboarding", "custom")])
 
 
+class TestPromptSkillNameCollisions(TempDirTest):
+    """A prompt named after a real skill must not generate a skill of that
+    name — the real skill already owns the directory."""
+
+    def setUp(self):
+        super().setUp()
+        self.prompts = self.tmp / "prompts"
+        self.prompts.mkdir()
+        for stem in ("create-sb", "tour-codebase"):
+            (self.prompts / f"{stem}.prompt.md").write_text(
+                f"---\ndescription: Do {stem}\n---\n\nBody\n",
+                encoding="utf-8")
+        self.skills = self.tmp / "skills"
+        (self.skills / "tour-codebase").mkdir(parents=True)
+        (self.skills / "tour-codebase" / "SKILL.md").write_text(
+            "real skill", encoding="utf-8")
+        self.dest = self.tmp / "dest"
+
+    def patched(self):
+        return mock.patch.multiple("install", PROMPTS_SRC=self.prompts,
+                                   SKILLS_SRC=self.skills)
+
+    def test_colliding_stem_excluded_from_generated_names(self):
+        with self.patched():
+            self.assertEqual(install.prompt_skill_names(), {"create-sb"})
+
+    def test_colliding_prompt_is_skipped_not_generated(self):
+        (self.dest / "tour-codebase").mkdir(parents=True)
+        (self.dest / "tour-codebase" / "SKILL.md").write_text(
+            "real skill", encoding="utf-8")
+        with self.patched():
+            results = install.install_prompt_skills(self.dest, False)
+        self.assertEqual(
+            results, [("copilot", "create-sb", "installed"),
+                      ("copilot", "tour-codebase",
+                       "skipped (real skill of same name)")])
+        self.assertEqual(
+            (self.dest / "tour-codebase" / "SKILL.md").read_text(),
+            "real skill")
+
+
+class TestClaudeCommandText(TempDirTest):
+    def build(self, front="mode: agent\ndescription: Explain it"):
+        p = self.tmp / "explain-code.prompt.md"
+        p.write_text(f"---\n{front}\n---\n\nBody line.\n", encoding="utf-8")
+        return install.claude_command_text(p)
+
+    def test_description_is_valid_quoted_yaml(self):
+        line = [l for l in self.build().splitlines()
+                if l.startswith("description:")][0]
+        self.assertEqual(json.loads(line[len("description: "):]),
+                         "Explain it")
+
+    def test_copilot_only_mode_key_is_dropped(self):
+        self.assertNotIn("mode: agent", self.build())
+
+    def test_body_arguments_and_provenance_marker(self):
+        text = self.build()
+        self.assertIn("Body line.", text)
+        self.assertIn("$ARGUMENTS", text)
+        self.assertIn("Generated from prompts/explain-code.prompt.md", text)
+
+
+class TestInstallClaudeCommands(TempDirTest):
+    def setUp(self):
+        super().setUp()
+        self.prompts = self.tmp / "prompts"
+        self.prompts.mkdir()
+        for stem in ("create-sb", "tour-codebase"):
+            (self.prompts / f"{stem}.prompt.md").write_text(
+                f"---\ndescription: Do {stem}\n---\n\nBody\n",
+                encoding="utf-8")
+        self.skills = self.tmp / "skills"
+        (self.skills / "tour-codebase").mkdir(parents=True)
+        self.commands = self.tmp / "commands"
+
+    def patched(self):
+        return mock.patch.multiple(
+            "install", PROMPTS_SRC=self.prompts, SKILLS_SRC=self.skills,
+            claude_commands_dir=lambda: self.commands)
+
+    def run_install(self, dry_run=False, names=None):
+        with self.patched():
+            return install.install_claude_commands(dry_run, names=names)
+
+    def test_one_command_file_per_non_colliding_prompt(self):
+        results = self.run_install()
+        self.assertEqual(
+            results, [("claude", "command:create-sb", "installed"),
+                      ("claude", "command:tour-codebase",
+                       "skipped (real skill of same name)")])
+        self.assertTrue((self.commands / "create-sb.md").is_file())
+        self.assertFalse((self.commands / "tour-codebase.md").exists())
+
+    def test_dry_run_writes_nothing(self):
+        self.run_install(dry_run=True)
+        self.assertFalse(self.commands.exists())
+
+    def test_second_run_up_to_date(self):
+        self.run_install()
+        statuses = dict((r[1], r[2]) for r in self.run_install())
+        self.assertEqual(statuses["command:create-sb"], "up to date")
+
+    def test_edited_prompt_reports_updated(self):
+        self.run_install()
+        (self.prompts / "create-sb.prompt.md").write_text(
+            "---\ndescription: Do create-sb\n---\n\nNew body\n",
+            encoding="utf-8")
+        statuses = dict((r[1], r[2]) for r in self.run_install())
+        self.assertEqual(statuses["command:create-sb"], "updated")
+        self.assertIn("New body",
+                      (self.commands / "create-sb.md").read_text())
+
+    def test_names_filter(self):
+        results = self.run_install(names={"create-sb.prompt.md"})
+        self.assertEqual([r[1] for r in results], ["command:create-sb"])
+
+    def test_uninstall_removes_the_command_file(self):
+        self.run_install()
+        with self.patched():
+            results = install.uninstall_claude_commands(
+                ["prompt:create-sb", "prompt:nope"], False)
+        self.assertEqual(results,
+                         [("claude", "command:create-sb", "removed"),
+                          ("claude", "command:nope", "not installed")])
+        self.assertFalse((self.commands / "create-sb.md").exists())
+
+    def test_uninstall_ignores_plain_skill_names(self):
+        self.run_install()
+        with self.patched():
+            results = install.uninstall_claude_commands(["create-sb"], False)
+        self.assertEqual(results, [])
+        self.assertTrue((self.commands / "create-sb.md").is_file())
+
+
 class TestPromptStem(unittest.TestCase):
     def test_strips_both_suffixes(self):
         self.assertEqual(install.prompt_stem("create-sb.prompt.md"),

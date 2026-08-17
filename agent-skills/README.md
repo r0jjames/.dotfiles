@@ -28,14 +28,16 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
   conventions) into `.tours/`. Tour planning, flow tracing and step writing
   are its own references; the community skills do the scanning and the
   `.tour` writing.
-- `prompts/` — Copilot `.prompt.md` slash commands (`/explain-code`,
+- `prompts/` — `.prompt.md` slash commands (`/explain-code`,
   `/explain-and-review`, `/create-sb`, `/implement-sb`,
-  `/create-implement-sb`). Prompt files are **repo-scoped**: Copilot reads
-  them from `<repo>/.github/prompts/`. VS Code additionally reads a
-  user-profile copy, which is why the slash commands appear there without
-  seeding a repo. For JetBrains, where no such personal scope exists, the
-  installer generates an equivalent skill per prompt — see
-  [JetBrains](#jetbrains-intellij--pycharm--goland). Not used by Claude.
+  `/create-implement-sb`, `/code-review-pr`, `/code-review-pr-fast`,
+  `/tour-codebase`). Prompt files are Copilot's format and are
+  **repo-scoped**: Copilot reads them from `<repo>/.github/prompts/`. VS Code
+  additionally reads a user-profile copy, which is why the slash commands
+  appear there without seeding a repo. The installer covers the two agents
+  that read neither — JetBrains Copilot gets a generated skill per prompt,
+  Claude gets a generated `~/.claude/commands/<stem>.md`. See
+  [Where each prompt lands](#where-each-prompt-lands).
 - `install.py` — installer for macOS, Linux and Windows/Git Bash
   (Python >= 3.8, stdlib only).
 
@@ -144,6 +146,40 @@ invisible to teammates. Do not add these paths to the global
 for team sharing, and a global rule would suppress intentional additions
 everywhere.
 
+## Where each prompt lands
+
+No agent reads every format, so one `prompts/*.prompt.md` is installed three
+ways. All three are personal scope — they reach every project with no
+per-repository seeding.
+
+| Destination | Serves | Spelling |
+| --- | --- | --- |
+| VS Code user prompts dir | Copilot in VS Code | `/create-sb` |
+| `~/.copilot/skills/<stem>/SKILL.md` (generated) | Copilot in JetBrains | `/skill:create-sb` |
+| `~/.claude/commands/<stem>.md` (generated) | Claude in VS Code and JetBrains | `/create-sb` |
+| `<repo>/.github/prompts/` (`--repo` only) | Copilot in JetBrains, that repo, shareable | `/create-sb` |
+
+Both generated forms carry the prompt body verbatim and end with a
+`Generated from prompts/<file>` marker — derived, never edited by hand.
+Re-running the installer refreshes them. The Claude form drops the
+Copilot-only `mode: agent` key and appends `My request: $ARGUMENTS`, so text
+typed after the command reaches the prompt.
+
+**A prompt named after a skill generates neither.** `code-review-pr`,
+`code-review-pr-fast` and `tour-codebase` exist in both `skills/` and
+`prompts/`; the skill already owns `~/.copilot/skills/<name>/` and answers to
+`/<name>` in Claude, so generating over it would replace the real `SKILL.md`
+with the prompt stub. Those three install as prompt files only, and
+`--status` reports the generator as `skipped (real skill of same name)`.
+The result is one spelling per agent:
+
+| | VS Code | JetBrains |
+| --- | --- | --- |
+| Copilot | `/code-review-pr` (prompt file) | `/skill:code-review-pr` (skill) |
+| Claude | `/code-review-pr` (skill) | `/code-review-pr` (skill) |
+
+Remove a generated command with `--uninstall prompt:<stem> --target claude`.
+
 ## JetBrains (IntelliJ / PyCharm / GoLand)
 
 Copilot reads the two customization kinds from different scopes:
@@ -162,7 +198,8 @@ To get the same commands in **every** project, `--target copilot` also
 generates one skill per prompt file into `~/.copilot/skills/<stem>/SKILL.md`,
 carrying the prompt body verbatim plus a description that triggers on the
 command name. Skills are personal scope, so those reach every project with no
-seeding. JetBrains namespaces them, so you type:
+seeding — except for the three prompts that share a name with a real skill,
+which need no generated copy. JetBrains namespaces them, so you type:
 
 | | VS Code | JetBrains, any project |
 | --- | --- | --- |
@@ -186,8 +223,8 @@ Setup checklist:
 2. **Settings → Languages & Frameworks → GitHub Copilot → Chat → Agent** —
    enable agent mode. Restart the IDE if the toggle has just appeared.
 3. `python install.py --target copilot --skills-only`.
-4. Reopen the IDE. In agent-mode chat type `/skill:` — the four custom skills
-   and the five generated from prompts should all list.
+4. Reopen the IDE. In agent-mode chat type `/skill:` — the seven custom
+   skills and the five generated from prompts should all list.
 5. Optional, per repo: `python install.py --repo .` also seeds
    `.github/prompts/`, which restores the bare `/create-sb` spelling in that
    project and shares both with teammates.

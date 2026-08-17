@@ -31,7 +31,7 @@ Explicit invocation differs per agent:
 
 | Agent | Command |
 | --- | --- |
-| Claude Code | `code-review-pr`, or plain English |
+| Claude Code (terminal, VS Code, JetBrains) | `/code-review-pr`, or plain English |
 | Copilot, VS Code | `/code-review-pr` |
 | Copilot, JetBrains | `/skill:code-review-pr` |
 

@@ -20,7 +20,7 @@ Dockerfiles, Kubernetes manifests or Helm charts are involved.
 
 | Agent | Command |
 | --- | --- |
-| Claude Code | `code-review-pr-fast`, or plain English |
+| Claude Code (terminal, VS Code, JetBrains) | `/code-review-pr-fast`, or plain English |
 | Copilot, VS Code | `/code-review-pr-fast` |
 | Copilot, JetBrains | `/skill:code-review-pr-fast` |
 

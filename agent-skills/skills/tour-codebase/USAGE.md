@@ -35,7 +35,7 @@ Explicit invocation differs per agent:
 
 | Agent | Command |
 | --- | --- |
-| Claude Code | `tour-codebase`, or plain English |
+| Claude Code (terminal, VS Code, JetBrains) | `/tour-codebase`, or plain English |
 | Copilot, VS Code | `/tour-codebase` |
 | Copilot, JetBrains | `/skill:tour-codebase` |
 
