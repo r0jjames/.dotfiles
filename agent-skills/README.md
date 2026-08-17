@@ -22,6 +22,12 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
 - `skills/code-review-pr-fast/` — chat-only short pass over the same diff,
   `git` calls only, no files written. Reads its method from
   `code-review-pr` when installed.
+- `skills/tour-codebase/` — onboarding into a repository you do not know:
+  delegates discovery to `acquire-codebase-knowledge`, then writes a chained
+  four-tour CodeTour series (orientation, architecture, core flow,
+  conventions) into `.tours/`. Tour planning, flow tracing and step writing
+  are its own references; the community skills do the scanning and the
+  `.tour` writing.
 - `prompts/` — Copilot `.prompt.md` slash commands (`/explain-code`,
   `/explain-and-review`, `/create-sb`, `/implement-sb`,
   `/create-implement-sb`). Prompt files are **repo-scoped**: Copilot reads
@@ -36,7 +42,9 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
 `explain-logic`, `soundboarding`, `investigate-issue` and `code-review-pr`
 each end a run by
 writing a CodeTour file into `.tours/` in the repo they worked on (chaining to
-the community `code-tour` skill), skipping only trivial single-file cases. The
+the community `code-tour` skill), skipping only trivial single-file cases.
+`tour-codebase` is the one whose tours *are* the output — a chained series
+rather than a single file. The
 [`git`](../git/README.md) tool keeps `.tours/` out of every repository, and
 `vsls-contrib.codetour` in [`vscode/extensions.txt`](../vscode/extensions.txt)
 opens the files.
@@ -206,6 +214,7 @@ Claude Code:
 - [investigate-issue](skills/investigate-issue/USAGE.md)
 - [code-review-pr](skills/code-review-pr/USAGE.md)
 - [code-review-pr-fast](skills/code-review-pr-fast/USAGE.md)
+- [tour-codebase](skills/tour-codebase/USAGE.md)
 - [community skills](docs/community-skills.md) (code-tour, caveman, ...)
 
 ## Tests
