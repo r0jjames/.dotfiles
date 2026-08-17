@@ -18,6 +18,12 @@ Dockerfiles, Kubernetes manifests or Helm charts are involved.
     fast review of my changes
     sanity check this branch
 
+| Agent | Command |
+| --- | --- |
+| Claude Code | `code-review-pr-fast`, or plain English |
+| Copilot, VS Code | `/code-review-pr-fast` |
+| Copilot, JetBrains | `/skill:code-review-pr-fast` |
+
 ## What it does
 
 Resolves the base the same way `code-review-pr` does, takes
@@ -35,8 +41,12 @@ Capped at five findings.
 
 The severity, confidence and suppression rules are read from the installed
 `code-review-pr` skill's `references/review-method.md`, so there is one
-source of truth. When that skill is not installed, condensed tables inlined
-in this skill's `SKILL.md` take over. Installing both is recommended.
+source of truth. It looks in repo scope (`.github/skills/`), then
+`~/.copilot/skills/`, then `~/.claude/skills/`, then `~/.agents/skills/`, so
+it resolves on Claude Code and on Copilot in both VS Code and JetBrains.
+When none of those exist, condensed tables inlined in this skill's
+`SKILL.md` take over and the run says so. Installing both skills is
+recommended.
 
 ## Install
 

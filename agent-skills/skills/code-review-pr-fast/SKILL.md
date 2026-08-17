@@ -15,13 +15,24 @@ involved.
 ## Load the method
 
 Read `references/review-method.md` from the installed `code-review-pr`
-skill — `~/.claude/skills/code-review-pr/references/review-method.md`, or the
-`~/.copilot/skills/` equivalent. If it is not there, use the condensed tables
-at the bottom of this file.
+skill. Try these in order and stop at the first that exists — the right one
+depends on the agent and the platform, so do not assume:
 
-Load at most one technology lens from that skill's `references/`, and only
-when the diff is dominated by one stack. When the diff spans several, load
-none and rely on the method plus `cross-cutting.md`.
+1. `<repo>/.github/skills/code-review-pr/references/review-method.md`
+   (repo scope, seeded by `install.py --repo .`)
+2. `~/.copilot/skills/code-review-pr/references/review-method.md`
+   (GitHub Copilot personal scope, VS Code and JetBrains)
+3. `~/.claude/skills/code-review-pr/references/review-method.md`
+   (Claude Code personal scope)
+4. `~/.agents/skills/code-review-pr/references/review-method.md`
+
+On Windows and Git Bash, `~` resolves under `%USERPROFILE%`; the same four
+paths apply. If none exist, use the condensed tables at the bottom of this
+file and say in one line that the full method was not found.
+
+Load at most one technology lens from the same `references/` directory, and
+only when the diff is dominated by one stack. When the diff spans several,
+load none and rely on the method plus `cross-cutting.md`.
 
 ## Run
 

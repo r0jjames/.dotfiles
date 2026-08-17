@@ -20,10 +20,23 @@ pass mid-work, use `code-review-pr-fast`.
 
 ## Invoking
 
+Plain English works everywhere — the skill triggers from its description:
+
     review my branch
     code review before I open the PR
     review this PR
-    code-review-pr release/2.4        # explicit base branch
+    review my branch against release/2.4     # explicit base branch
+
+Explicit invocation differs per agent:
+
+| Agent | Command |
+| --- | --- |
+| Claude Code | `code-review-pr`, or plain English |
+| Copilot, VS Code | `/code-review-pr` |
+| Copilot, JetBrains | `/skill:code-review-pr` |
+
+All three are personal scope once installed, so they reach every project
+with no per-repository seeding.
 
 With no argument the base is resolved from `origin/HEAD`, then `origin/main`,
 `origin/master`, `origin/develop`, then their local equivalents. The resolved
@@ -100,3 +113,18 @@ From the repo root:
 
     python3 agent-skills/install.py --target claude    # mac / Claude Code
     python3 agent-skills/install.py --target copilot   # work / GitHub Copilot
+    python3 agent-skills/install.py --target both
+
+On the Windows VDI use `python` rather than `python3`. Copilot installs to
+`~/.copilot/skills/` (under `%USERPROFILE%` on Windows), which is personal
+scope: the skill is then available in every project, in both VS Code and
+JetBrains agent-mode chat. No `.github/skills` seeding is required.
+
+Copilot receives copies, not symlinks — re-run the installer after editing
+any rule file. `--status` shows what is installed where.
+
+If the skill does not appear in JetBrains: confirm chat is in agent mode,
+that the Copilot plugin is current, and that `install.py --status` lists
+`code-review-pr` under `~/.copilot/skills`. Type `/skill:` to list
+everything — the picker filters on the namespaced name, so `/code-rev`
+matches nothing there.

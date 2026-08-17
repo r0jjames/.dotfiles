@@ -20,7 +20,12 @@ Rules that hold for the whole run:
 - A clean branch is reported as clean. Never invent findings.
 
 Always load `references/review-method.md` and `references/cross-cutting.md`
-before reviewing. Load technology lenses only as phase 3 selects them.
+from this skill's own directory before reviewing. Load technology lenses only
+as phase 3 selects them.
+
+The skill needs a terminal to run `git`. If the agent cannot run commands
+(some Copilot configurations), say so and ask the user to paste
+`git diff <base>...HEAD` — then review that, and skip phases 5 and 8.
 
 ## Phase 1 — Resolve the base branch
 
@@ -146,9 +151,11 @@ Steps come from evidence already gathered — one step per `file:line` already
 cited, ordered by the change summary and then by severity. Never
 re-investigate the repository to build the tour.
 
-Validate with `code-tour`'s `scripts/validate_tour.py`, resolved from the
-installed skill directory (`~/.claude/skills/code-tour/` or
-`~/.copilot/skills/code-tour/`).
+Validate with `code-tour`'s `scripts/validate_tour.py`, resolved from
+whichever installed skill directory exists — `~/.copilot/skills/code-tour/`,
+`~/.claude/skills/code-tour/`, or `<repo>/.github/skills/code-tour/`. Its own
+SKILL.md documents a `~/.agents/...` path that usually does not exist. Skip
+validation rather than failing the run if the script cannot be found.
 
 Skip the tour only when the branch is one file with fewer than about three
 steps; then say so in one line with the reason. `.tours/` is in the global
