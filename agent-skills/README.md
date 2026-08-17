@@ -14,6 +14,14 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
 - `skills/investigate-issue/` — problem `.md` in, validated root cause +
   fix-steps `-investigation.md` out (Bamboo plans/agents, Java, Python,
   Bash, Go, Docker, k8s).
+- `skills/code-review-pr/` — feature-branch review before or after a PR:
+  change summary, severity/confidence-tagged findings, `-review.md` report
+  and a tour. Rules split into always-loaded method + cross-cutting, and
+  language/platform lenses (Java/Maven, Python, Bash, Go, Bamboo, k8s, Helm,
+  Docker) loaded from the diff. Git-only — no PR host API.
+- `skills/code-review-pr-fast/` — chat-only short pass over the same diff,
+  `git` calls only, no files written. Reads its method from
+  `code-review-pr` when installed.
 - `prompts/` — Copilot `.prompt.md` slash commands (`/explain-code`,
   `/explain-and-review`, `/create-sb`, `/implement-sb`,
   `/create-implement-sb`). Prompt files are **repo-scoped**: Copilot reads
@@ -25,7 +33,8 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
 - `install.py` — installer for macOS, Linux and Windows/Git Bash
   (Python >= 3.8, stdlib only).
 
-`explain-logic`, `soundboarding` and `investigate-issue` each end a run by
+`explain-logic`, `soundboarding`, `investigate-issue` and `code-review-pr`
+each end a run by
 writing a CodeTour file into `.tours/` in the repo they worked on (chaining to
 the community `code-tour` skill), skipping only trivial single-file cases. The
 [`git`](../git/README.md) tool keeps `.tours/` out of every repository, and
@@ -195,6 +204,8 @@ Claude Code:
 - [soundboarding](skills/soundboarding/USAGE.md)
 - [interview-prep](skills/interview-prep/USAGE.md)
 - [investigate-issue](skills/investigate-issue/USAGE.md)
+- [code-review-pr](skills/code-review-pr/USAGE.md)
+- [code-review-pr-fast](skills/code-review-pr-fast/USAGE.md)
 - [community skills](docs/community-skills.md) (code-tour, caveman, ...)
 
 ## Tests
