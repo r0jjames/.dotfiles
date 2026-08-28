@@ -39,6 +39,7 @@ import os
 import shutil
 import subprocess
 import sys
+import sysconfig
 import tempfile
 from pathlib import Path
 
@@ -760,11 +761,37 @@ def install_community_for_target(target, dest_root, sel_community, dry_run):
     return results
 
 
-# uv and pipx drop their shims in ~/.local/bin, which is on PATH for new
-# shells but not necessarily for this process — look there before giving up.
-USER_BIN_DIRS = (Path.home() / ".local" / "bin",)
+def user_script_dirs():
+    """Directories a user-scope install drops executables into. uv and pipx
+    use ~/.local/bin; `pip install --user` uses the interpreter's user scheme
+    (on Windows that is %APPDATA%\\Python\\PythonXY\\Scripts). Any of them may
+    be missing from this process's PATH even when a new shell would find it."""
+    dirs = [Path.home() / ".local" / "bin"]
+    try:
+        scheme = (sysconfig.get_preferred_scheme("user")
+                  if hasattr(sysconfig, "get_preferred_scheme")
+                  else ("nt_user" if os.name == "nt" else "posix_user"))
+        dirs.append(Path(sysconfig.get_path("scripts", scheme)))
+    except (KeyError, ValueError, AttributeError):
+        pass
+    return tuple(dict.fromkeys(dirs))
+
+
+def pip_install_cmd():
+    """`pip install` for this interpreter. --user is invalid inside a venv,
+    where site-packages is already writable and private."""
+    cmd = [sys.executable, "-m", "pip", "install"]
+    if sys.prefix == getattr(sys, "base_prefix", sys.prefix):
+        cmd.append("--user")
+    return cmd
+
+
+USER_BIN_DIRS = user_script_dirs()
 CLI_SUFFIXES = ("", ".exe", ".cmd", ".bat") if os.name == "nt" else ("",)
-BOOTSTRAP_CMDS = (["uv", "tool", "install"], ["pipx", "install"])
+# Best first. pip is the last resort — it is always there (we are running
+# under it) but installs into the user site rather than an isolated venv.
+BOOTSTRAP_CMDS = (["uv", "tool", "install"], ["pipx", "install"],
+                  pip_install_cmd())
 
 
 def find_cli(name):
@@ -788,22 +815,27 @@ def bootstrap_cli(ext, dry_run):
     if found or dry_run:
         return found
     for cmd in BOOTSTRAP_CMDS:
-        if not shutil.which(cmd[0]):
+        via = "pip" if cmd[0] == sys.executable else cmd[0]
+        if via != "pip" and not shutil.which(cmd[0]):
             continue
-        log(f"Installing {ext['package']} with {cmd[0]}...")
+        log(f"Installing {ext['package']} with {via}...")
         try:
             subprocess.run([*cmd, ext["package"]], check=True)
         except (subprocess.CalledProcessError, OSError):
-            warn(f"{cmd[0]} could not install {ext['package']}")
+            warn(f"{via} could not install {ext['package']}")
             continue
         found = find_cli(ext["cli"])
         if found:
             ok(f"{ext['cli']} ready ({found})")
+            if not shutil.which(ext["cli"]):
+                warn(f"{Path(found).parent} is not on PATH — the skill calls "
+                     f"'{ext['cli']}' by name, so add that directory to PATH")
             return found
-        warn(f"{cmd[0]} reported success but {ext['cli']} is not on PATH")
-    warn(f"No {ext['cli']} CLI and no uv/pipx to install it — skipping. "
+        warn(f"{via} reported success but {ext['cli']} is not on PATH")
+    warn(f"No {ext['cli']} CLI and no uv/pipx/pip to install it — skipping. "
          f"Install it yourself with 'uv tool install {ext['package']}' "
-         f"(or 'pipx install {ext['package']}') and re-run.")
+         f"(or 'pipx install {ext['package']}', or "
+         f"'python -m pip install --user {ext['package']}') and re-run.")
     return None
 
 

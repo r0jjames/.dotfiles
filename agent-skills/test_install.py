@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -1217,13 +1218,55 @@ class TestBootstrapCli(ExternalTest):
         run.assert_called_once_with(["pipx", "install", "tool-y-pkg"],
                                     check=True)
 
+    def test_falls_back_to_pip_when_uv_and_pipx_absent(self):
+        # pip is never looked up on PATH — it runs as `<this python> -m pip`,
+        # which is the one interpreter guaranteed to exist here.
+        pip = [sys.executable, "-m", "pip", "install", "--user"]
+        with mock.patch("install.find_cli", side_effect=[None, "/bin/tool-y"]), \
+                mock.patch("install.shutil.which", return_value=None), \
+                mock.patch("install.BOOTSTRAP_CMDS",
+                           (["uv", "tool", "install"], pip)), \
+                mock.patch("install.subprocess.run") as run:
+            path = install.bootstrap_cli(self.fake_external(), dry_run=False)
+        self.assertEqual(path, "/bin/tool-y")
+        run.assert_called_once_with([*pip, "tool-y-pkg"], check=True)
+
     def test_no_installer_available_returns_none(self):
         with mock.patch("install.find_cli", return_value=None), \
                 mock.patch("install.shutil.which", return_value=None), \
+                mock.patch("install.BOOTSTRAP_CMDS",
+                           (["uv", "tool", "install"],)), \
                 mock.patch("install.subprocess.run") as run:
             self.assertIsNone(install.bootstrap_cli(self.fake_external(),
                                                     dry_run=False))
         run.assert_not_called()
+
+    def test_warns_when_installed_shim_is_off_path(self):
+        with mock.patch("install.find_cli",
+                        side_effect=[None, "/home/x/.local/bin/tool-y"]), \
+                mock.patch("install.shutil.which",
+                           side_effect=lambda c: "/bin/uv" if c == "uv"
+                           else None), \
+                mock.patch("install.subprocess.run"), \
+                mock.patch("install.warn") as warned:
+            install.bootstrap_cli(self.fake_external(), dry_run=False)
+        self.assertTrue(any("not on PATH" in c.args[0]
+                            for c in warned.call_args_list))
+
+
+class TestUserScriptDirs(ExternalTest):
+    def test_includes_local_bin_and_the_user_scheme(self):
+        dirs = install.user_script_dirs()
+        self.assertIn(Path.home() / ".local" / "bin", dirs)
+        self.assertEqual(len(set(dirs)), len(dirs))
+
+    def test_pip_cmd_drops_user_flag_inside_a_venv(self):
+        with mock.patch.object(sys, "prefix", "/venv"), \
+                mock.patch.object(sys, "base_prefix", "/usr"):
+            self.assertNotIn("--user", install.pip_install_cmd())
+        with mock.patch.object(sys, "prefix", "/usr"), \
+                mock.patch.object(sys, "base_prefix", "/usr"):
+            self.assertIn("--user", install.pip_install_cmd())
 
 
 class TestInstallExternalForTarget(ExternalTest):

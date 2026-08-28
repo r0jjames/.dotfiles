@@ -113,11 +113,17 @@ macOS/Linux, **both** Claude and Copilot on Windows (Git Bash).
 
 Some skills ship with a tool rather than as a folder we can copy. Those are
 listed in `EXTERNALS` in `install.py`: the installer puts the CLI on the
-machine (`uv tool install`, falling back to `pipx install`), then hands the
-per-target install to that CLI, so the skill is always the upstream version
-and nothing is vendored here. A missing CLI with no `uv`/`pipx` to bootstrap
-it is a skip with instructions, never a failed run. `--skills-only` skips
-externals along with community skills — both need the network.
+machine, then hands the per-target install to that CLI, so the skill is always
+the upstream version and nothing is vendored here. It tries `uv tool install`,
+then `pipx install`, then `python -m pip install --user` — the last one always
+exists, since the installer is itself running under that interpreter. A CLI it
+cannot install is a skip with instructions, never a failed run. `--skills-only`
+skips externals along with community skills — both need the network.
+
+After a `pip --user` install the executable lands in the interpreter's user
+scripts dir (`%APPDATA%\Python\PythonXY\Scripts` on Windows), which the
+installer finds even when it is not on PATH. It warns when that happens: the
+skill calls the CLI by bare name, so the agent needs that directory on PATH.
 
 **[`graphify`](https://github.com/Graphify-Labs/graphify)** (`graphifyy` on
 PyPI) — maps a project (code, docs, PDFs, images, video) into a knowledge
@@ -166,8 +172,9 @@ Run everything with `python` (Git Bash has no `python3` unless you alias it).
 6. If the proxy blocks the clone, follow the printed ZIP fallback, or use
    `--skills-only`.
 
-Step 4 also installs `graphifyy` from PyPI with `uv` or `pipx` (whichever is
-on the box) so the `graphify` skill has its CLI. If the proxy blocks PyPI,
+Step 4 also installs `graphifyy` from PyPI so the `graphify` skill has its
+CLI — with `uv` or `pipx` if either is on the box, otherwise plain
+`pip install --user`. If the proxy blocks PyPI,
 the run prints the manual command and carries on without it — and
 `--skills-only` skips it outright. A `graphify` skill without its CLI is
 inert, and `--status` says so.
