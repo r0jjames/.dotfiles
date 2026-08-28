@@ -122,8 +122,11 @@ skips externals along with community skills — both need the network.
 
 After a `pip --user` install the executable lands in the interpreter's user
 scripts dir (`%APPDATA%\Python\PythonXY\Scripts` on Windows), which the
-installer finds even when it is not on PATH. It warns when that happens: the
-skill calls the CLI by bare name, so the agent needs that directory on PATH.
+installer finds even when the shell cannot. That case — installed but not
+callable by name — is the one failure that looks like success, since the skill
+invokes the CLI bare, so the run ends with the exact `export PATH` line to fix
+it (`cygpath`-wrapped on Windows) and `--status` repeats it. The slash command
+itself (`/graphify .`) is typed **in the agent's chat**, never in a shell.
 
 **[`graphify`](https://github.com/Graphify-Labs/graphify)** (`graphifyy` on
 PyPI) — maps a project (code, docs, PDFs, images, video) into a knowledge

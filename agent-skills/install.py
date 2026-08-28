@@ -807,6 +807,24 @@ def find_cli(name):
     return None
 
 
+def cli_path_hint(ext):
+    """Actionable line when an external's CLI exists but the shell cannot find
+    it by name, else None. The skill invokes it bare, so an off-PATH install
+    is installed-but-inert — the one failure that otherwise looks like
+    success."""
+    found = find_cli(ext["cli"])
+    if not found or shutil.which(ext["cli"]):
+        return None
+    directory = Path(found).parent
+    # Git Bash needs the Windows scripts dir translated before it can be
+    # prepended to a POSIX PATH.
+    where = (f'$(cygpath -u "{directory}")' if os.name == "nt"
+             else str(directory))
+    return (f"{ext['cli']} is installed at {found}, but {directory} is not on "
+            f"PATH — the skill calls '{ext['cli']}' by name. Add it with: "
+            f"""echo 'export PATH="$PATH:{where}"' >> ~/.bashrc""")
+
+
 def bootstrap_cli(ext, dry_run):
     """Ensure an external's CLI is present. Returns its path, or None when it
     is missing and could not be installed — callers skip the external then
@@ -827,9 +845,6 @@ def bootstrap_cli(ext, dry_run):
         found = find_cli(ext["cli"])
         if found:
             ok(f"{ext['cli']} ready ({found})")
-            if not shutil.which(ext["cli"]):
-                warn(f"{Path(found).parent} is not on PATH — the skill calls "
-                     f"'{ext['cli']}' by name, so add that directory to PATH")
             return found
         warn(f"{via} reported success but {ext['cli']} is not on PATH")
     warn(f"No {ext['cli']} CLI and no uv/pipx/pip to install it — skipping. "
@@ -993,11 +1008,14 @@ def gather_status(target, dest_root, custom_names, plugin_map,
             version = external_version(entry, ext_map[name])
             kind = f"external ({ext_map[name]['package']}" + (
                 f" {version})" if version else ")")
-            if not find_cli(ext_map[name]["cli"]):
-                warnings.append(
-                    f"{target}: {name} skill is installed but its "
-                    f"{ext_map[name]['cli']} CLI is not on PATH — the skill "
-                    f"cannot run")
+            cli = ext_map[name]["cli"]
+            if not find_cli(cli):
+                warnings.append(f"{target}: {name} skill is installed but its "
+                                f"{cli} CLI is missing — the skill cannot run")
+            else:
+                hint = cli_path_hint(ext_map[name])
+                if hint:
+                    warnings.append(f"{target}: {hint}")
         else:
             kind = "unknown"
         mech = "symlink" if entry.is_symlink() else "copy"
@@ -1089,6 +1107,10 @@ def print_summary(results, targets, dry_run):
         ext = ext_map[name]
         log(f"Verify {name}:  run '{ext['cli']} --version', then "
             f"'/{name} .' in the agent — {ext['doc']}")
+        # Last thing printed, so a PATH problem cannot scroll out of view.
+        hint = cli_path_hint(ext)
+        if hint and not dry_run:
+            warn(hint)
     if "repo" in targets:
         log("Verify JetBrains: reopen the project, Copilot Chat -> Agent "
             "mode, type '/' — the prompt files list as slash commands")

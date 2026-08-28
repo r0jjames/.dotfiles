@@ -1241,17 +1241,45 @@ class TestBootstrapCli(ExternalTest):
                                                     dry_run=False))
         run.assert_not_called()
 
-    def test_warns_when_installed_shim_is_off_path(self):
+
+class TestCliPathHint(ExternalTest):
+    def test_hint_when_found_but_not_callable_by_name(self):
         with mock.patch("install.find_cli",
-                        side_effect=[None, "/home/x/.local/bin/tool-y"]), \
+                        return_value="/home/x/.local/bin/tool-y"), \
+                mock.patch("install.shutil.which", return_value=None):
+            hint = install.cli_path_hint(self.fake_external())
+        self.assertIn("/home/x/.local/bin", hint)
+        self.assertIn("~/.bashrc", hint)
+
+    def test_no_hint_when_on_path(self):
+        with mock.patch("install.find_cli", return_value="/usr/bin/tool-y"), \
                 mock.patch("install.shutil.which",
-                           side_effect=lambda c: "/bin/uv" if c == "uv"
-                           else None), \
-                mock.patch("install.subprocess.run"), \
+                           return_value="/usr/bin/tool-y"):
+            self.assertIsNone(install.cli_path_hint(self.fake_external()))
+
+    def test_no_hint_when_not_installed(self):
+        with mock.patch("install.find_cli", return_value=None), \
+                mock.patch("install.shutil.which", return_value=None):
+            self.assertIsNone(install.cli_path_hint(self.fake_external()))
+
+    def test_summary_repeats_the_hint_so_it_cannot_scroll_away(self):
+        results = [("claude", "graphify", "installed (by CLI)")]
+        with mock.patch("install.cli_path_hint",
+                        return_value="tool-y is installed at X"), \
                 mock.patch("install.warn") as warned:
-            install.bootstrap_cli(self.fake_external(), dry_run=False)
-        self.assertTrue(any("not on PATH" in c.args[0]
+            install.print_summary(results, ["claude"], dry_run=False)
+        self.assertTrue(any("installed at X" in c.args[0]
                             for c in warned.call_args_list))
+
+    def test_status_reports_an_off_path_cli(self):
+        dest = self.tmp / "claude-skills"
+        (dest / "tool-y").mkdir(parents=True)
+        with mock.patch("install.EXTERNALS", [self.fake_external()]), \
+                mock.patch("install.find_cli", return_value="/opt/bin/tool-y"), \
+                mock.patch("install.shutil.which", return_value=None):
+            _, warnings = install.gather_status("claude", dest, set(), {})
+        self.assertTrue(any("/opt/bin" in w for w in warnings))
+
 
 
 class TestUserScriptDirs(ExternalTest):
@@ -1418,13 +1446,15 @@ class TestExternalStatus(ExternalTest):
             rows, warnings = install.gather_status("claude", dest, set(), {})
         self.assertEqual(rows, [("tool-y", "external (tool-y-pkg 9.9.9)",
                                  "copy")])
-        self.assertTrue(any("not on PATH" in w for w in warnings))
+        self.assertTrue(any("CLI is missing" in w for w in warnings))
 
     def test_no_warning_when_cli_present(self):
         dest = self.tmp / "claude-skills"
         (dest / "tool-y").mkdir(parents=True)
         with mock.patch("install.EXTERNALS", [self.fake_external()]), \
-                mock.patch("install.find_cli", return_value="/bin/tool-y"):
+                mock.patch("install.find_cli", return_value="/bin/tool-y"), \
+                mock.patch("install.shutil.which",
+                           return_value="/bin/tool-y"):
             rows, warnings = install.gather_status("claude", dest, set(), {})
         self.assertEqual(rows, [("tool-y", "external (tool-y-pkg)", "copy")])
         self.assertEqual(warnings, [])
