@@ -27,3 +27,8 @@
 - Commits to ANY repository use Roj's git identity ONLY. Never add Claude as an
   author, co-author, or trailer (no `Co-Authored-By`, no `Claude-Session`, no
   "Generated with Claude" footers) in commit messages or PR bodies.
+- `graphify` (knowledge-graph CLI, installed by `agent-skills/install.py` as an
+  external skill) stays **skill-only**: invoke it as `/graphify .`, never as an
+  always-on block. This bullet is also the guard — `graphify install` appends
+  its own always-on section to `~/.claude/CLAUDE.md` (a symlink to this file)
+  unless the word graphify already appears here. Keep the word.

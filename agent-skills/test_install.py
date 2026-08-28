@@ -329,7 +329,11 @@ class TestBuildItems(unittest.TestCase):
         kinds = [k for k, _ in items]
         self.assertEqual(kinds[:2], ["skill", "skill"])
         self.assertEqual(kinds[2:4], ["prompt", "prompt"])
-        self.assertTrue(all(k == "community" for k in kinds[4:]))
+        community = len(install.all_community_names())
+        self.assertTrue(all(k == "community"
+                            for k in kinds[4:4 + community]))
+        self.assertTrue(all(k == "external"
+                            for k in kinds[4 + community:]))
         names = [n for _, n in items]
         for s in (install.COMMUNITY_SKILLS + install.CAVEMAN_SKILLS
                   + install.ADDY_SKILLS):
@@ -1122,6 +1126,282 @@ class TestInstallClaudeCommands(TempDirTest):
             results = install.uninstall_claude_commands(["create-sb"], False)
         self.assertEqual(results, [])
         self.assertTrue((self.commands / "create-sb.md").is_file())
+
+
+
+class ExternalTest(TempDirTest):
+    """Externals delegate to a CLI, so every test here fakes both the CLI
+    lookup and the subprocess call — nothing may reach a real install."""
+
+    def fake_external(self, **overrides):
+        ext = {
+            "name": "tool-y", "package": "tool-y-pkg", "cli": "tool-y",
+            "targets": ("copilot", "claude", "repo"), "default": True,
+            "doc": "does things",
+            "install": {"claude": ["install"],
+                        "copilot": ["vscode", "install"]},
+            "uninstall": {"claude": ["claude", "uninstall"],
+                          "copilot": ["vscode", "uninstall"]},
+            "repo_cwd": True,
+            "version_file": ".tool_y_version",
+        }
+        ext.update(overrides)
+        return ext
+
+    def record_runs(self):
+        """Patch run_cli to record argv + cwd instead of running anything."""
+        calls = []
+
+        def fake(argv, cwd):
+            calls.append((list(argv), str(cwd)))
+            return True
+
+        return calls, mock.patch("install.run_cli", side_effect=fake)
+
+
+class TestFindCli(ExternalTest):
+    def test_prefers_path(self):
+        with mock.patch("install.shutil.which", return_value="/usr/bin/tool-y"):
+            self.assertEqual(install.find_cli("tool-y"), "/usr/bin/tool-y")
+
+    def test_falls_back_to_user_bin(self):
+        bin_dir = self.tmp / "bin"
+        bin_dir.mkdir()
+        shim = bin_dir / "tool-y"
+        shim.write_text("#!/bin/sh\n")
+        with mock.patch("install.shutil.which", return_value=None), \
+                mock.patch("install.USER_BIN_DIRS", (bin_dir,)):
+            self.assertEqual(install.find_cli("tool-y"), str(shim))
+
+    def test_missing_returns_none(self):
+        with mock.patch("install.shutil.which", return_value=None), \
+                mock.patch("install.USER_BIN_DIRS", (self.tmp / "nope",)):
+            self.assertIsNone(install.find_cli("tool-y"))
+
+
+class TestBootstrapCli(ExternalTest):
+    def test_present_cli_is_not_reinstalled(self):
+        with mock.patch("install.find_cli", return_value="/bin/tool-y") as f, \
+                mock.patch("install.subprocess.run") as run:
+            path = install.bootstrap_cli(self.fake_external(), dry_run=False)
+        self.assertEqual(path, "/bin/tool-y")
+        run.assert_not_called()
+        f.assert_called_once_with("tool-y")
+
+    def test_dry_run_never_installs(self):
+        with mock.patch("install.find_cli", return_value=None), \
+                mock.patch("install.subprocess.run") as run:
+            self.assertIsNone(install.bootstrap_cli(self.fake_external(),
+                                                    dry_run=True))
+        run.assert_not_called()
+
+    def test_installs_with_uv_then_finds_shim(self):
+        with mock.patch("install.find_cli",
+                        side_effect=[None, "/home/x/.local/bin/tool-y"]), \
+                mock.patch("install.shutil.which",
+                           side_effect=lambda c: "/bin/uv" if c == "uv"
+                           else None), \
+                mock.patch("install.subprocess.run") as run:
+            path = install.bootstrap_cli(self.fake_external(), dry_run=False)
+        self.assertEqual(path, "/home/x/.local/bin/tool-y")
+        run.assert_called_once_with(["uv", "tool", "install", "tool-y-pkg"],
+                                    check=True)
+
+    def test_falls_back_to_pipx_when_uv_absent(self):
+        with mock.patch("install.find_cli", side_effect=[None, "/bin/tool-y"]), \
+                mock.patch("install.shutil.which",
+                           side_effect=lambda c: "/bin/pipx" if c == "pipx"
+                           else None), \
+                mock.patch("install.subprocess.run") as run:
+            install.bootstrap_cli(self.fake_external(), dry_run=False)
+        run.assert_called_once_with(["pipx", "install", "tool-y-pkg"],
+                                    check=True)
+
+    def test_no_installer_available_returns_none(self):
+        with mock.patch("install.find_cli", return_value=None), \
+                mock.patch("install.shutil.which", return_value=None), \
+                mock.patch("install.subprocess.run") as run:
+            self.assertIsNone(install.bootstrap_cli(self.fake_external(),
+                                                    dry_run=False))
+        run.assert_not_called()
+
+
+class TestInstallExternalForTarget(ExternalTest):
+    def test_claude_runs_cli_outside_the_cwd(self):
+        calls, patched = self.record_runs()
+        with patched:
+            results = install.install_external_for_target(
+                "claude", self.fake_external(), "/bin/tool-y", None,
+                dry_run=False)
+        self.assertEqual(results, [("claude", "tool-y", "installed (by CLI)")])
+        argv, cwd = calls[0]
+        self.assertEqual(argv, ["/bin/tool-y", "install"])
+        self.assertNotEqual(cwd, str(Path.cwd()))
+
+    def test_copilot_uses_the_vscode_body(self):
+        calls, patched = self.record_runs()
+        with patched:
+            install.install_external_for_target(
+                "copilot", self.fake_external(), "/bin/tool-y", None,
+                dry_run=False)
+        self.assertEqual(calls[0][0],
+                         ["/bin/tool-y", "vscode", "install"])
+
+    def test_repo_runs_in_repo_then_copies_personal_skill(self):
+        home_skill = self.tmp / "copilot-skills" / "tool-y"
+        home_skill.mkdir(parents=True)
+        (home_skill / "SKILL.md").write_text("body")
+        repo = self.tmp / "proj"
+        (repo / ".github" / "skills").mkdir(parents=True)
+        calls, patched = self.record_runs()
+        with patched, mock.patch(
+                "install.target_root",
+                side_effect=lambda t, r=None: (
+                    home_skill.parent if t == "copilot"
+                    else repo / ".github" / "skills")):
+            results = install.install_external_for_target(
+                "repo", self.fake_external(), "/bin/tool-y", repo,
+                dry_run=False)
+        self.assertEqual(calls[0][1], str(repo))
+        self.assertEqual(results, [("repo", "tool-y", "installed")])
+        self.assertTrue(
+            (repo / ".github" / "skills" / "tool-y" / "SKILL.md").is_file())
+
+    def test_repo_reports_failure_when_personal_skill_missing(self):
+        repo = self.tmp / "proj"
+        repo.mkdir()
+        calls, patched = self.record_runs()
+        with patched, mock.patch("install.target_root",
+                                 side_effect=lambda t, r=None:
+                                 self.tmp / "ghost"):
+            results = install.install_external_for_target(
+                "repo", self.fake_external(), "/bin/tool-y", repo,
+                dry_run=False)
+        self.assertIn("failed", results[0][2])
+
+    def test_dry_run_plans_without_running(self):
+        with mock.patch("install.run_cli") as run:
+            results = install.install_external_for_target(
+                "claude", self.fake_external(), None, None, dry_run=True)
+        run.assert_not_called()
+        self.assertEqual(results,
+                         [("claude", "tool-y",
+                           "dry-run: would run tool-y install")])
+
+    def test_missing_cli_skips_instead_of_failing(self):
+        with mock.patch("install.run_cli") as run:
+            results = install.install_external_for_target(
+                "claude", self.fake_external(), None, None, dry_run=False)
+        run.assert_not_called()
+        self.assertEqual(results,
+                         [("claude", "tool-y", "skipped (CLI unavailable)")])
+
+    def test_target_policy_respected(self):
+        ext = self.fake_external(targets=("copilot",))
+        with mock.patch("install.run_cli") as run:
+            results = install.install_external_for_target(
+                "claude", ext, "/bin/tool-y", None, dry_run=False)
+        run.assert_not_called()
+        self.assertEqual(results,
+                         [("claude", "tool-y", "skipped (not for claude)")])
+
+
+class TestInstallExternalsForTarget(ExternalTest):
+    def test_only_selected_externals_run(self):
+        ext = self.fake_external()
+        ext["_exe"] = "/bin/tool-y"
+        calls, patched = self.record_runs()
+        with patched, mock.patch("install.EXTERNALS", [ext]):
+            selected = install.install_externals_for_target(
+                "claude", {"tool-y"}, None, dry_run=False)
+            skipped = install.install_externals_for_target(
+                "claude", set(), None, dry_run=False)
+        self.assertEqual(len(calls), 1)
+        self.assertEqual(len(selected), 1)
+        self.assertEqual(skipped, [])
+
+
+class TestUninstallExternals(ExternalTest):
+    def test_delegates_to_cli_per_target(self):
+        ext = self.fake_external()
+        calls, patched = self.record_runs()
+        with patched, mock.patch("install.EXTERNALS", [ext]), \
+                mock.patch("install.find_cli", return_value="/bin/tool-y"):
+            results = install.uninstall_externals(["tool-y"], "copilot",
+                                                  dry_run=False)
+        self.assertEqual(calls[0][0],
+                         ["/bin/tool-y", "vscode", "uninstall"])
+        self.assertEqual(results,
+                         [("copilot", "tool-y", "removed (by CLI)")])
+
+    def test_repo_scope_left_to_uninstall_skills(self):
+        with mock.patch("install.EXTERNALS", [self.fake_external()]), \
+                mock.patch("install.run_cli") as run:
+            self.assertEqual(
+                install.uninstall_externals(["tool-y"], "repo", False), [])
+        run.assert_not_called()
+
+    def test_without_cli_removes_the_directory(self):
+        dest_root = self.tmp / "skills"
+        (dest_root / "tool-y").mkdir(parents=True)
+        with mock.patch("install.EXTERNALS", [self.fake_external()]), \
+                mock.patch("install.find_cli", return_value=None), \
+                mock.patch("install.target_root",
+                           side_effect=lambda t, r=None: dest_root):
+            results = install.uninstall_externals(["tool-y"], "claude", False)
+        self.assertEqual(results,
+                         [("claude", "tool-y", "removed (no CLI — dir only)")])
+        self.assertFalse((dest_root / "tool-y").exists())
+
+    def test_dry_run_plans_without_running(self):
+        with mock.patch("install.EXTERNALS", [self.fake_external()]), \
+                mock.patch("install.find_cli", return_value="/bin/tool-y"), \
+                mock.patch("install.run_cli") as run:
+            results = install.uninstall_externals(["tool-y"], "claude", True)
+        run.assert_not_called()
+        self.assertEqual(
+            results,
+            [("claude", "tool-y",
+              "dry-run: would run tool-y claude uninstall")])
+
+
+class TestExternalStatus(ExternalTest):
+    def test_classified_with_version_and_missing_cli_warning(self):
+        dest = self.tmp / "claude-skills"
+        (dest / "tool-y").mkdir(parents=True)
+        (dest / "tool-y" / ".tool_y_version").write_text("9.9.9\n")
+        with mock.patch("install.EXTERNALS", [self.fake_external()]), \
+                mock.patch("install.find_cli", return_value=None):
+            rows, warnings = install.gather_status("claude", dest, set(), {})
+        self.assertEqual(rows, [("tool-y", "external (tool-y-pkg 9.9.9)",
+                                 "copy")])
+        self.assertTrue(any("not on PATH" in w for w in warnings))
+
+    def test_no_warning_when_cli_present(self):
+        dest = self.tmp / "claude-skills"
+        (dest / "tool-y").mkdir(parents=True)
+        with mock.patch("install.EXTERNALS", [self.fake_external()]), \
+                mock.patch("install.find_cli", return_value="/bin/tool-y"):
+            rows, warnings = install.gather_status("claude", dest, set(), {})
+        self.assertEqual(rows, [("tool-y", "external (tool-y-pkg)", "copy")])
+        self.assertEqual(warnings, [])
+
+
+class TestExternalRegistry(unittest.TestCase):
+    def test_graphify_is_a_default_external_for_every_target(self):
+        ext = install.externals()["graphify"]
+        self.assertIn("graphify", install.default_external_names())
+        self.assertEqual(set(ext["targets"]), {"copilot", "claude", "repo"})
+
+    def test_copilot_installs_the_vscode_skill_body(self):
+        # Both bodies write ~/.copilot/skills/graphify/SKILL.md; only the
+        # vscode one works without a parallel Agent tool (JetBrains, VS Code).
+        self.assertEqual(install.externals()["graphify"]["install"]["copilot"],
+                         ["vscode", "install"])
+
+    def test_externals_appear_in_the_picker(self):
+        items = install.build_items([], [])
+        self.assertIn(("external", "graphify"), items)
 
 
 class TestPromptStem(unittest.TestCase):

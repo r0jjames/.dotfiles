@@ -26,6 +26,11 @@ The prompts in prompts/ reach every agent in every IDE, in three forms: the
 slash command in ~/.claude/commands (Claude in both IDEs, as /<name>).
 A prompt named after a real skill in skills/ generates neither — the skill
 already answers to that name in both places.
+
+Skills come from three kinds of source: this repo (skills/), a community git
+repo (SOURCES, sparse-cloned into ~/.agent-skills-cache), and an external CLI
+that installs its own skill (EXTERNALS — the installer bootstraps the CLI and
+delegates). Externals need a package index, so --skills-only skips them.
 """
 import argparse
 import filecmp
@@ -34,6 +39,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent
@@ -118,6 +124,50 @@ SOURCES = [
         },
     },
 ]
+
+# External skills: shipped and installed by their own CLI, never vendored
+# here. We bootstrap the CLI, then delegate each target's install to it, so an
+# external is always the upstream version — nothing to keep in sync.
+EXTERNALS = [
+    {
+        "name": "graphify",
+        "package": "graphifyy",
+        "cli": "graphify",
+        "targets": ANY,
+        "default": True,
+        "doc": "knowledge graph over code/docs/PDFs — /graphify",
+        # Per target: argv for the CLI. Claude's own install auto-picks the
+        # PowerShell skill variant on Windows, so no --platform is needed.
+        #
+        # Copilot gets `vscode install`, not `copilot install`: both write the
+        # same ~/.copilot/skills/graphify/SKILL.md, and only the vscode body
+        # drives extraction by hand. The copilot body calls a parallel Agent
+        # tool that neither VS Code Copilot Chat nor JetBrains Copilot has.
+        # That personal scope is what serves both IDEs.
+        "install": {"claude": ["install"], "copilot": ["vscode", "install"]},
+        "uninstall": {"claude": ["claude", "uninstall"],
+                      "copilot": ["vscode", "uninstall"]},
+        # `vscode install` also writes <cwd>/.github/copilot-instructions.md.
+        # Personal scope runs in a scratch cwd to keep that out of whatever
+        # directory the installer was launched from; repo scope runs in the
+        # repo, where the file belongs.
+        "repo_cwd": True,
+        "version_file": ".graphify_version",
+    },
+]
+
+
+def externals():
+    """{external_name: ext}."""
+    return {ext["name"]: ext for ext in EXTERNALS}
+
+
+def all_external_names():
+    return set(externals())
+
+
+def default_external_names():
+    return {e["name"] for e in EXTERNALS if e["default"]}
 
 
 def registry():
@@ -300,10 +350,11 @@ def status_targets(arg_target, repo):
 
 def build_items(custom_skills, prompt_files):
     """Ordered installable items as (kind, name): custom skills, prompt
-    files, then community skills."""
+    files, community skills, then CLI-installed externals."""
     items = [("skill", n) for n in custom_skills]
     items += [("prompt", n) for n in prompt_files]
     items += [("community", n) for n in sorted(all_community_names())]
+    items += [("external", n) for n in sorted(all_external_names())]
     return items
 
 
@@ -709,6 +760,149 @@ def install_community_for_target(target, dest_root, sel_community, dry_run):
     return results
 
 
+# uv and pipx drop their shims in ~/.local/bin, which is on PATH for new
+# shells but not necessarily for this process — look there before giving up.
+USER_BIN_DIRS = (Path.home() / ".local" / "bin",)
+CLI_SUFFIXES = ("", ".exe", ".cmd", ".bat") if os.name == "nt" else ("",)
+BOOTSTRAP_CMDS = (["uv", "tool", "install"], ["pipx", "install"])
+
+
+def find_cli(name):
+    """Absolute path to a CLI, or None."""
+    found = shutil.which(name)
+    if found:
+        return found
+    for d in USER_BIN_DIRS:
+        for suffix in CLI_SUFFIXES:
+            candidate = d / (name + suffix)
+            if candidate.is_file():
+                return str(candidate)
+    return None
+
+
+def bootstrap_cli(ext, dry_run):
+    """Ensure an external's CLI is present. Returns its path, or None when it
+    is missing and could not be installed — callers skip the external then
+    rather than failing the whole run."""
+    found = find_cli(ext["cli"])
+    if found or dry_run:
+        return found
+    for cmd in BOOTSTRAP_CMDS:
+        if not shutil.which(cmd[0]):
+            continue
+        log(f"Installing {ext['package']} with {cmd[0]}...")
+        try:
+            subprocess.run([*cmd, ext["package"]], check=True)
+        except (subprocess.CalledProcessError, OSError):
+            warn(f"{cmd[0]} could not install {ext['package']}")
+            continue
+        found = find_cli(ext["cli"])
+        if found:
+            ok(f"{ext['cli']} ready ({found})")
+            return found
+        warn(f"{cmd[0]} reported success but {ext['cli']} is not on PATH")
+    warn(f"No {ext['cli']} CLI and no uv/pipx to install it — skipping. "
+         f"Install it yourself with 'uv tool install {ext['package']}' "
+         f"(or 'pipx install {ext['package']}') and re-run.")
+    return None
+
+
+def run_cli(argv, cwd):
+    try:
+        subprocess.run(argv, cwd=str(cwd), check=True)
+        return True
+    except (subprocess.CalledProcessError, OSError) as exc:
+        warn(f"{' '.join(str(a) for a in argv)} failed: {exc}")
+        return False
+
+
+def external_version(dest, ext):
+    """Version the external's CLI stamped into an installed skill dir."""
+    try:
+        return (dest / ext["version_file"]).read_text(
+            encoding="utf-8").strip() or None
+    except (OSError, KeyError):
+        return None
+
+
+def install_external_for_target(target, ext, exe, repo, dry_run):
+    """Delegate one external's install for one target.
+
+    Personal scope runs the CLI in a scratch directory so the repo-scoped
+    files some installers write next to the cwd land nowhere. Repo scope runs
+    it in the repo (where those files belong), then copies the personal skill
+    into <repo>/.github/skills for JetBrains Copilot."""
+    name = ext["name"]
+    if target not in ext["targets"]:
+        return [(target, name, f"skipped (not for {target})")]
+    # Repo scope reuses the copilot install: same skill, seeded per project.
+    argv_key = "copilot" if target == "repo" else target
+    argv = [exe or ext["cli"], *ext["install"][argv_key]]
+    shown = " ".join([ext["cli"], *ext["install"][argv_key]])
+    if dry_run:
+        planned = [(target, name, f"dry-run: would run {shown}")]
+        if target == "repo":
+            planned.append((target, name, "dry-run: would copy into "
+                            f"{target_root('repo', repo) / name}"))
+        return planned
+    if not exe:
+        return [(target, name, "skipped (CLI unavailable)")]
+    with tempfile.TemporaryDirectory() as scratch:
+        cwd = repo if (target == "repo" and ext.get("repo_cwd")) else scratch
+        if not run_cli(argv, cwd):
+            return [(target, name, "failed")]
+    if target != "repo":
+        return [(target, name, "installed (by CLI)")]
+    src = target_root("copilot") / name
+    if not src.is_dir():
+        return [(target, name, f"failed — {src} missing after install")]
+    return [(target, name,
+             install_copy(src, target_root("repo", repo) / name, dry_run))]
+
+
+def install_externals_for_target(target, sel_externals, repo, dry_run):
+    """Install selected externals for one target. Each carries its resolved
+    CLI path under '_exe' (None = missing and not installable)."""
+    results = []
+    for ext in EXTERNALS:
+        if ext["name"] not in sel_externals:
+            continue
+        results.extend(install_external_for_target(
+            target, ext, ext.get("_exe"), repo, dry_run))
+    return results
+
+
+def uninstall_externals(names, target, dry_run):
+    """Hand personal-scope removal back to the external's own CLI. Repo scope
+    is a plain directory, so uninstall_skills handles it instead."""
+    results = []
+    if target == "repo":
+        return results
+    for ext in EXTERNALS:
+        name = ext["name"]
+        argv_tail = ext["uninstall"].get(target)
+        if name not in names or not argv_tail or target not in ext["targets"]:
+            continue
+        dest = target_root(target) / name
+        exe = find_cli(ext["cli"])
+        if not exe:
+            if not dest.exists():
+                results.append((target, name, "not installed"))
+            else:
+                if not dry_run:
+                    shutil.rmtree(dest)
+                results.append((target, name, "removed (no CLI — dir only)"))
+            continue
+        if dry_run:
+            results.append((target, name, "dry-run: would run "
+                            f"{' '.join([ext['cli'], *argv_tail])}"))
+            continue
+        with tempfile.TemporaryDirectory() as scratch:
+            done = run_cli([exe, *argv_tail], scratch)
+        results.append((target, name, "removed (by CLI)" if done else "failed"))
+    return results
+
+
 def enabled_plugins(settings_path=None):
     settings_path = settings_path or (Path.home() / ".claude"
                                       / "settings.json")
@@ -746,6 +940,7 @@ def gather_status(target, dest_root, custom_names, plugin_map,
     """Classify installed skills in dest_root. Returns (rows, warnings);
     row = (name, kind, mechanism)."""
     reg = registry()
+    ext_map = externals()
     rows, warnings = [], []
     if not dest_root.is_dir():
         return rows, warnings
@@ -762,6 +957,15 @@ def gather_status(target, dest_root, custom_names, plugin_map,
             kind = "custom"
         elif name in reg:
             kind = f"community ({reg[name][0]['label']})"
+        elif name in ext_map:
+            version = external_version(entry, ext_map[name])
+            kind = f"external ({ext_map[name]['package']}" + (
+                f" {version})" if version else ")")
+            if not find_cli(ext_map[name]["cli"]):
+                warnings.append(
+                    f"{target}: {name} skill is installed but its "
+                    f"{ext_map[name]['cli']} CLI is not on PATH — the skill "
+                    f"cannot run")
         else:
             kind = "unknown"
         mech = "symlink" if entry.is_symlink() else "copy"
@@ -846,6 +1050,13 @@ def print_summary(results, targets, dry_run):
     if "claude" in targets:
         log("Verify Claude:   ask 'what skills are available?' in a new "
             "claude session")
+    ext_map = externals()
+    touched = {name for _, name, status in results
+               if name in ext_map and not status.startswith("skipped")}
+    for name in sorted(touched):
+        ext = ext_map[name]
+        log(f"Verify {name}:  run '{ext['cli']} --version', then "
+            f"'/{name} .' in the agent — {ext['doc']}")
     if "repo" in targets:
         log("Verify JetBrains: reopen the project, Copilot Chat -> Agent "
             "mode, type '/' — the prompt files list as slash commands")
@@ -859,7 +1070,8 @@ def main():
     ap.add_argument("--target", choices=["copilot", "claude", "both"],
                     help="where to install (omit for interactive menu)")
     ap.add_argument("--skills-only", action="store_true",
-                    help="skip fetching community skills (offline/proxy)")
+                    help="skip community skills and CLI-installed externals "
+                         "(offline/proxy)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print planned actions without writing anything")
     ap.add_argument("--status", action="store_true",
@@ -884,10 +1096,17 @@ def main():
         targets = pick_targets(args.target, repo)
         names = [n.strip() for n in args.uninstall.split(",") if n.strip()]
         known = (custom_skill_names() | all_community_names()
-                 | prompt_skill_names())
+                 | prompt_skill_names() | all_external_names())
         results = []
         for target in targets:
-            skills = [n for n in names if not n.startswith("prompt:")]
+            # Externals are removed by their own CLI in personal scope; in
+            # repo scope they are ordinary copied directories.
+            ext_names = [n for n in names if n in all_external_names()]
+            results.extend(uninstall_externals(ext_names, target,
+                                               args.dry_run))
+            skills = [n for n in names
+                      if not n.startswith("prompt:")
+                      and (target == "repo" or n not in ext_names)]
             results.extend(uninstall_skills(
                 skills, target, target_root(target, repo), known,
                 args.force, args.dry_run))
@@ -911,8 +1130,11 @@ def main():
     if interactive:
         items = build_items([p.name for p in custom], prompt_files)
         reg = registry()
+        ext_map = externals()
         plugin_map = plugin_skills()
-        preselected = [reg[n][1]["default"] if k == "community" else True
+        preselected = [reg[n][1]["default"] if k == "community"
+                       else ext_map[n]["default"] if k == "external"
+                       else True
                        for k, n in items]
         tags = {(k, n): item_tag(k, n, targets, plugin_map)
                 for k, n in items}
@@ -921,13 +1143,18 @@ def main():
         sel_skills = {n for k, n in chosen if k == "skill"}
         sel_prompts = {n for k, n in chosen if k == "prompt"}
         sel_community = {n for k, n in chosen if k == "community"}
+        sel_externals = {n for k, n in chosen if k == "external"}
         custom = [p for p in custom if p.name in sel_skills]
     else:
         sel_prompts = None
         sel_community = default_community_names()
+        sel_externals = default_external_names()
 
     if args.skills_only:
-        log("--skills-only: skipping community skills")
+        # Externals fetch from a package index, same network the community
+        # sources need — --skills-only means neither is reachable.
+        log("--skills-only: skipping community skills and externals")
+        sel_externals = set()
         for source in SOURCES:
             source["_cache"] = None
     else:
@@ -936,6 +1163,9 @@ def main():
             source["_cache"] = (update_source_cache(source, args.dry_run,
                                                     names=wanted)
                                 if wanted else None)
+    for ext in EXTERNALS:
+        ext["_exe"] = (bootstrap_cli(ext, args.dry_run)
+                       if ext["name"] in sel_externals else None)
 
     results = []
     for target in targets:
@@ -953,6 +1183,8 @@ def main():
             results.append((target, skill.name, status))
         results.extend(install_community_for_target(
             target, dest_root, sel_community, args.dry_run))
+        results.extend(install_externals_for_target(
+            target, sel_externals, repo, args.dry_run))
         if target == "copilot":
             # Personal scope reaches every project; JetBrains has no global
             # prompts dir, so the prompts also ship as generated skills.

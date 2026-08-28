@@ -39,7 +39,9 @@ Claude Code, plus an installer. One `SKILL.md` format serves every platform.
   Claude gets a generated `~/.claude/commands/<stem>.md`. See
   [Where each prompt lands](#where-each-prompt-lands).
 - `install.py` — installer for macOS, Linux and Windows/Git Bash
-  (Python >= 3.8, stdlib only).
+  (Python >= 3.8, stdlib only). Also bootstraps the CLI-installed externals
+  (see [External skills](#external-skills-installed-by-their-own-cli)) —
+  today that is `graphify`.
 
 `explain-logic`, `soundboarding`, `investigate-issue` and `code-review-pr`
 each end a run by
@@ -107,6 +109,49 @@ in place (missing = install, present = update, unchanged = up to date):
 install (no community fetch) as part of normal dotfiles setup — Claude only on
 macOS/Linux, **both** Claude and Copilot on Windows (Git Bash).
 
+## External skills (installed by their own CLI)
+
+Some skills ship with a tool rather than as a folder we can copy. Those are
+listed in `EXTERNALS` in `install.py`: the installer puts the CLI on the
+machine (`uv tool install`, falling back to `pipx install`), then hands the
+per-target install to that CLI, so the skill is always the upstream version
+and nothing is vendored here. A missing CLI with no `uv`/`pipx` to bootstrap
+it is a skip with instructions, never a failed run. `--skills-only` skips
+externals along with community skills — both need the network.
+
+**[`graphify`](https://github.com/Graphify-Labs/graphify)** (`graphifyy` on
+PyPI) — maps a project (code, docs, PDFs, images, video) into a knowledge
+graph you query instead of grepping, and writes `graphify-out/` with
+`graph.html`, `GRAPH_REPORT.md` and `graph.json`. Code is parsed locally with
+tree-sitter; the semantic pass over docs uses whichever agent invoked it. Run
+it as `/graphify .`.
+
+| Target | What the installer runs | Where it lands |
+| --- | --- | --- |
+| claude | `graphify install` | `~/.claude/skills/graphify/` (auto-picks the PowerShell variant on Windows) |
+| copilot | `graphify vscode install` | `~/.copilot/skills/graphify/` — personal scope, so **VS Code and JetBrains Copilot both see it** |
+| repo (`--repo P`) | the same, run inside `P` | `P/.github/skills/graphify/` + `P/.github/copilot-instructions.md` |
+
+Copilot deliberately gets the `vscode` skill body, not the `copilot` one.
+Both write the same `~/.copilot/skills/graphify/SKILL.md`, but the `copilot`
+body dispatches extraction through a parallel Agent tool that neither VS Code
+Copilot Chat nor JetBrains Copilot has; the `vscode` body drives the same
+extraction by hand. Copilot CLI reads the same file and only loses the
+parallelism.
+
+`graphify vscode install` also writes `.github/copilot-instructions.md` next
+to its working directory, so personal-scope runs happen in a scratch dir and
+only `--repo` writes that file, into the repo where it belongs.
+
+`graphify install` appends an always-on `## graphify` section to
+`~/.claude/CLAUDE.md` — a symlink to `claude/CLAUDE.md` in this repo — unless
+the word `graphify` already appears there. The bullet in `claude/CLAUDE.md`
+is that guard: it keeps graphify skill-only (no per-session token cost) and
+keeps the CLI out of a repo-managed file.
+
+Uninstall goes back through the CLI: `python3 install.py --uninstall graphify
+--target both`. Repo scope is a plain copy, removed as a directory.
+
 ## Work VDI (Windows, Git Bash)
 
 Run everything with `python` (Git Bash has no `python3` unless you alias it).
@@ -120,6 +165,12 @@ Run everything with `python` (Git Bash has no `python3` unless you alias it).
 5. `python install.py --status` — verify new installs.
 6. If the proxy blocks the clone, follow the printed ZIP fallback, or use
    `--skills-only`.
+
+Step 4 also installs `graphifyy` from PyPI with `uv` or `pipx` (whichever is
+on the box) so the `graphify` skill has its CLI. If the proxy blocks PyPI,
+the run prints the manual command and carries on without it — and
+`--skills-only` skips it outright. A `graphify` skill without its CLI is
+inert, and `--status` says so.
 
 From the repo root, `python install.py install agent-skills` does steps 1–4
 for the custom skills only.
