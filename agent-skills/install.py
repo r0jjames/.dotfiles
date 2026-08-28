@@ -8,6 +8,7 @@ Usage:
   python3 install.py                # interactive: pick target + items
   python3 install.py --target claude --skills-only   # skip community fetch
   python3 install.py --repo .       # seed .github/skills + .github/prompts
+  python3 install.py --target both --upgrade   # newer graphify, then refresh
 
 Python >= 3.8, standard library only.
 Copilot gets copies; Claude gets per-skill symlinks (edit the repo, changes
@@ -30,7 +31,9 @@ already answers to that name in both places.
 Skills come from three kinds of source: this repo (skills/), a community git
 repo (SOURCES, sparse-cloned into ~/.agent-skills-cache), and an external CLI
 that installs its own skill (EXTERNALS — the installer bootstraps the CLI and
-delegates). Externals need a package index, so --skills-only skips them.
+delegates). Externals need a package index, so --skills-only skips them, and
+nothing about them auto-updates: --upgrade upgrades the CLI, and the same run
+then re-copies the skill files the new version ships.
 """
 import argparse
 import filecmp
@@ -792,6 +795,8 @@ CLI_SUFFIXES = ("", ".exe", ".cmd", ".bat") if os.name == "nt" else ("",)
 # under it) but installs into the user site rather than an isolated venv.
 BOOTSTRAP_CMDS = (["uv", "tool", "install"], ["pipx", "install"],
                   pip_install_cmd())
+UPGRADE_CMDS = (["uv", "tool", "upgrade"], ["pipx", "upgrade"],
+                pip_install_cmd() + ["--upgrade"])
 
 
 def find_cli(name):
@@ -823,6 +828,46 @@ def cli_path_hint(ext):
     return (f"{ext['cli']} is installed at {found}, but {directory} is not on "
             f"PATH — the skill calls '{ext['cli']}' by name. Add it with: "
             f"""echo 'export PATH="$PATH:{where}"' >> ~/.bashrc""")
+
+
+def cli_version(exe):
+    """`<cli> --version` reduced to the bare version, or None."""
+    if not exe:
+        return None
+    try:
+        out = subprocess.run([exe, "--version"], capture_output=True,
+                             text=True, timeout=60)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    first = (out.stdout or out.stderr or "").strip().splitlines()
+    return first[0].split()[-1] if first and first[0].split() else None
+
+
+def upgrade_cli(ext, exe, dry_run):
+    """Upgrade an already-installed external in place. Returns a status
+    string for the summary.
+
+    Which manager installed the package is not recorded anywhere, so the
+    managers are tried in install order: the ones that do not own this
+    package fail immediately and cost nothing."""
+    if dry_run:
+        return f"dry-run: would upgrade {ext['package']}"
+    before = cli_version(exe)
+    for cmd in UPGRADE_CMDS:
+        via = "pip" if cmd[0] == sys.executable else cmd[0]
+        if via != "pip" and not shutil.which(cmd[0]):
+            continue
+        log(f"Upgrading {ext['package']} with {via}...")
+        try:
+            subprocess.run([*cmd, ext["package"]], check=True)
+        except (subprocess.CalledProcessError, OSError):
+            continue
+        after = cli_version(find_cli(ext["cli"]) or exe)
+        if before and after and before != after:
+            return f"upgraded ({before} -> {after})"
+        return f"already latest ({after or before or 'version unknown'})"
+    warn(f"No uv/pipx/pip available to upgrade {ext['package']}")
+    return "upgrade unavailable"
 
 
 def bootstrap_cli(ext, dry_run):
@@ -1126,6 +1171,9 @@ def main():
     ap.add_argument("--skills-only", action="store_true",
                     help="skip community skills and CLI-installed externals "
                          "(offline/proxy)")
+    ap.add_argument("--upgrade", action="store_true",
+                    help="upgrade external CLIs (graphify) to the latest "
+                         "release before refreshing their skill files")
     ap.add_argument("--dry-run", action="store_true",
                     help="print planned actions without writing anything")
     ap.add_argument("--status", action="store_true",
@@ -1217,11 +1265,22 @@ def main():
             source["_cache"] = (update_source_cache(source, args.dry_run,
                                                     names=wanted)
                                 if wanted else None)
-    for ext in EXTERNALS:
-        ext["_exe"] = (bootstrap_cli(ext, args.dry_run)
-                       if ext["name"] in sel_externals else None)
-
+    if args.upgrade and args.skills_only:
+        warn("--upgrade has nothing to do with --skills-only: externals are "
+             "skipped entirely")
     results = []
+    for ext in EXTERNALS:
+        ext.pop("_upgrade", None)
+        if ext["name"] not in sel_externals:
+            ext["_exe"] = None
+            continue
+        ext["_exe"] = bootstrap_cli(ext, args.dry_run)
+        # A missing CLI was just installed at its latest version; upgrading
+        # only makes sense for one that was already there.
+        if args.upgrade and (ext["_exe"] or args.dry_run):
+            ext["_upgrade"] = upgrade_cli(ext, ext["_exe"], args.dry_run)
+            results.append(("external", ext["name"], ext["_upgrade"]))
+
     for target in targets:
         dest_root = target_root(target, repo)
         log(f"Target {target}: {dest_root}")

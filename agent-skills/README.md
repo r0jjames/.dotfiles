@@ -80,7 +80,8 @@ python3 install.py --target copilot --repo .   # personal + repo in one run
 `.claude/skills` and `.agents/skills` workspace scopes are left alone.
 
 Flags: `--dry-run` (print planned actions), `--skills-only` (skip the
-community-skill fetch — offline or behind a proxy), `--force` (bypass unknown-name
+community-skill fetch — offline or behind a proxy), `--upgrade` (upgrade
+external CLIs before refreshing their skills), `--force` (bypass unknown-name
 checks on uninstall).
 
 Interactive runs (no flags) show an item picker: toggle individual skills,
@@ -157,6 +158,31 @@ only `--repo` writes that file, into the repo where it belongs.
 the word `graphify` already appears there. The bullet in `claude/CLAUDE.md`
 is that guard: it keeps graphify skill-only (no per-session token cost) and
 keeps the CLI out of a repo-managed file.
+
+### Updating an external
+
+Nothing about an external updates itself. Three layers move independently:
+
+```bash
+python3 install.py --target both --upgrade   # CLI + skill files, in that order
+python3 install.py --repo . --upgrade        # and any per-project copies
+```
+
+`--upgrade` upgrades the package (trying `uv tool upgrade`, `pipx upgrade`,
+then `pip install --user --upgrade` — whichever owns it; the others fail fast),
+then the same run re-copies the skill files the new version ships. It reports
+`upgraded (0.9.50 -> 0.9.51)` or `already latest (…)` in the summary. Without
+`--upgrade` a re-run only refreshes the skill files: the bootstrap installs a
+CLI only when it is missing, never over one that already works.
+
+The third layer is the graph itself (`graphify-out/`), which the agent
+rebuilds — a full `/graphify .` or an incremental `graphify update <path>`
+after code changes. A stale graph is worse than none, since the skill tells
+the agent to trust it over reading files.
+
+`--status` prints the version stamped into each skill dir. If it disagrees
+with `graphify --version`, the skill files are behind — re-run with
+`--upgrade`.
 
 Uninstall goes back through the CLI: `python3 install.py --uninstall graphify
 --target both`. Repo scope is a plain copy, removed as a directory.

@@ -1242,6 +1242,89 @@ class TestBootstrapCli(ExternalTest):
         run.assert_not_called()
 
 
+
+class TestCliVersion(ExternalTest):
+    def result(self, stdout="", stderr=""):
+        return subprocess.CompletedProcess([], 0, stdout, stderr)
+
+    def test_parses_trailing_version_from_stdout(self):
+        with mock.patch("install.subprocess.run",
+                        return_value=self.result("tool-y 1.2.3\n")):
+            self.assertEqual(install.cli_version("/bin/tool-y"), "1.2.3")
+
+    def test_falls_back_to_stderr(self):
+        with mock.patch("install.subprocess.run",
+                        return_value=self.result("", "tool-y 4.5.6")):
+            self.assertEqual(install.cli_version("/bin/tool-y"), "4.5.6")
+
+    def test_missing_exe_is_none(self):
+        self.assertIsNone(install.cli_version(None))
+        with mock.patch("install.subprocess.run", side_effect=OSError):
+            self.assertIsNone(install.cli_version("/bin/tool-y"))
+
+
+class TestUpgradeCli(ExternalTest):
+    def versions(self, *values):
+        return mock.patch("install.cli_version", side_effect=list(values))
+
+    def test_reports_the_version_change(self):
+        with self.versions("1.0.0", "2.0.0"), \
+                mock.patch("install.shutil.which", return_value="/bin/uv"), \
+                mock.patch("install.find_cli", return_value="/bin/tool-y"), \
+                mock.patch("install.subprocess.run") as run:
+            status = install.upgrade_cli(self.fake_external(), "/bin/tool-y",
+                                         dry_run=False)
+        self.assertEqual(status, "upgraded (1.0.0 -> 2.0.0)")
+        run.assert_called_once_with(["uv", "tool", "upgrade", "tool-y-pkg"],
+                                    check=True)
+
+    def test_same_version_reads_as_already_latest(self):
+        with self.versions("2.0.0", "2.0.0"), \
+                mock.patch("install.shutil.which", return_value="/bin/uv"), \
+                mock.patch("install.find_cli", return_value="/bin/tool-y"), \
+                mock.patch("install.subprocess.run"):
+            status = install.upgrade_cli(self.fake_external(), "/bin/tool-y",
+                                         dry_run=False)
+        self.assertEqual(status, "already latest (2.0.0)")
+
+    def test_falls_through_to_a_manager_that_owns_the_package(self):
+        # uv is present but did not install it, so `uv tool upgrade` fails and
+        # the next manager gets a turn.
+        calls = []
+
+        def run(argv, check=False):
+            calls.append(argv)
+            if argv[0] == "uv":
+                raise subprocess.CalledProcessError(1, argv)
+            return subprocess.CompletedProcess(argv, 0)
+
+        with self.versions("1.0.0", "1.1.0"), \
+                mock.patch("install.shutil.which", return_value="/bin/x"), \
+                mock.patch("install.find_cli", return_value="/bin/tool-y"), \
+                mock.patch("install.subprocess.run", side_effect=run):
+            status = install.upgrade_cli(self.fake_external(), "/bin/tool-y",
+                                         dry_run=False)
+        self.assertEqual([c[0] for c in calls], ["uv", "pipx"])
+        self.assertEqual(status, "upgraded (1.0.0 -> 1.1.0)")
+
+    def test_no_manager_available(self):
+        with mock.patch("install.cli_version", return_value="1.0.0"), \
+                mock.patch("install.shutil.which", return_value=None), \
+                mock.patch("install.UPGRADE_CMDS",
+                           (["uv", "tool", "upgrade"],)), \
+                mock.patch("install.subprocess.run") as run:
+            status = install.upgrade_cli(self.fake_external(), "/bin/tool-y",
+                                         dry_run=False)
+        run.assert_not_called()
+        self.assertEqual(status, "upgrade unavailable")
+
+    def test_dry_run_plans_without_running(self):
+        with mock.patch("install.subprocess.run") as run:
+            status = install.upgrade_cli(self.fake_external(), "/bin/tool-y",
+                                         dry_run=True)
+        run.assert_not_called()
+        self.assertEqual(status, "dry-run: would upgrade tool-y-pkg")
+
 class TestCliPathHint(ExternalTest):
     def test_hint_when_found_but_not_callable_by_name(self):
         with mock.patch("install.find_cli",
