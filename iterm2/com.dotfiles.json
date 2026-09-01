@@ -16,7 +16,7 @@
       "Cursor Color": { "Red Component": 0.7333333492, "Green Component": 0.7333333492, "Blue Component": 0.7333333492, "Alpha Component": 1 },
       "Cursor Text Color": { "Red Component": 0.1882352978, "Green Component": 0.03921568766, "Blue Component": 0.1411764771, "Alpha Component": 1 },
       "Selection Color": { "Red Component": 0.709800005, "Green Component": 0.8353000283, "Blue Component": 1, "Alpha Component": 1 },
-      "Selected Text Color": { "Red Component": 0.9333333373, "Green Component": 0.9333333373, "Blue Component": 0.9254902005, "Alpha Component": 1 },
+      "Selected Text Color": { "Red Component": 0.1882352978, "Green Component": 0.03921568766, "Blue Component": 0.1411764771, "Alpha Component": 1 },
       "Ansi 0 Color": { "Red Component": 0.180392161, "Green Component": 0.2039215714, "Blue Component": 0.2117647082, "Alpha Component": 1 },
       "Ansi 1 Color": { "Red Component": 0.8000000119, "Green Component": 0, "Blue Component": 0, "Alpha Component": 1 },
       "Ansi 2 Color": { "Red Component": 0.3058823645, "Green Component": 0.6039215922, "Blue Component": 0.02352941222, "Alpha Component": 1 },

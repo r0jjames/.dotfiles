@@ -12,7 +12,7 @@ left installed as a fallback; the two coexist.
 
 ## What it does
 
-- Installs Ghostty + MesloLGS Nerd Font (Homebrew casks; the font is a no-op if
+- Installs Ghostty + MesloLGS Nerd Font Mono (Homebrew casks; the font is a no-op if
   the iTerm2 tool already installed it)
 - Copies [`config`](config) (theme + font) to `~/.config/ghostty/config`
 
@@ -28,6 +28,18 @@ restart Ghostty.
 
 The color values mirror [`iterm2/com.dotfiles.json`](../iterm2/com.dotfiles.json);
 keep them in sync if you change one.
+
+`selection-foreground` is the background purple, not the foreground white.
+Both profiles originally paired near-white selected text with the pale blue
+selection background — about 1.3:1, so selected text was effectively
+invisible. Dark-on-pale-blue is roughly 11.6:1. The iTerm2 profile's
+`Selected Text Color` carries the same fix; keep the two in step.
+
+One setting has no iTerm2 equivalent: `minimum-contrast = 3` lifts the darkest
+Tango slots at render time. Tango was drawn for a near-black background;
+against `#300a24` slots 0, 8, 5, 4 and 1 all land under 3:1 (slot 0 is
+1.39:1). Raising the floor keeps the palette itself identical to the iTerm2
+profile.
 
 ## Keymaps
 
