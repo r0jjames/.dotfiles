@@ -32,10 +32,13 @@ palette = 15=#eeeeec
 # profiles stay in sync if that default ever changes.
 bold-is-bright = true
 
-# Tango was drawn for a near-black background; on this purple the darkest
-# slots (0, 8, 5, 4, 1) fall under 3:1. Lift them at render time instead of
-# editing the palette, so the colors stay in sync with the iTerm2 profile.
-minimum-contrast = 3
+# Guard against text that is literally invisible against the background,
+# and nothing more. minimum-contrast does not lift a color toward the
+# foreground -- Ghostty swaps any color below the ratio for pure white or
+# pure black. On this purple (white 17.6:1, black 1.2:1) that means white,
+# so a threshold of 3 silently flattened red (2.99), blue (2.97), magenta
+# (2.67) and both greys (1.39, 2.41) into plain white.
+minimum-contrast = 1.1
 
 # ---- Font (same cask as iTerm2: font-meslo-lg-nerd-font) ----
 font-family = MesloLGS Nerd Font Mono
