@@ -1,4 +1,4 @@
-# Managed by ~/Dev/.dotfiles (symlinked). Machine-local tweaks go in ~/.zshrc.local.
+# Managed by ~/Dev/projects/.dotfiles (symlinked). Machine-local tweaks go in ~/.zshrc.local.
 
 # ---- Homebrew (Linux/WSL needs this on PATH; macOS Apple Silicon too) ----
 if [[ -x /home/linuxbrew/.linuxbrew/bin/brew ]]; then
@@ -34,7 +34,7 @@ alias v='nvim'
 alias python="python3"
 alias pip="pip3"
 alias dev="cd $HOME/dev"
-alias dot="cd $HOME/dev/.dotfiles"
+alias dot="cd $HOME/dev/projects/.dotfiles"
 alias projects="cd $HOME/dev/projects"
 
 # ---- Tool integrations ----
