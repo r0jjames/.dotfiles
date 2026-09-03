@@ -1,0 +1,39 @@
+# Managed by ~/Dev/projects/.dotfiles (symlinked).
+# Reference: https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md
+# Only non-defaults live here — lazygit rewrites this file when a key is
+# renamed between versions, so a short file means fewer surprise diffs.
+
+gui:
+  # MesloLGS Nerd Font comes from the iterm2/ghostty casks and nvim's
+  # post-install, so icons render everywhere this repo sets up.
+  nerdFontsVersion: "3"
+  showFileTree: true
+  showRandomTip: false
+  # Tango palette on the purple background used by ghostty/iterm2.
+  theme:
+    activeBorderColor:
+      - "#8ae234"
+      - bold
+    inactiveBorderColor:
+      - "#555753"
+    selectedLineBgColor:
+      - "#3465a4"
+    optionsTextColor:
+      - "#729fcf"
+    cherryPickedCommitBgColor:
+      - "#75507b"
+    cherryPickedCommitFgColor:
+      - "#eeeeec"
+    unstagedChangesColor:
+      - "#ef2929"
+
+git:
+  # Show the full graph in the commits panel, not just the current branch.
+  log:
+    showGraph: always
+
+os:
+  # Matches the vim/vi/v aliases in zsh/.zshrc.
+  editPreset: "nvim"
+
+disableStartupPopups: true

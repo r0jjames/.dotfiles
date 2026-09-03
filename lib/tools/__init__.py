@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 from lib.tools import (agent_skills, citrix_vdi, claude, ghostty, git, iterm2,
-                       jetbrains, maven, nvim, rancher_desktop, starship,
-                       terminal_macos, vscode, wezterm, zsh)
+                       jetbrains, lazygit, maven, nvim, rancher_desktop,
+                       starship, terminal_macos, vscode, wezterm, zsh)
 
 _ALL = (
     zsh.TOOL,
     starship.TOOL,
     git.TOOL,
+    lazygit.TOOL,
     nvim.TOOL,
     wezterm.TOOL,
     vscode.TOOL,
