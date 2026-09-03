@@ -9,7 +9,7 @@
     "superpowers@claude-plugins-official": true,
     "vercel@claude-plugins-official": false,
     "caveman@caveman": true,
-    "supabase@claude-plugins-official": false,
+    "supabase@claude-plugins-official": true,
     "code-simplifier@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "claude-code-setup@claude-plugins-official": true,
