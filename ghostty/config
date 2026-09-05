@@ -50,3 +50,10 @@ window-padding-y = 8
 cursor-style = block
 copy-on-select = false
 macos-titlebar-style = tabs
+
+# ---- tmux ----
+# Send Alt when Option is pressed, so tmux's stock M- bindings are reachable:
+# M-1..M-7 (select window), M-n / M-p (next/previous window with an alert)
+# and this repo's M-hjkl pane resize. Without it macOS eats Option for
+# accented characters and those keys never arrive.
+macos-option-as-alt = true

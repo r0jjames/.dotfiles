@@ -15,6 +15,9 @@ left installed as a fallback; the two coexist.
 - Installs Ghostty + MesloLGS Nerd Font Mono (Homebrew casks; the font is a no-op if
   the iTerm2 tool already installed it)
 - Copies [`config`](config) (theme + font) to `~/.config/ghostty/config`
+- Sets `macos-option-as-alt = true` so Option reaches the shell and tmux as
+  Alt. This is an input setting, not a keymap: no key is bound to a Ghostty
+  action, so the file stays portable across environments.
 
 Ghostty injects its shell integration automatically — nothing is sourced in
 [`zsh/.zshrc`](../zsh/.zshrc), unlike the iTerm2 setup.
@@ -45,3 +48,8 @@ profile.
 
 Deliberately not in `config`. Set keybindings per-environment (e.g. inside a
 Citrix VDI) so the shared config stays portable.
+
+## Keys
+
+Ghostty's `⌘` bindings and tmux's prefix bindings side by side:
+[docs/cheatsheet-tmux-ghostty.md](../docs/cheatsheet-tmux-ghostty.md).

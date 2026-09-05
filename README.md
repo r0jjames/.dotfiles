@@ -62,6 +62,8 @@ are left installed — the summary lists them for manual removal.
 | [`git/`](git/README.md) | Global git ignore (`.tours/`, agent leftovers) + `core.excludesFile` | macOS, WSL, Windows (Git Bash) |
 | [`lazygit/`](lazygit/README.md) | lazygit terminal UI for git + config (`lg` alias) | macOS, WSL |
 | [`nvim/`](nvim/README.md) | Neovim DevOps IDE (k8s, Helm, Docker, Python, Ansible, Terraform) | macOS, WSL |
+| [`docs/`](docs/cheatsheet-tmux-ghostty.md) | Ghostty + tmux keyboard cheat sheet (stock keys and this repo's additions) | — |
+| [`tmux/`](tmux/README.md) | tmux + Ghostty-themed status bar, additive keys only, fzf project picker | macOS, WSL |
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
 | [`jetbrains/`](jetbrains/README.md) | F-free cross-OS keymap for every JetBrains IDE — IntelliJ, PyCharm, GoLand (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
