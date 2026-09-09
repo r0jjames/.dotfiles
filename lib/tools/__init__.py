@@ -3,8 +3,8 @@ from __future__ import annotations
 
 from lib.tools import (agent_skills, citrix_vdi, claude, ghostty, git, iterm2,
                        jetbrains, lazygit, maven, nvim, rancher_desktop,
-                       starship, terminal_macos, tmux, vscode, wezterm,
-                       zsh)
+                       starship, terminal_macos, terminal_ubuntu,
+                       terminal_windows, tmux, vscode, wezterm, zsh)
 
 _ALL = (
     zsh.TOOL,
@@ -20,6 +20,8 @@ _ALL = (
     agent_skills.TOOL,
     maven.TOOL,
     terminal_macos.TOOL,
+    terminal_ubuntu.TOOL,
+    terminal_windows.TOOL,
     iterm2.TOOL,
     ghostty.TOOL,
     citrix_vdi.TOOL,

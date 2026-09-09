@@ -1,9 +1,10 @@
 # lib/tools/lazygit.py
 """lazygit: terminal UI for git, with the repo config symlinked in.
 
-lazygit is not macOS-only — brew covers macOS and Linux/WSL, which is the
-same pair every other shell tool in this repo targets. (On the Windows side
-proper it ships via winget/scoop; that is out of scope here, same as zsh.)
+lazygit is not macOS-only. brew covers macOS; Ubuntu does not package it at
+all, so on Linux the upstream release binary is unpacked into ~/.local/bin
+(see lib/apt.py). (On the Windows side proper it ships via winget/scoop; that
+is out of scope here, same as zsh.)
 
 The config directory is not the same everywhere, so the link target is
 resolved at install time instead of being a static Link:
@@ -44,6 +45,10 @@ def _target() -> Path:
 
 
 def _post() -> None:
+    if core.detect_os() == "linux":
+        # Not in Ubuntu's archive; the release binary goes to ~/.local/bin.
+        from lib import apt
+        apt.install_lazygit()
     core.link_file(_src(), _target())
 
 
@@ -61,6 +66,7 @@ TOOL = Tool(
     doc="lazygit terminal UI + config",
     platforms=frozenset({"macos", "linux"}),
     brew=("lazygit",),
+    # apt has no lazygit; _post fetches the release binary instead.
     post_install=_post,
     extra_uninstall=_uninstall,
     status_probe=_probe,

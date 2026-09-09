@@ -13,6 +13,11 @@ _THEMES_URL = ("https://github.com/lysyi3m/macos-terminal-themes/"
 
 
 def _default_theme() -> str:
+    # `defaults` exists only on macOS. The probe still runs off-macOS --
+    # ./install.py status reports every tool, applicable or not -- so a
+    # missing binary has to read as "no theme set", not raise.
+    if not core.have("defaults"):
+        return ""
     return core.run(["defaults", "read", "com.apple.Terminal",
                      "Default Window Settings"],
                     check=False, capture=True).stdout.strip()

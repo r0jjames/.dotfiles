@@ -175,16 +175,47 @@ class InstallUninstallTest(unittest.TestCase):
             extra_uninstall=lambda: self.events.append("cleanup"))
 
     def test_install_orders_brew_links_post(self):
-        with mock.patch.object(core, "brew_install") as bi, \
+        with mock.patch.object(core, "detect_os", return_value="macos"), \
+             mock.patch.object(core, "brew_install") as bi, \
              mock.patch.object(core, "ensure_brew", return_value="brew"):
             core.install_tool(self.tool)
         bi.assert_called_once_with("somepkg", cask=False)
         self.assertTrue(self.target.is_symlink())
         self.assertEqual(self.events, ["post"])
 
+    def test_install_uses_apt_not_brew_on_linux(self):
+        """Linux takes the apt list and never reaches for Homebrew."""
+        tool = core.Tool(
+            name="fake", doc="", platforms=frozenset({"linux"}),
+            brew=("somepkg",), apt=("somepkg-apt",),
+            links=(core.Link(str(self.root / "conf"), str(self.target)),),
+            post_install=lambda: self.events.append("post"))
+        from lib import apt as apt_mod
+        with mock.patch.object(core, "detect_os", return_value="linux"), \
+             mock.patch.object(core, "brew_install") as bi, \
+             mock.patch.object(core, "ensure_brew") as eb, \
+             mock.patch.object(apt_mod, "install") as ai:
+            core.install_tool(tool)
+        ai.assert_called_once_with("somepkg-apt")
+        bi.assert_not_called()
+        eb.assert_not_called()
+        self.assertTrue(self.target.is_symlink())
+        self.assertEqual(self.events, ["post"])
+
+    def test_install_skips_packages_when_os_list_empty(self):
+        """A macOS-only brew list must not drag brew in on Linux."""
+        tool = core.Tool(name="fake", doc="",
+                         platforms=frozenset({"macos", "linux"}),
+                         brew=("somepkg",))
+        with mock.patch.object(core, "detect_os", return_value="linux"), \
+             mock.patch.object(core, "ensure_brew") as eb:
+            core.install_tool(tool)
+        eb.assert_not_called()
+
     def test_uninstall_symmetry(self):
         self.target.write_text("pre-existing")
-        with mock.patch.object(core, "brew_install"), \
+        with mock.patch.object(core, "detect_os", return_value="macos"), \
+             mock.patch.object(core, "brew_install"), \
              mock.patch.object(core, "ensure_brew", return_value="brew"):
             core.install_tool(self.tool)
         core.uninstall_tool(self.tool)

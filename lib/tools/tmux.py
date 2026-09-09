@@ -69,6 +69,7 @@ TOOL = Tool(
     doc="tmux + status bar, additive keys, fzf project picker",
     platforms=frozenset({"macos", "linux"}),
     brew=("tmux",),
+    apt=("tmux",),
     post_install=_post,
     extra_uninstall=_uninstall,
     status_probe=_probe,

@@ -234,8 +234,9 @@ class Tool:
     name: str
     doc: str
     platforms: frozenset
-    brew: tuple = ()
-    casks: tuple = ()
+    brew: tuple = ()      # macOS package source
+    casks: tuple = ()     # macOS, GUI apps and fonts
+    apt: tuple = ()       # Debian/Ubuntu package source
     links: tuple = ()                       # tuple[Link, ...]
     post_install: Optional[Callable[[], None]] = None
     extra_uninstall: Optional[Callable[[], None]] = None
@@ -264,13 +265,22 @@ def tool_status(tool: Tool) -> str:
 
 
 def install_tool(tool: Tool) -> None:
-    """brew packages -> links -> post_install."""
-    if tool.brew or tool.casks:
-        ensure_brew()
-    for pkg in tool.brew:
-        brew_install(pkg, cask=False)
-    for pkg in tool.casks:
-        brew_install(pkg, cask=True)
+    """packages -> links -> post_install.
+
+    The package source is per-OS: Homebrew on macOS, apt on Linux. A tool
+    declares both lists and only the current OS's is used; whatever neither
+    archive carries is left to the tool's own post_install."""
+    if detect_os() == "linux":
+        if tool.apt:
+            from lib import apt      # imported lazily: Linux-only module
+            apt.install(*tool.apt)
+    else:
+        if tool.brew or tool.casks:
+            ensure_brew()
+        for pkg in tool.brew:
+            brew_install(pkg, cask=False)
+        for pkg in tool.casks:
+            brew_install(pkg, cask=True)
     for link in tool.links:
         link_file(link.src_path(), link.target_path())
     if tool.post_install is not None:

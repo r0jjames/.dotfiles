@@ -5,7 +5,17 @@
 # works normally. One session per repo, reused on the next pick.
 set -euo pipefail
 
-ROOTS=("$HOME/Dev/projects" "$HOME/Dev" "$HOME/dev/projects" "$HOME/dev")
+# Where projects live. The spelling differs per machine -- ~/Dev on the Mac,
+# ~/Development on the Ubuntu laptop -- so every variant is scanned and the
+# ones that do not exist are skipped below. Override per machine by exporting
+# a colon-separated DOTFILES_PROJECT_ROOTS from ~/.zshrc.local.
+if [ -n "${DOTFILES_PROJECT_ROOTS:-}" ]; then
+  IFS=: read -r -a ROOTS <<<"$DOTFILES_PROJECT_ROOTS"
+else
+  ROOTS=("$HOME/Dev/projects" "$HOME/Dev"
+         "$HOME/Development/projects" "$HOME/Development"
+         "$HOME/dev/projects" "$HOME/dev")
+fi
 
 command -v fzf >/dev/null 2>&1 || {
   echo "fzf not installed — run ./install.py install zsh" >&2

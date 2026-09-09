@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from lib import core
+from lib import apt, core
 from lib.tools import lazygit
 
 
@@ -23,6 +23,9 @@ class LazygitToolTest(unittest.TestCase):
             mock.patch.object(core, "REPO_ROOT", self.repo),
             mock.patch.object(Path, "home", classmethod(lambda cls: self.tmp)),
             mock.patch.dict(os.environ, {}, clear=False),
+            # _post fetches the release binary on Linux. These tests are
+            # about the config link, and must not reach the network.
+            mock.patch.object(apt, "install_lazygit"),
         ]
         for p in patches:
             p.start()
@@ -42,6 +45,20 @@ class LazygitToolTest(unittest.TestCase):
 
     def test_installs_brew_package(self):
         self.assertEqual(lazygit.TOOL.brew, ("lazygit",))
+
+    def test_no_apt_package(self):
+        """Ubuntu does not package lazygit; the binary comes from upstream."""
+        self.assertEqual(lazygit.TOOL.apt, ())
+
+    def test_linux_post_fetches_release_binary(self):
+        with self.os_is("linux"):
+            lazygit._post()
+        apt.install_lazygit.assert_called_once_with()
+
+    def test_macos_post_leaves_binary_to_brew(self):
+        with self.os_is("macos"):
+            lazygit._post()
+        apt.install_lazygit.assert_not_called()
 
     # ---- config location ----
     def test_macos_uses_application_support(self):

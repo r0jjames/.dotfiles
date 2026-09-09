@@ -1,8 +1,12 @@
 # Global conventions
 
-- Claude Code config is managed in `~/Dev/.dotfiles/claude/` — `settings.json`,
-  `statusline-command.sh`, and this file land in `~/.claude/`. Change config
-  through the repo and commit; never edit the `~/.claude` copies in place.
+- Claude Code config is managed in the dotfiles repo's `claude/` directory —
+  `settings.json`, `statusline-command.sh`, and this file land in `~/.claude/`.
+  The repo's clone path differs per machine (`~/Dev/.dotfiles` on the Mac,
+  `~/Development/.dotfiles` on the Ubuntu laptop); resolve it with
+  `dirname "$(readlink -f ~/.claude/CLAUDE.md)"` rather than assuming either.
+  Change config through the repo and commit; never edit the `~/.claude` copies
+  in place.
   On macOS/Linux they are symlinks (same files). On Windows/Git Bash they are
   copies — re-run `./install.py install claude` after editing.
 - Heavy stack plugins (`vercel`, `supabase`, `frontend-design`) are disabled

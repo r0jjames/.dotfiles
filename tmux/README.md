@@ -71,10 +71,21 @@ glance.
 ## Project picker
 
 `prefix g` opens `scripts/sessionizer.sh` in a popup: fzf over every git repo
-up to three levels under `~/Dev/projects` and `~/Dev`, then attaches a
-session named after the repo (creating it the first time). Needs `fzf`, which
-the [zsh module](../zsh/README.md) installs; `fd` is used when present and
-`find` otherwise.
+up to three levels under the project roots, then attaches a session named
+after the repo (creating it the first time). Needs `fzf`, which the
+[zsh module](../zsh/README.md) installs; `fd` is used when present and `find`
+otherwise.
+
+The roots default to `~/Dev`, `~/Development` and `~/dev` (each also with a
+`projects/` subdirectory), because the spelling differs per machine — `~/Dev`
+on the Mac, `~/Development` on the Ubuntu laptop. Roots that do not exist are
+skipped, and roots that resolve to the same directory — `~/Dev` and `~/dev` on
+a case-insensitive macOS volume — are scanned once. To point it somewhere
+else, export a colon-separated list from `~/.zshrc.local`:
+
+```sh
+export DOTFILES_PROJECT_ROOTS="$HOME/work:$HOME/oss"
+```
 
 ## Starting tmux
 

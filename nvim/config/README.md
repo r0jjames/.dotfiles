@@ -12,8 +12,8 @@ split (`:vsplit ~/.config/nvim/README.md`) while the muscle memory forms.
 ## 1. First launch
 
 ```bash
-cd ~/Dev/.dotfiles/setup-scripts && ./setup-nvim.sh   # one-time install
-nvim                                                   # open editor
+./install.py install nvim   # one-time install, from the repo root
+nvim                        # open editor
 ```
 
 Then inside Neovim:
