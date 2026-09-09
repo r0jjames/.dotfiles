@@ -1,7 +1,7 @@
 # lib/tools/agent_skills.py
-"""Agent skills: install custom skills into the agent skill dirs via the
-standalone agent-skills/install.py (kept separate — it also handles community
-skill fetching and the Copilot target).
+"""Agent skills: install skills into the agent skill dirs via the standalone
+agent-skills/install.py (kept separate — it also handles community skill
+fetching, external CLIs like graphify, and the Copilot target).
 
   macOS/Linux — Claude only, symlinked into ~/.claude/skills.
   Git Bash    — Claude and Copilot (~/.claude/skills, ~/.copilot/skills).
@@ -68,13 +68,24 @@ def _installed() -> list:
 
 def _post() -> None:
     targets = _targets()
-    core.run([sys.executable, str(INSTALLER), "--skills-only",
+    if core.detect_os() == "linux":
+        # graphify's CLI is bootstrapped with `uv tool install`. Ubuntu marks
+        # its Python EXTERNALLY-MANAGED (PEP 668), so pip --user is refused,
+        # and a stock desktop has no pip or pipx at all — without uv the
+        # external is skipped with a warning.
+        from lib import apt
+        apt.install_uv()
+
+    # Deliberately NOT --skills-only. That flag skips community skills and
+    # externals, which would leave a new machine without the chain
+    # claude/CLAUDE.md documents as the default route into a codebase:
+    # context-map -> acquire-codebase-knowledge -> explain-logic ->
+    # code-tour, plus graphify. Each source is idempotent, so the extra work
+    # on a re-run is a fetch, not a reinstall.
+    core.run([sys.executable, str(INSTALLER),
               "--target", "both" if len(targets) > 1 else targets[0]])
     core.ok("Agent skills setup complete.")
-    if core.detect_os() == "gitbash":
-        core.info("Community skills and VS Code prompt files are not part of "
-                  "this step — run 'python agent-skills/install.py' directly "
-                  "for the interactive picker.")
+    core.info("Skills load at session start — restart claude to see them.")
 
 
 def _uninstall() -> None:

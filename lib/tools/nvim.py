@@ -15,8 +15,10 @@ from __future__ import annotations
 from lib import core, fonts
 from lib.core import Link, Tool
 
-# Installed by brew on macOS; not yet wired up on Linux (see module docstring).
-LINUX_EXTRA_CLIS = ("kubectl", "helm", "terraform", "uv", "hadolint")
+# Installed by brew on macOS; not yet wired up on Linux (see module
+# docstring). uv is not here: it installs as a single static binary with no
+# apt repo needed, and agent-skills needs it to bootstrap external skills.
+LINUX_EXTRA_CLIS = ("kubectl", "helm", "terraform", "hadolint")
 
 
 def _post() -> None:
@@ -37,6 +39,7 @@ def _post() -> None:
     if core.detect_os() == "linux":
         from lib import apt
         apt.install_neovim(minimum="0.10")
+        apt.install_uv()
         missing = [c for c in LINUX_EXTRA_CLIS if not core.have(c)]
         if missing:
             core.skip(f"Not installed on Linux: {', '.join(missing)} — "

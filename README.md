@@ -60,10 +60,16 @@ rather than deferring to a Windows-side terminal. Ghostty comes from the
 Ubuntu archive from 26.04 on.
 
 The cloud CLIs the macOS build gets from brew — `kubectl`, `helm`,
-`terraform`, `uv`, `hadolint` — are **not** installed on Linux; each would
-need its own third-party apt repo. `LINUX_EXTRA_CLIS` in
+`terraform`, `hadolint` — are **not** installed on Linux; each would need its
+own third-party apt repo. `LINUX_EXTRA_CLIS` in
 [`lib/tools/nvim.py`](lib/tools/nvim.py) records the gap, and the installer
 prints which are missing.
+
+`uv` **is** installed (a single static binary, no apt repo needed). It is not
+optional on Linux: Ubuntu marks its Python `EXTERNALLY-MANAGED` (PEP 668) so
+`pip install --user` is refused, and a stock desktop has neither pip nor
+pipx — without `uv`, `agent-skills` cannot bootstrap external skill CLIs like
+`graphify`.
 
 ## Quick start — work Windows machine (WSL Ubuntu)
 

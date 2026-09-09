@@ -234,6 +234,30 @@ def install_starship() -> None:
     core.ok("starship installed.")
 
 
+def install_uv() -> None:
+    """uv from the upstream installer into ~/.local/bin.
+
+    Ubuntu 24.04 marks its Python EXTERNALLY-MANAGED (PEP 668), so
+    `pip install --user` is refused outright and there is no pip or pipx on
+    a stock desktop anyway. uv installs as a single static binary needing no
+    Python of its own, and `uv tool install` is what
+    agent-skills/install.py reaches for first when bootstrapping an external
+    skill's CLI."""
+    if core.have("uv"):
+        core.ok(f"uv already installed: {_version_of('uv')}")
+        return
+    core.info("Installing uv (official installer, ~/.local/bin)...")
+    local_bin().mkdir(parents=True, exist_ok=True)
+    result = core.run(
+        'curl -LsSf https://astral.sh/uv/install.sh | '
+        f'env UV_INSTALL_DIR="{local_bin()}" INSTALLER_NO_MODIFY_PATH=1 sh',
+        shell=True, check=False)
+    if result.returncode != 0 or not (local_bin() / "uv").exists():
+        raise core.DotfilesError(
+            "uv install failed. See https://docs.astral.sh/uv/")
+    core.ok(f"uv -> {local_bin() / 'uv'}")
+
+
 def _at_least(version_text: str, minimum: str) -> bool:
     """Compare the first x.y found in `version_text` against `minimum`."""
     import re
