@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from lib.tools import (agent_skills, citrix_vdi, claude, ghostty, git, iterm2,
-                       jetbrains, lazygit, maven, nvim, rancher_desktop,
+                       jetbrains, lazygit, maven, node, nvim, rancher_desktop,
                        starship, terminal_macos, terminal_ubuntu,
                        terminal_windows, tmux, vscode, wezterm, zsh)
 
@@ -19,6 +19,7 @@ _ALL = (
     claude.TOOL,
     agent_skills.TOOL,
     maven.TOOL,
+    node.TOOL,
     terminal_macos.TOOL,
     terminal_ubuntu.TOOL,
     terminal_windows.TOOL,

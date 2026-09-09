@@ -40,13 +40,15 @@ Karabiner, Rancher) skip themselves. When it finishes, **log out and back
 in** — `chsh` only takes effect on a new login session, and newly installed
 fonts need a fresh session.
 
-Three things Ubuntu 24.04 cannot supply are installed under `~/.local`
-instead, needing no root (see [`lib/apt.py`](lib/apt.py)):
+Four things Ubuntu 24.04 cannot supply are installed under `~/.local`
+instead, needing no root (see [`lib/apt.py`](lib/apt.py), and
+[`lib/tools/node.py`](lib/tools/node.py) for `node`):
 
 | Tool | Why not apt | Source |
 |---|---|---|
 | `starship`, `lazygit` | not packaged at all | upstream release binary |
 | `neovim` | packaged, but 0.9.5 — [`nvim/config`](nvim/README.md)'s Mason, lspconfig and treesitter plugins need ≥ 0.10 | upstream tarball |
+| `node` | packaged, but 18.x is EOL — and a version manager's PATH never reaches the non-interactive `/bin/sh` that Claude Code plugin hooks run in | upstream tarball |
 
 Two apt packages install under a different command name (`bat` ships
 `batcat`, `fd-find` ships `fdfind`, both to dodge Debian name collisions).
@@ -121,6 +123,7 @@ are left installed — the summary lists them for manual removal.
 | [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, Linux, Windows (Git Bash) |
 | [`agent-skills/`](agent-skills/README.md) | Custom agent skills for Claude Code and GitHub Copilot | macOS, Linux, Windows (Git Bash) |
 | `maven` | Maven build tool, via SDKMAN | macOS, Linux |
+| `node` | Node.js LTS from the official tarball, symlinked into `~/.local/bin` — required by Claude Code plugin hooks | macOS, Linux |
 | [`terminal-macos/`](terminal-macos/README.md) | Terminal.app themes + font | macOS only |
 | [`terminal-ubuntu/`](terminal-ubuntu/README.md) | GNOME Terminal themed to match Ghostty (palette read from `ghostty/config`) | Ubuntu only |
 | [`terminal-windows/`](terminal-windows/README.md) | Windows Terminal themed to match Ghostty — merged into `settings.json` | Windows (Git Bash) |
