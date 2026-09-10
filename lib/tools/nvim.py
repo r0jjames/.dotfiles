@@ -9,6 +9,12 @@ The cloud CLIs in `brew` below are macOS-only for now: each would need its
 own third-party apt repository or release binary on Ubuntu, which is a
 bigger commitment than a terminal setup calls for. `LINUX_EXTRA_CLIS` records
 what is missing so it is a deliberate gap rather than an oversight.
+
+python3-venv is an apt dependency because Mason's pip3 installer builds a
+venv per package. Ubuntu splits ensurepip out of python3, so on a stock
+desktop `python3 -m venv` exits 1 and every pip3-backed Mason package
+(basedpyright, yamllint, ansible-lint) fails with nothing but "failed to
+install". uv does not cover this: Mason shells out to python3 directly.
 """
 from __future__ import annotations
 
@@ -66,7 +72,7 @@ TOOL = Tool(
     brew=("git", "neovim", "kubectl", "helm", "ansible", "uv",
           "hadolint", "terraform"),
     # neovim is deliberately absent: apt's 0.9.5 is too old, _post fetches it.
-    apt=("git", "ansible"),
+    apt=("git", "ansible", "python3-venv"),
     links=(Link("nvim/config", "~/.config/nvim"),),
     post_install=_post,
 )
