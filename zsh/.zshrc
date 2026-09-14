@@ -118,3 +118,4 @@ export SDKMAN_DIR="$HOME/.sdkman"
 ### MANAGED BY RANCHER DESKTOP START (DO NOT EDIT)
 export PATH="/Users/roj/.rd/bin:$PATH"
 ### MANAGED BY RANCHER DESKTOP END (DO NOT EDIT)
+export PATH="$HOME/.local/go/bin:$HOME/go/bin:$PATH"
