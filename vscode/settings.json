@@ -1,18 +1,21 @@
 {
     // ---- Appearance ----
-    // Auto-switch theme with macOS appearance (System Settings > Appearance > Auto):
-    // Solarized Light by day, Solarized Dark at night.
+    // Auto-switch theme with the OS appearance setting (macOS System Settings >
+    // Appearance > Auto, GNOME dark style, Windows app mode):
+    // Solarized Light by day, Monokai Dimmed at night.
     "window.autoDetectColorScheme": true,
     "workbench.preferredLightColorTheme": "Solarized Light",
-    "workbench.preferredDarkColorTheme": "Solarized Dark",
+    "workbench.preferredDarkColorTheme": "Monokai Dimmed",
     "workbench.colorTheme": "Solarized Light",
     "workbench.iconTheme": "vscode-icons",
     "editor.fontSize": 15,
     "editor.fontFamily": "'MesloLGS Nerd Font', 'MesloLGS NF', Menlo, Consolas, monospace",
+    "editor.semanticHighlighting.enabled": true,
     "terminal.integrated.fontFamily": "'MesloLGS Nerd Font', 'MesloLGS NF', monospace",
     // ---- Terminal ----
-    // Windows only: Git Bash as default shell. macOS keeps VS Code's default (zsh).
+    // Windows: Git Bash. Linux: zsh (macOS already defaults to it).
     "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.defaultProfile.linux": "zsh",
     // ---- Files ----
     "files.autoSave": "onFocusChange",
     "files.trimTrailingWhitespace": true,
@@ -23,6 +26,21 @@
     // ---- AI / MCP ----
     "chat.mcp.gallery.enabled": true,
     "claudeCode.preferredLocation": "panel",
+    // ---- Go ----
+    // Formatting and imports go through gopls, so no go.formatTool.
+    // golang.go offers to install any missing tool (gopls, dlv, golangci-lint).
+    "go.useLanguageServer": true,
+    "go.lintTool": "golangci-lint",
+    "go.lintOnSave": "package",
+    "go.testFlags": ["-v"],
+    "go.testTimeout": "60s",
+    "go.coverOnSingleTest": true,
+    "go.toolsManagement.autoUpdate": true,
+    "gopls": {
+        "ui.diagnostic.staticcheck": true,
+        "ui.completion.usePlaceholders": true,
+        "ui.semanticTokens": true
+    },
     // ---- Per-language formatting ----
     "[json]": {
         "editor.defaultFormatter": "vscode.json-language-features",
@@ -34,6 +52,20 @@
     },
     "[python]": {
         "editor.formatOnSave": true
+    },
+    "[go]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
+    },
+    "[go.mod]": {
+        "editor.defaultFormatter": "golang.go",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+        }
     },
     "claude-usage-monitor.statusBarFormat": "{icon} {5h.pct} · {5h.reset}"
 }

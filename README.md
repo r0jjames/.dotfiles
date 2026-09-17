@@ -118,7 +118,7 @@ are left installed — the summary lists them for manual removal.
 | [`tmux/`](tmux/README.md) | tmux + Ghostty-themed status bar, additive keys only, fzf project picker | macOS, Linux |
 | [`ghostty/`](ghostty/README.md) | Ghostty terminal + config (Tango palette, MesloLGS Nerd Font) | macOS, Linux |
 | [`wezterm/`](wezterm/README.md) | WezTerm terminal + config | macOS (Windows: manual) |
-| [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Windows (Git Bash) |
+| [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Linux, Windows (Git Bash) |
 | [`jetbrains/`](jetbrains/README.md) | F-free cross-OS keymap for every JetBrains IDE — IntelliJ, PyCharm, GoLand (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
 | [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, Linux, Windows (Git Bash) |
 | [`agent-skills/`](agent-skills/README.md) | Custom agent skills for Claude Code and GitHub Copilot | macOS, Linux, Windows (Git Bash) |
@@ -138,6 +138,6 @@ are left installed — the summary lists them for manual removal.
 
 Configs are **symlinked** from this repo into `$HOME` (e.g. `~/.zshrc → ~/Dev/.dotfiles/zsh/.zshrc`). Edit here, commit, `git pull` on other machines — changes are live immediately.
 
-The clone path itself is not fixed: everything resolves relative to `install.py`, so the repo works from wherever it is cloned (`~/Dev/.dotfiles` on the Mac, `~/Development/.dotfiles` on the Ubuntu laptop). The commands below just pick one; substitute your own. To find where a linked config actually came from, follow the link — `readlink -f ~/.zshrc`. Any pre-existing real file is backed up as `<name>.bak-YYYY-MM-DD` before linking. Exception: on Windows (Git Bash) `vscode`, `jetbrains`, `claude` and `agent-skills` copy instead of linking (symlinks there need admin rights or Developer Mode) — re-run the installer after editing to refresh the copies.
+The clone path itself is not fixed: everything resolves relative to `install.py`, so the repo works from wherever it is cloned (`~/Dev/.dotfiles` on the Mac, `~/Development/.dotfiles` on the Ubuntu laptop). The commands below just pick one; substitute your own. To find where a linked config actually came from, follow the link — `readlink -f ~/.zshrc`. Any pre-existing real file is backed up as `<name>.bak-YYYY-MM-DD` before linking. Exceptions: on Windows (Git Bash) `jetbrains`, `claude` and `agent-skills` copy instead of linking (symlinks there need admin rights or Developer Mode), and `vscode` copies on **every** platform because VS Code's Settings Sync rewrites the installed file (see [vscode/README.md](vscode/README.md)) — re-run the installer after editing to refresh those copies.
 
 Machine-local shell tweaks that shouldn't be in git go in `~/.zshrc.local`.

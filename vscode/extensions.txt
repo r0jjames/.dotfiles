@@ -1,15 +1,16 @@
 # VS Code extensions installed by install.py (one id per line, # = comment)
-# Optional platform tag after the id: @macos or @windows.
-# Untagged lines install on both machines.
+# Optional platform tag after the id: @macos, @linux or @windows.
+# Untagged lines install on all three machines.
 
 # ---- Themes / UI ----
 vscode-icons-team.vscode-icons
 oderwat.indent-rainbow
 
 # ---- AI ----
-# Personal Mac uses Claude Code; work Windows machine uses Copilot.
-anthropic.claude-code @macos
-yahyashareef.claude-code-usage-tracker @macos
+# Personal Mac and Ubuntu laptop use Claude Code; work Windows machine
+# uses Copilot.
+anthropic.claude-code @macos @linux
+yahyashareef.claude-code-usage-tracker @macos @linux
 github.copilot @windows
 github.copilot-chat @windows
 
@@ -53,6 +54,8 @@ vscjava.vscode-maven
 
 # ---- Go ----
 golang.go
+# Go projects drive builds and test targets through make.
+ms-vscode.makefile-tools
 
 # ---- JS ----
 dbaeumer.vscode-eslint
