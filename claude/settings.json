@@ -68,5 +68,10 @@
       "**Org-specific CLIs**: None configured",
       "**Routine under roj/ prefix**: git commits/PRs in this repo use Roj's git identity only — never add Claude as author, co-author, or trailer"
     ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(gh repo edit:*)"
+    ]
   }
 }
