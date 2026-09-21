@@ -15,9 +15,13 @@ _handoff_block.
 from __future__ import annotations
 
 import os
-import pwd
 import shutil
 from pathlib import Path
+
+try:
+    import pwd
+except ImportError:  # Windows: no passwd database, and zsh never runs there.
+    pwd = None
 
 from lib import core
 from lib.core import Link, Tool
