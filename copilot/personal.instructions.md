@@ -45,13 +45,35 @@ description: Roj's personal Copilot instructions — output style and git safety
 - In an IDE terminal, put `--no-pager` right after `git` for `log`, `diff`
   and `show`, so no pager stops the run.
 
-<!--
---- Stack conventions --------------------------------------------------------
-Still a scaffold. Idioms and tooling actually in use, so answers do not arrive
-in the wrong dialect. Name languages and tools only — no employer names,
-ticket contents, hostnames, internal URLs or architecture details. This file
-is committed to a personal dotfiles repository.
+# Stack conventions
 
+A repository's own instructions win over everything below. These are defaults
+for when the repository says nothing.
+
+- **Go** — module-based, `gopls` for formatting and imports, `golangci-lint`
+  for linting, `go test -v`. Wrap errors with `fmt.Errorf` and `%w`; return
+  errors rather than logging and continuing.
+- **Python** — standard library only unless a dependency is genuinely needed,
+  and say so when proposing one. Tests are `python3 -m unittest`, not pytest.
+  Target 3.9+. Type-annotate public functions.
+- **Java / Maven** — Maven is the build tool. Atlassian Bamboo Specs are Java,
+  against the `bamboo-specs-api`; treat a Specs change as a behaviour change
+  to the pipeline, not as configuration.
+- **Bamboo** — model work as plan → stage → job → task. Be explicit about
+  variable scope (plan vs global vs build) and about artifact flow between
+  plans.
+- **Shell** — `set -euo pipefail`. Quote expansions. Say what happens when a
+  mid-pipeline command fails.
+- **Kubernetes / Helm** — charts with values files per environment. Never
+  suggest editing a live resource in place as a fix.
+- **TypeScript / React** — Vite for build and dev, Vitest for tests, `tsc -b`
+  for type checking. ES modules, not CommonJS.
+- **Cross-platform** — tooling here runs on macOS, Ubuntu and Windows Git
+  Bash. Do not assume GNU coreutils, bash 4+, or that a path separator is `/`.
+- **Commits** — Conventional Commits with a scope: `type(scope): subject`.
+  Subject in the imperative, no trailing period.
+
+<!--
 --- Scoped rules -------------------------------------------------------------
 Rules that apply to only some files belong in their own file next to this one,
 not here. Create `<name>.instructions.md` with a narrower `applyTo`:
