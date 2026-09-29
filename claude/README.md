@@ -214,6 +214,28 @@ Habits that matter more than any setting here:
   skills, subagents, plugins and individual MCP servers, and flags
   behaviours (long context, cache misses) above 10%.
 
+### Skills that reduce tokens
+
+Skills are not only weight to prune — several installed ones exist to cut
+context. Reach for these instead of the default path:
+
+| Instead of | Use | Why |
+| --- | --- | --- |
+| `Explore` agent, or grepping yourself | `caveman:cavecrew-investigator` | Returns a `file:line` table; the reads stay in the subagent |
+| Opening files to orient in a new repo | `caveman:caveman-explore` | Read-only exploration, citations only, reads stay out of main context |
+| A full review pass | `caveman:cavecrew-reviewer` | One line per finding, no prose |
+| Guessing what a session cost | `/caveman-stats`, `/usage` | Actual token accounting |
+| A heavy CLAUDE.md or memory file | `/caveman-compress` | Compresses the always-loaded text, keeps a backup |
+| Re-reading the same files each session | `/graphify .` | Query a persistent graph instead |
+| Re-exploring a repo you already mapped | `acquire-codebase-knowledge` | One discovery pass, written to `docs/codebase/` |
+
+`skillOverrides` in `settings.json` turns off individual skills without
+disabling their plugin. Twelve caveman skills are off there: the Caveman Cloud
+operations set (no gateway configured here) and the generic workflow set
+(`lean-build`, `migration`, `investigate-first`, `surgical-patch`,
+`verify-and-stop`, `safe-refactor`), which overlaps superpowers'
+`systematic-debugging`, `test-driven-development` and `executing-plans`.
+
 Per-project `enabledPlugins` exists precisely so global context stays small:
 `supabase`, `vercel`, `frontend-design`, `skill-creator`,
 `claude-md-management` and `claude-code-setup` are off globally and enabled

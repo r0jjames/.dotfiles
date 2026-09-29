@@ -350,46 +350,112 @@ it (`explain-logic`, `investigate-issue`, `soundboarding`, `code-review-pr`,
 `explain-feature-changes`). Asking for a tour outright still builds one with
 no confirmation, since that is the request itself.
 
-## Section 5 — Agent skills as token instruments (queued, not started)
+### The baseline measurement method was wrong
+
+The byte figures in the original baseline came from `awk '/^description:/'`,
+which reads only the first line of a description. Most plugin skills use
+folded YAML (`description: >`), so every folded description was counted at a
+fraction of its size — `code-tour` at 14 B instead of 744 B, and caveman's
+whole set at 1,866 B instead of 3,591 B. The plugin cache also ships four
+caveman skills twice under a nested `plugins/caveman/` directory, which a
+naive walk double-counts.
+
+Section 1's claim that caveman was "the best weight-to-value ratio in the set"
+at 1,866 B was therefore wrong: at 3,591 B deduped it was the **largest**
+single always-loaded contributor, ahead of superpowers at 2,304 B. That error
+is what Section 5 acts on.
+
+All figures in Results are re-measured with a frontmatter-aware parser that
+deduplicates skill names and honours `skillOverrides` on both sides.
+
+## Section 5 — Agent skills as token instruments
 
 The design treated skills only as always-loaded weight to prune. That is half
-the subject: skills are also the mechanism for *reducing* tokens, and that half
-is unexamined. Queued as follow-up work.
+the subject: skills are also the mechanism for *reducing* tokens.
 
-Savers already installed and probably underused: `caveman:cavecrew-investigator`
-and `caveman:caveman-explore` (read-only locators whose reads stay out of main
-context), `caveman:cavecrew-reviewer` (one line per finding),
-`caveman:caveman-compress` (aimed squarely at always-loaded weight),
-`caveman:caveman-stats` (per-session accounting, so before/after stops being
-guesswork), `graphify` (query a graph instead of re-reading files), and
-`acquire-codebase-knowledge` (one discovery pass, read cheaply thereafter).
+### Disable individual skills, not whole plugins
 
-Sinks to examine: the per-invocation SKILL.md bodies, which range from 584
-words (`code-review-pr-fast`) to 1,714 (`explain-feature-changes`); the
-`explain-feature-changes` chain, which pulls in three other skills and whose
-`context-map` requirement is currently disabled; and whether
-`code-review-pr-fast` should be the default habit over `code-review-pr`.
+`skillOverrides` turns off one skill without disabling its plugin. Twelve
+caveman skills are now off there, 2,180 B of always-loaded description:
 
-The Copilot side is entirely unexamined. `agent-skills/install.py --repo .`
-seeds `.github/skills` and `.github/prompts`, and per `jetbrains/README.md`
-repo scope is the only scope JetBrains Copilot reads prompt files from. Under
+- **Caveman Cloud operations** (1,181 B) — `caveman-learn`, `caveman-optimize`,
+  `caveman-discover`, `caveman-evidence-review`, `caveman-setup`,
+  `caveman-manage`. They drive a paid gateway and observability product that
+  has no configuration on this machine.
+- **Generic dev workflows** (999 B) — `lean-build`, `migration`,
+  `investigate-first`, `surgical-patch`, `verify-and-stop`, `safe-refactor`.
+  These overlap superpowers' `systematic-debugging`,
+  `test-driven-development` and `executing-plans`, which are in active use.
+
+What stays is caveman's core: the mode itself, `cavecrew` delegation,
+`caveman-explore`, `caveman-stats`, `caveman-compress`, `caveman-review`,
+`caveman-commit`, `caveman-help` — 1,411 B.
+
+### Document the savers so they get used
+
+Several installed skills exist to *cut* context and were going unused because
+nothing pointed at them. `claude/README.md` now carries a table routing the
+default action to the cheaper skill: `cavecrew-investigator` and
+`caveman-explore` in place of `Explore` or manual grepping (their reads stay
+in the subagent), `cavecrew-reviewer` for one-line findings, `caveman-stats`
+and `/usage` instead of guessing at cost, `/caveman-compress` for heavy
+always-loaded files, `graphify` instead of re-reading the same files each
+session, and `acquire-codebase-knowledge` instead of re-exploring a mapped
+repo.
+
+### Repair the broken dependency chain
+
+`REQUIRES` declared `explain-feature-changes` → (`code-tour`, `context-map`,
+`write-pr-description`). Two of the three were dead: `context-map` is `off` in
+`skillOverrides` by the user's own earlier choice, and `write-pr-description`
+was never installed on the Claude target at all. The skill documents inline
+fallbacks for both, so declaring them only pulled descriptions into context and
+produced misleading `--status` output. `REQUIRES` is now `("code-tour",)`.
+
+### Uninstall reaches both targets
+
+The earlier removal of `architecture-blueprint-generator` and
+`add-educational-comments` used `--target claude` only, leaving both installed
+under `~/.copilot/skills`. Removed from the Copilot target too.
+
+### Still open
+
+The per-invocation SKILL.md bodies are untouched and are the remaining lever:
+`code-tour` is 22,654 B and `graphify` 41,276 B, both loaded in full whenever
+invoked, and `explain-feature-changes` is 11,156 B before its chain. The
+CodeTour flip removes most of that cost from the common path, but nothing has
+been trimmed. Whether `code-review-pr-fast` (3,959 B, chat-only) should be the
+default habit over `code-review-pr` (8,794 B plus report) is also unresolved.
+
+The Copilot side remains unexamined. `agent-skills/install.py --repo .` seeds
+`.github/skills` and `.github/prompts`, and per `jetbrains/README.md` repo
+scope is the only scope JetBrains Copilot reads prompt files from. Under
 per-prompt billing a skill that prevents one retry pays for itself at once.
 
 ## Results
 
-Byte measurements, macOS machine, before and after. These are the proxy; the
-authoritative `/context` and `/usage` figures are interactive commands the user
-runs, and are still to be recorded.
+Byte measurements, macOS machine. Measured with a frontmatter-aware parser
+that deduplicates skill names and excludes anything `skillOverrides` marks
+`off` — on both sides, so the three skills that were already off before this
+work (474 B) count in neither column. These are the proxy; the authoritative
+`/context` and `/usage` figures are interactive commands the user runs, and are
+still to be recorded.
 
 | Measurement | Before | After | Saved |
 | --- | --- | --- | --- |
-| Enabled plugin skill descriptions | 7,969 B | 5,238 B | 2,731 B |
-| `~/.claude/skills` descriptions | 5,009 B | 4,521 B | 488 B |
+| Plugin skill descriptions (loaded) | 8,532 B | 3,715 B | 4,817 B |
+| `~/.claude/skills` descriptions (loaded) | 5,033 B | 5,033 B | 0 B |
 | `autoMode.environment` | 2,251 B | 1,410 B | 841 B |
-| **Total always-loaded** | **15,229 B** | **11,169 B** | **4,060 B (~1,000 tokens/session)** |
+| **Total always-loaded** | **15,816 B** | **10,158 B** | **5,658 B (~1,414 tokens/session)** |
 
-Not counted above, and larger than all of it: the CodeTour policy flip removes
-an entire generation pass from every walkthrough that does not ask for one.
+Plugin savings break down as: `supabase` 1,626 B, twelve caveman skills
+2,180 B, `claude-code-setup` 354 B, `claude-md-management` 338 B,
+`skill-creator` 319 B.
+
+Two things are not counted above and are larger than all of it: the CodeTour
+policy flip removes an entire generation pass from every walkthrough that does
+not ask for one, and the `code-tour` skill body it would have loaded is
+22,654 B on its own.
 
 | Measurement | Before | After |
 | --- | --- | --- |
