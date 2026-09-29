@@ -445,6 +445,51 @@ The Copilot side remains unexamined. `agent-skills/install.py --repo .` seeds
 scope is the only scope JetBrains Copilot reads prompt files from. Under
 per-prompt billing a skill that prevents one retry pays for itself at once.
 
+## Section 6 — measured with `/skill-doctor`, not with byte counting
+
+`/skill-doctor` (v2.1.252+) reports each skill's per-turn listing cost, its
+invocation count and when it last ran. `claude -p "/skill-doctor"` prints the
+same report from a fresh session, which is the only way to observe a settings
+change — the session that makes the change loaded its skills before it.
+
+It should have been the first instrument used. The byte-counting parser built
+for the earlier sections approximates what this command reports directly, and
+got the `skillOverrides` mechanism wrong on the way.
+
+What it found, none of which the byte counting could see:
+
+| Group | Skills | Invocations | Per-turn cost |
+| --- | --- | --- | --- |
+| This repo's own agent-skills | 13 | 0 | ~1,680 |
+| claude.ai sync skills | 13 | 0 | ~3,010 |
+| caveman | 20 | 2 in 3 months | ~1,420 |
+
+The first group is not waste: those skills install to both targets and are
+used on the Copilot side, where skill context is free under per-prompt
+billing. Hiding them from Claude's listing costs nothing there.
+
+All 26 are set to `user-invocable-only` rather than `off` — hidden from the
+listing Claude reads every turn, still typeable as a slash command. The key
+format was verified with one prefixed probe, one bare probe and an untouched
+control before the full set was written.
+
+caveman was disabled outright. `skillOverrides` cannot trim a plugin, so it
+was all or nothing: ~1,420 tokens of listing, a ~1,000-token SessionStart
+block, a per-turn UserPromptSubmit block and 368 tokens of agent definitions,
+roughly 2,850 tokens per turn, against two skill invocations in three months.
+Its terse-output mode came from the hook rather than the skills, and did not
+pay for the context it cost.
+
+Measured progression of the skill listing, each from a fresh session:
+
+| State | Skills listed | Tokens/turn |
+| --- | --- | --- |
+| Before this section | 64 | ~7,350 |
+| After hiding 26 never-invoked skills | 38 | ~2,660 |
+| After disabling caveman | 17 | ~1,240 |
+
+~6,110 tokens per turn, against ~870 for Sections 1–5 combined.
+
 ## Results
 
 Byte measurements, macOS machine. Measured with a frontmatter-aware parser

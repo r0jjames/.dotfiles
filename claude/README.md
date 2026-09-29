@@ -109,10 +109,19 @@ Specs and plans land in `docs/superpowers/specs/` and `docs/superpowers/plans/`.
 | `/superpowers:using-git-worktrees` | Isolated workspace for feature work |
 | `/superpowers:writing-skills` | Create or edit skills |
 
-### caveman — token-efficient output (JuliusBrussee)
+### caveman — token-efficient output (JuliusBrussee) — **disabled**
 
-Session hook activates caveman mode automatically (terse replies, full
-technical substance). Level persists per session.
+Off in `enabledPlugins`. `/skill-doctor` measured it at ~1,420 tokens of
+skill listing every turn, plus a ~1,000-token SessionStart block, a
+per-turn UserPromptSubmit block and 368 tokens of agent definitions —
+roughly 2,850 tokens/turn — against 2 skill invocations in three months.
+The terse output it produced did not pay for the context it cost.
+
+Re-enable by flipping `caveman@caveman` to `true`; the marketplace entry is
+kept so nothing else is needed. Note that `skillOverrides` cannot trim it
+selectively — plugin skills ignore those entries, so it is all or nothing.
+
+Below is what it provides when enabled.
 
 | Skill | Use |
 |---|---|
