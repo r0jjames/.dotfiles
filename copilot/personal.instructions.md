@@ -51,8 +51,7 @@ A repository's own instructions win over everything below. These are defaults
 for when the repository says nothing.
 
 - **Go** — module-based, `gopls` for formatting and imports, `golangci-lint`
-  for linting, `go test -v`. Wrap errors with `fmt.Errorf` and `%w`; return
-  errors rather than logging and continuing.
+  for linting, `go test -v`.
 - **Python** — standard library only unless a dependency is genuinely needed,
   and say so when proposing one. Tests are `python3 -m unittest`, not pytest.
   Target 3.9+. Type-annotate public functions.
@@ -64,8 +63,7 @@ for when the repository says nothing.
   plans.
 - **Shell** — `set -euo pipefail`. Quote expansions. Say what happens when a
   mid-pipeline command fails.
-- **Kubernetes / Helm** — charts with values files per environment. Never
-  suggest editing a live resource in place as a fix.
+- **Kubernetes / Helm** — charts with values files per environment.
 - **TypeScript / React** — Vite for build and dev, Vitest for tests, `tsc -b`
   for type checking. ES modules, not CommonJS.
 - **Cross-platform** — tooling here runs on macOS, Ubuntu and Windows Git
