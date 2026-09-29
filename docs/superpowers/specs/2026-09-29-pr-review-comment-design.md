@@ -72,10 +72,13 @@ the PR knows why the branch exists.
 - **Posts:** exactly one review per run via
   `gh api repos/{owner}/{repo}/pulls/{n}/reviews --input <payload.json>`.
 - Invocable by hand (`/review-pr-comment 42`) as well as from the hook.
+- `skillOverrides`: `user-invocable-only`, like the other custom skills —
+  no per-turn listing cost.
+- `REQUIRES` in `agent-skills/install.py`: `code-review-pr`.
 - Documented as a new entry in `agent-skills/README.md` Layout, with its
   dependency on `code-review-pr` listed under Skill dependencies.
 
-### 2. `claude/pr-review-hook.py`
+### 2. `claude/pr_review_hook.py`
 
 Python 3, stdlib only — it parses the hook's JSON payload and must run on
 Windows/Git Bash where `jq` is not guaranteed.
@@ -88,7 +91,7 @@ Registered in `claude/settings.json`:
     {
       "matcher": "Bash",
       "hooks": [
-        { "type": "command", "command": "python3 \"$HOME/.claude/pr-review-hook.py\"" }
+        { "type": "command", "command": "python3 \"$HOME/.claude/pr_review_hook.py\"" }
       ]
     }
   ]
@@ -111,7 +114,11 @@ Logic, as pure functions so it is unit-testable:
    endpoint is used.)
 5. `build_output(...)` → hook JSON with
    `hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext}`: "A PR was just opened at <url>
-   in an allowlisted repository. Run the review-pr-comment skill on it now."
+   in an allowlisted repository. Review it now: read
+   ~/.claude/skills/review-pr-comment/SKILL.md and follow it for this PR."
+   The hook names the file rather than the skill because custom skills are
+   `user-invocable-only` in `skillOverrides` (kept out of the per-turn
+   listing); reading the file works regardless.
    Plus one line on the Copilot request's outcome when it was attempted.
 
 Always exits 0. Never blocks the tool call.
@@ -201,7 +208,7 @@ override the global value (add an org, turn Copilot on for one repo, or set
 
 **`tests/test_claude.py`** additions:
 
-- `pr-review-hook.py` is in `_FILES`.
+- `pr_review_hook.py` is in `_FILES`.
 - The hook command in `settings.json` uses `$HOME/.claude/` (not a
   machine-specific path).
 - `PR_REVIEW_OWNERS` and `PR_REVIEW_COPILOT` defaults are present in `env`.
