@@ -1,10 +1,11 @@
 """Tool registry. Order here is menu/run order (mirrors old ALL_TOOLS)."""
 from __future__ import annotations
 
-from lib.tools import (agent_skills, citrix_vdi, claude, ghostty, git, iterm2,
-                       jetbrains, lazygit, maven, node, nvim, rancher_desktop,
-                       starship, terminal_macos, terminal_ubuntu,
-                       terminal_windows, tmux, vscode, wezterm, zsh)
+from lib.tools import (agent_skills, citrix_vdi, claude, copilot, ghostty,
+                       git, iterm2, jetbrains, lazygit, maven, node, nvim,
+                       rancher_desktop, starship, terminal_macos,
+                       terminal_ubuntu, terminal_windows, tmux, vscode,
+                       wezterm, zsh)
 
 _ALL = (
     zsh.TOOL,
@@ -17,6 +18,7 @@ _ALL = (
     vscode.TOOL,
     jetbrains.TOOL,
     claude.TOOL,
+    copilot.TOOL,
     agent_skills.TOOL,
     maven.TOOL,
     node.TOOL,

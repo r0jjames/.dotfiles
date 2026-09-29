@@ -121,6 +121,7 @@ are left installed — the summary lists them for manual removal.
 | [`vscode/`](vscode/README.md) | VS Code settings, keybindings, extensions | macOS, Linux, Windows (Git Bash) |
 | [`jetbrains/`](jetbrains/README.md) | F-free cross-OS keymap for every JetBrains IDE — IntelliJ, PyCharm, GoLand (Mac/Windows/VDI) | macOS, Windows (Git Bash) |
 | [`claude/`](claude/README.md) | Claude Code CLI, settings, plugins + skills inventory, statusline | macOS, Linux, Windows (Git Bash) |
+| [`copilot/`](copilot/README.md) | Personal Copilot instruction files (`~/.copilot/instructions`), read by the CLI, VS Code and JetBrains | macOS, Linux, Windows (Git Bash) |
 | [`agent-skills/`](agent-skills/README.md) | Custom agent skills for Claude Code and GitHub Copilot | macOS, Linux, Windows (Git Bash) |
 | `maven` | Maven build tool, via SDKMAN | macOS, Linux |
 | `node` | Node.js LTS from the official tarball, symlinked into `~/.local/bin` — required by Claude Code plugin hooks | macOS, Linux |
