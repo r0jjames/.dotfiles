@@ -516,8 +516,39 @@ policy flip removes an entire generation pass from every walkthrough that does
 not ask for one, and the `code-tour` skill body it would have loaded is
 22,654 B on its own.
 
-| Measurement | Before | After |
-| --- | --- | --- |
-| `/context` always-loaded, fresh session in `.dotfiles` | | |
-| `/usage` 7-day | | |
-| Copilot premium requests, one week | | |
+### Measured with `/context`
+
+`claude -p "/context"` prints the report from a fresh session, which is the
+only way to see a settings change take effect — the session that makes the
+change loaded its skills before it.
+
+| Category | Before | After | Saved |
+| --- | --- | --- | --- |
+| Skills | 9.9k | 3.4k | 6.5k |
+| System prompt | 3.2k | 2.2k | 1.0k |
+| Custom agents (the three `cavecrew` definitions) | 368 | absent | 368 |
+| **Total attributable** | | | **~7.9k tokens/turn** |
+
+`model` resolves to `claude-sonnet-5-5`, confirming Section 1.5 is live.
+
+One row is deliberately excluded. System tools reads 4.3k in the fresh report
+against 17.2k in the session that made the changes, but nothing here could
+cause that: `claude -p` runs non-interactive and loads fewer tools. That
+difference is the measurement method, not the work, and the same caveat
+applies to the totals — the fresh session carries 1.3k of messages against
+250k. Only Skills, System prompt and Custom agents are comparable.
+
+### Against the plan
+
+The byte measurements above predicted ~870 tokens. The `/skill-doctor` work
+in Section 6 found roughly nine times that, because it measures invocation
+counts alongside cost — the pairing that says what is safe to remove. Cost
+alone cannot.
+
+### Still outstanding
+
+| Measurement | Status |
+| --- | --- |
+| `/context` in a real interactive session | expect higher System tools than the `-p` report above |
+| `/usage` 7-day | not yet taken |
+| Copilot premium requests, one week | needs a week of comparable work after the instruction files landed |
