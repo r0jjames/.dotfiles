@@ -4,6 +4,23 @@
     "type": "command",
     "command": "sh \"$HOME/.claude/statusline-command.sh\""
   },
+  "env": {
+    "PR_REVIEW_OWNERS": "r0jjames",
+    "PR_REVIEW_COPILOT": "0"
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$HOME/.claude/pr_review_hook.py\" || true"
+          }
+        ]
+      }
+    ]
+  },
   "enabledPlugins": {
     "skill-creator@claude-plugins-official": false,
     "superpowers@claude-plugins-official": true,
@@ -69,6 +86,7 @@
     "acquire-codebase-knowledge": "user-invocable-only",
     "code-review-pr": "user-invocable-only",
     "code-review-pr-fast": "user-invocable-only",
+    "review-pr-comment": "user-invocable-only",
     "code-tour": "user-invocable-only",
     "explain-logic": "user-invocable-only",
     "investigate-issue": "user-invocable-only",

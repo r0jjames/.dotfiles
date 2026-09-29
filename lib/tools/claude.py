@@ -1,5 +1,6 @@
 # lib/tools/claude.py
-"""Claude Code: CLI install + global settings + statusline. Plugins install
+"""Claude Code: CLI install + global settings + statusline + PR-review hook.
+Plugins install
 themselves on next `claude` start from settings.json.
 
   macOS/Linux        — symlinks into ~/.claude
@@ -15,7 +16,8 @@ from typing import Tuple
 from lib import core
 from lib.core import Tool
 
-_FILES = ("settings.json", "statusline-command.sh", "CLAUDE.md")
+_FILES = ("settings.json", "statusline-command.sh", "CLAUDE.md",
+          "pr_review_hook.py")
 
 
 def _target() -> Tuple[Path, str]:

@@ -13,7 +13,9 @@ plus an inventory of every installed plugin/skill and how to invoke it.
 2. Links `claude/statusline-command.sh` → `~/.claude/statusline-command.sh`.
 3. Links `claude/CLAUDE.md` → `~/.claude/CLAUDE.md` (global memory, loaded
    into every session — keep it short).
-4. Installs the Claude Code CLI if missing (official native installer,
+4. Links `claude/pr_review_hook.py` → `~/.claude/pr_review_hook.py` (the
+   PR auto-review hook, below).
+5. Installs the Claude Code CLI if missing (official native installer,
    lands in `~/.local/bin/claude`).
 
 Plugins are **not** installed by the installer: `settings.json` carries
@@ -32,7 +34,7 @@ Review them: commit to keep, checkout to revert.
 
 Same command, two differences:
 
-- Symlinks need admin rights, so the three config files are **copied** into
+- Symlinks need admin rights, so the config files are **copied** into
   `~/.claude` (i.e. `%USERPROFILE%\.claude`). Copies are snapshots — re-run
   `./install.py install claude` after editing one, and runtime changes made
   inside Claude Code will **not** show up as a git diff here.
@@ -45,6 +47,30 @@ Same command, two differences:
 
 `statusLine.command` uses `$HOME` rather than an absolute path so the same
 `settings.json` works on macOS, WSL and Windows.
+
+## PR auto-review
+
+`settings.json` registers `pr_review_hook.py` as a `PostToolUse` hook on
+Bash. When Claude runs `gh pr create` and the new PR's owner is in
+`PR_REVIEW_OWNERS`, the hook tells Claude to follow
+`~/.claude/skills/review-pr-comment/SKILL.md` (from `agent-skills`), which
+posts one `COMMENT` review with inline comments to the PR. It posts
+without asking — the allowlist is the authorization.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `PR_REVIEW_OWNERS` | `r0jjames` | Comma-separated owners/orgs whose repos get auto-review; empty disables |
+| `PR_REVIEW_COPILOT` | `0` | `1` also requests a Copilot review |
+
+Override per repository in its `.claude/settings.json`:
+
+```json
+{ "env": { "PR_REVIEW_COPILOT": "1" } }
+```
+
+`{ "env": { "PR_REVIEW_OWNERS": "" } }` opts a repo out. PRs opened from the
+web UI or a plain terminal are not reviewed; run `/review-pr-comment <n>` by
+hand for those. On Windows/Git Bash the hook needs `python3` on `PATH`.
 
 ## Not managed by this repo
 

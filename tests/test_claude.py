@@ -164,6 +164,37 @@ class ClaudeSettingsTest(unittest.TestCase):
             key = f"{name}@claude-plugins-official"
             self.assertIs(enabled.get(key), False, key)
 
+    def test_pr_review_hook_is_installed(self):
+        self.assertIn("pr_review_hook.py", claude._FILES)
+
+    def test_pr_review_hook_command_is_not_machine_specific(self):
+        entries = self.settings()["hooks"]["PostToolUse"]
+        commands = [h["command"] for e in entries if e["matcher"] == "Bash"
+                    for h in e["hooks"]]
+        hook = [c for c in commands if "pr_review_hook.py" in c]
+        self.assertEqual(len(hook), 1, commands)
+        self.assertIn("$HOME/.claude/pr_review_hook.py", hook[0])
+        self.assertNotIn("/Users/", hook[0])
+        self.assertNotIn("/home/", hook[0])
+
+    def test_pr_review_hook_never_blocks_when_missing(self):
+        """settings.json goes live the moment it is saved (symlink), before
+        install links the script — and a machine may lack python3. Exit 2
+        from python would block every Bash call, so the command swallows it."""
+        entries = self.settings()["hooks"]["PostToolUse"]
+        command = [h["command"] for e in entries for h in e["hooks"]
+                   if "pr_review_hook.py" in h["command"]][0]
+        self.assertTrue(command.rstrip().endswith("|| true"), command)
+
+    def test_pr_review_defaults(self):
+        env = self.settings()["env"]
+        self.assertEqual(env["PR_REVIEW_OWNERS"], "r0jjames")
+        self.assertEqual(env["PR_REVIEW_COPILOT"], "0")
+
+    def test_review_skill_stays_out_of_the_listing(self):
+        overrides = self.settings()["skillOverrides"]
+        self.assertEqual(overrides["review-pr-comment"], "user-invocable-only")
+
 
 if __name__ == "__main__":
     unittest.main()
