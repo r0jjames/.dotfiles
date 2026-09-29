@@ -293,9 +293,103 @@ Extend the existing suites, following their established patterns:
   `agent-skills/install.py` requirements before removal; `context-map` was
   retained precisely because that check caught it.
 
+## Implementation findings
+
+Five things turned up during implementation that the design had wrong or did
+not know.
+
+### `~/.claude/settings.json` was not a symlink
+
+It was a real file, last written 19 September, and the repo and the live file
+had diverged in both directions. Live held `skillOverrides`, six `@synced`
+plugin entries and `permissions.defaultMode: "auto"` that the repo never knew
+about; the repo held `Bash(gh repo edit:*)` (commit `c9aa514`) that live had
+lost. Both sides were merged into the repo and the symlink restored, so future
+drift shows up in `git status` instead of silently.
+
+This is the same hazard `lib/tools/vscode.py` documents and guards against for
+Settings Sync, and `lib/tools/claude.py` does not. Worth a follow-up.
+
+### Two of the skills were already disabled by hand
+
+Live `skillOverrides` already had `architecture-blueprint-generator: off` and
+`add-educational-comments: off`, so flipping their installer defaults matched
+intent that was already there. It also had **`context-map: "off"`**, which
+contradicts `REQUIRES` in `agent-skills/install.py`: `explain-feature-changes`
+declares `context-map` as a runtime requirement, and that requirement is
+currently disabled. Left as found; resolving it belongs to Section 5.
+
+### Copilot ships inside VS Code now
+
+VS Code 1.139.0 bundles `GitHub.copilot-chat` 0.67.0 as a built-in under
+`Contents/Resources/app/extensions/copilot`. Listing either `github.copilot` or
+`github.copilot-chat` in `extensions.txt` makes every install run fail —
+the built-in cannot be downgraded to the marketplace version, and
+`github.copilot` depends on that older build, so it cannot install on its own
+either. Both ids were removed. The `github.copilot.chat.*` settings in
+Section 2 are still served, by the built-in.
+
+### The Copilot setting ids rest on one source
+
+All five came from a single WebFetch of one VS Code docs page. Three of them
+(`useInstructionFiles`, `includeApplyingInstructions`,
+`summarizeAgentConversationHistory`) are documented as already `true` by
+default, so a wrong id changes nothing. The two that carry the behaviour —
+`codesearch.enabled` and `editor.temporalContext.enabled`, both documented as
+default `false`, the latter experimental — are unverified against a running
+VS Code. The definitive check is opening the installed `settings.json` in VS
+Code and looking for "Unknown Configuration Setting" squiggles.
+
+### CodeTour was a standing cost written into policy
+
+`~/.claude/CLAUDE.md` made a tour the default ending for every walkthrough
+skill, with a narrow skip. A tour is a full second generation pass over
+material the walkthrough already produced. Flipped to off-by-default with a
+one-line offer, in `claude/CLAUDE.md` and in all five skills that implemented
+it (`explain-logic`, `investigate-issue`, `soundboarding`, `code-review-pr`,
+`explain-feature-changes`). Asking for a tour outright still builds one with
+no confirmation, since that is the request itself.
+
+## Section 5 — Agent skills as token instruments (queued, not started)
+
+The design treated skills only as always-loaded weight to prune. That is half
+the subject: skills are also the mechanism for *reducing* tokens, and that half
+is unexamined. Queued as follow-up work.
+
+Savers already installed and probably underused: `caveman:cavecrew-investigator`
+and `caveman:caveman-explore` (read-only locators whose reads stay out of main
+context), `caveman:cavecrew-reviewer` (one line per finding),
+`caveman:caveman-compress` (aimed squarely at always-loaded weight),
+`caveman:caveman-stats` (per-session accounting, so before/after stops being
+guesswork), `graphify` (query a graph instead of re-reading files), and
+`acquire-codebase-knowledge` (one discovery pass, read cheaply thereafter).
+
+Sinks to examine: the per-invocation SKILL.md bodies, which range from 584
+words (`code-review-pr-fast`) to 1,714 (`explain-feature-changes`); the
+`explain-feature-changes` chain, which pulls in three other skills and whose
+`context-map` requirement is currently disabled; and whether
+`code-review-pr-fast` should be the default habit over `code-review-pr`.
+
+The Copilot side is entirely unexamined. `agent-skills/install.py --repo .`
+seeds `.github/skills` and `.github/prompts`, and per `jetbrains/README.md`
+repo scope is the only scope JetBrains Copilot reads prompt files from. Under
+per-prompt billing a skill that prevents one retry pays for itself at once.
+
 ## Results
 
-To be filled in during implementation.
+Byte measurements, macOS machine, before and after. These are the proxy; the
+authoritative `/context` and `/usage` figures are interactive commands the user
+runs, and are still to be recorded.
+
+| Measurement | Before | After | Saved |
+| --- | --- | --- | --- |
+| Enabled plugin skill descriptions | 7,969 B | 5,238 B | 2,731 B |
+| `~/.claude/skills` descriptions | 5,009 B | 4,521 B | 488 B |
+| `autoMode.environment` | 2,251 B | 1,410 B | 841 B |
+| **Total always-loaded** | **15,229 B** | **11,169 B** | **4,060 B (~1,000 tokens/session)** |
+
+Not counted above, and larger than all of it: the CodeTour policy flip removes
+an entire generation pass from every walkthrough that does not ask for one.
 
 | Measurement | Before | After |
 | --- | --- | --- |

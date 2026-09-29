@@ -15,13 +15,15 @@
 - The `MCP_DOCKER` MCP server only connects when Rancher Desktop is
   running; a failed connection there is expected, not a config bug.
 - Walkthrough skills (`explain-logic`, `investigate-issue`, `soundboarding`,
-  `code-review-pr`) end by writing a CodeTour file into `.tours/`
-  in the repo being worked on — chain to the `code-tour` skill, built from
-  evidence already gathered, no second investigation pass. Skip it only when
-  all of: one file, no cross-file flow, under ~3 steps — then say so in one
-  line with the reason. "make a tour" overrides a skip, "no tour" overrides
-  the default. `.tours/` is in the global git ignore (`git/ignore`), so tours
-  stay local.
+  `code-review-pr`) **do not write a CodeTour by default** — a tour is a whole
+  extra generation pass, and most walkthroughs are read once and never
+  replayed. Finish the walkthrough, then offer the tour in one line and wait
+  for a yes before chaining to `code-tour`. Build it from evidence already
+  gathered, never a second investigation pass. "make a tour" in the original
+  request skips the confirmation. `.tours/` is in the global git ignore
+  (`git/ignore`), so tours stay local.
+- Asking for a tour outright (`code-tour`, `tour-codebase`, "tour this repo")
+  is the request itself — build it, no confirmation.
 - Onboarding into an unfamiliar repo goes through `tour-codebase`, which owns
   those triggers: it runs `acquire-codebase-knowledge` for discovery, then
   writes a chained tour series into `.tours/`. Use

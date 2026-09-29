@@ -7,12 +7,19 @@ vscode-icons-team.vscode-icons
 oderwat.indent-rainbow
 
 # ---- AI ----
-# Personal Mac and Ubuntu laptop use Claude Code; work Windows machine
-# uses Copilot.
+# Personal Mac and Ubuntu laptop use Claude Code. Copilot runs on both
+# accounts — Business on the work Windows machine, Pro personally — so it
+# is untagged.
 anthropic.claude-code @macos @linux
 yahyashareef.claude-code-usage-tracker @macos @linux
-github.copilot @windows
-github.copilot-chat @windows
+# Copilot ships WITH VS Code from 1.139.0 — GitHub.copilot-chat 0.67.0 is a
+# built-in (Contents/Resources/app/extensions/copilot), so it needs no entry
+# here and the github.copilot.chat.* settings are served by it.
+# Both ids are deliberately absent: listing either makes every install run
+# fail with "Extension 'github.copilot-chat' is a built-in extension with
+# version '0.67.0' and cannot be downgraded to version '0.48.1'" — and
+# github.copilot cannot install on its own either, since it depends on that
+# older copilot-chat. Re-add them only for a machine on VS Code < 1.139.
 
 # ---- DevOps ----
 ms-azuretools.vscode-containers

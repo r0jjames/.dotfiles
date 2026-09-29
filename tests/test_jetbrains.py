@@ -192,6 +192,13 @@ class PluginsFileTest(unittest.TestCase):
         text = (_JETBRAINS / "plugins.txt").read_text()
         self.assertIn("com.intellij.plugins.vscodekeymap", text)
 
+    def test_ai_assistant_plugins_listed(self):
+        text = (_JETBRAINS / "plugins.txt").read_text()
+        # Copilot on every platform (Business at work, Pro personally);
+        # Claude Code only on the personal Mac.
+        self.assertIn("com.github.copilot", text)
+        self.assertIn("com.anthropic.code.plugin @macos", text)
+
 
 class MigrationTest(unittest.TestCase):
     """Symlinks from a pre-rename (intellij/) install dangle after the move."""

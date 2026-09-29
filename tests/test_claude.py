@@ -143,6 +143,27 @@ class ClaudeSettingsTest(unittest.TestCase):
         self.assertNotIn("/Users/", command)
         self.assertIn("$HOME", command)
 
+    def settings(self):
+        return json.loads(
+            (Path(__file__).resolve().parents[1]
+             / "claude" / "settings.json").read_text())
+
+    def test_auto_mode_environment_carries_no_single_repo_context(self):
+        """This file is user-level, so it loads in every repository. Anything
+        specific to one repo belongs in that repo's .claude/settings.json."""
+        env = "\n".join(self.settings()["autoMode"]["environment"])
+        for needle in ("second-brain", "6-Work", "ai-context"):
+            self.assertNotIn(needle, env)
+
+    def test_heavy_plugins_are_per_project_not_global(self):
+        """Every globally enabled plugin's skill descriptions load into every
+        session. Occasional-use plugins are enabled per project instead."""
+        enabled = self.settings()["enabledPlugins"]
+        for name in ("vercel", "supabase", "frontend-design", "skill-creator",
+                     "claude-md-management", "claude-code-setup"):
+            key = f"{name}@claude-plugins-official"
+            self.assertIs(enabled.get(key), False, key)
+
 
 if __name__ == "__main__":
     unittest.main()

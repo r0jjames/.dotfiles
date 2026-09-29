@@ -26,6 +26,23 @@
     // ---- AI / MCP ----
     "chat.mcp.gallery.enabled": true,
     "claudeCode.preferredLocation": "panel",
+    // ---- Copilot ----
+    // Copilot bills one premium request per prompt you send, not per token, so
+    // the expensive event is the retry after a wrong answer. These four widen
+    // the context per prompt on purpose: extra context is free here, retries
+    // are not. (Claude Code is the opposite — see claude/README.md.)
+    // Not set on purpose:
+    //   chat.agent.maxRequests        — caps iterations inside one billed
+    //                                   prompt; lowering it forces a second.
+    //   *.autoApprove                 — auto-approving terminal commands is a
+    //                                   security trade, not a dotfiles default.
+    //   virtualTools.threshold        — set it only if the 128-tool error
+    //                                   appears; VS Code documents no default.
+    "github.copilot.chat.codesearch.enabled": true,
+    "github.copilot.chat.editor.temporalContext.enabled": true,
+    "github.copilot.chat.codeGeneration.useInstructionFiles": true,
+    "chat.includeApplyingInstructions": true,
+    "github.copilot.chat.summarizeAgentConversationHistory.enabled": true,
     // ---- Go ----
     // Formatting and imports go through gopls, so no go.formatTool.
     // golang.go offers to install any missing tool (gopls, dlv, golangci-lint).

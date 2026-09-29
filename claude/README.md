@@ -128,7 +128,7 @@ Also ships subagents: `cavecrew-investigator` (locate code),
 `cavecrew-builder` (1–2 file edits), `cavecrew-reviewer` (diff review) —
 compressed output saves main-thread context.
 
-### skill-creator
+### skill-creator (per-project only)
 
 | Skill | Use |
 |---|---|
@@ -154,14 +154,14 @@ Includes the Supabase MCP server (migrations, SQL, logs, advisors).
 Agent `code-simplifier:code-simplifier` — simplify recently modified code
 while preserving behavior.
 
-### claude-md-management
+### claude-md-management (per-project only)
 
 | Skill | Use |
 |---|---|
 | `/claude-md-management:revise-claude-md` | Update CLAUDE.md with session learnings |
 | `claude-md-improver` | Audit/improve CLAUDE.md files (auto-triggers) |
 
-### claude-code-setup
+### claude-code-setup (per-project only)
 
 `claude-automation-recommender` — analyze a codebase, recommend hooks,
 subagents, skills, MCP servers.
@@ -180,9 +180,44 @@ new or reworked UI (auto-triggers on UI work).
   occasionally; `/fewer-permission-prompts` builds a sane allowlist.
 - `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` and
   `docs/superpowers/plans/` — superpowers workflow artifacts.
-- No custom user-level skills yet (`~/.claude/skills/` unused); add one
-  with `/skill-creator:skill-creator` and track it here if it should be
+- `~/.claude/skills/` holds the repo's own skills (symlinked from
+  `agent-skills/skills/`) plus installer-managed community skills. Add new
+  ones through `agent-skills/install.py`, not by hand, so they stay
   reproducible.
+
+## Token routing
+
+Claude bills **tokens of context per turn**; Copilot bills **one premium
+request per prompt**. The two need opposite handling, so don't carry habits
+across — see `vscode/README.md` for the Copilot half.
+
+Defaults set in `settings.json`: `model: sonnet`, `effortLevel: high`.
+
+| Task | Model | Notes |
+| --- | --- | --- |
+| Routine edits, tests, refactors, reviews | `sonnet` (default) | Handles most coding work |
+| Architecture, multi-step debugging, tricky design | `/model opus` | Switch for the task, then switch back |
+| Verbose subagent work (log parsing, doc fetching) | `haiku` via subagent config | Output stays in the subagent's context |
+
+Habits that matter more than any setting here:
+
+- **`/clear` between unrelated tasks.** Claude re-sends the whole
+  conversation every turn, so stale context is charged on every later
+  message. `/rename` first if you want to `/resume` it later.
+- **Plan mode (Shift+Tab) before large changes.** A wrong direction costs
+  far more than the planning turn.
+- **Delegate verbose output to subagents** so it never enters the main
+  context.
+- **Prefer CLI tools (`gh`, `kubectl`) over MCP servers** where both exist —
+  no per-tool listing in context.
+- **Watch `/context` and `/usage`.** `/usage` attributes recent spend to
+  skills, subagents, plugins and individual MCP servers, and flags
+  behaviours (long context, cache misses) above 10%.
+
+Per-project `enabledPlugins` exists precisely so global context stays small:
+`supabase`, `vercel`, `frontend-design`, `skill-creator`,
+`claude-md-management` and `claude-code-setup` are off globally and enabled
+in the repos that need them.
 
 ## Useful commands
 

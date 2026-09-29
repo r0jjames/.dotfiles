@@ -7,18 +7,25 @@ VS Code settings, keybindings, and a curated extension list — same editor on t
 - [`settings.json`](settings.json) — Solarized Light / Monokai Dimmed following the OS appearance, vscode-icons, MesloLGS Nerd Font (editor + terminal), autosave, git smart-commit/autofetch, Go via gopls, per-language format-on-save
 - [`keybindings.json`](keybindings.json) — custom terminal/file-tree/navigation keybindings. Every binding ships a `cmd+` and a `ctrl+` variant, so one file covers all three platforms; the unused half is inert.
 - [`extensions.txt`](extensions.txt) — curated extension ids, grouped by purpose (DevOps, Remote/WSL, Python, Java, Go, Markdown, AI, docs/walkthroughs, utilities)
+- [`copilot-instructions.template.md`](copilot-instructions.template.md) — template to copy into a project's `.github/`. Not installed by `install.py`; copied per project by hand.
 
 ### Platform tags in extensions.txt
 
 Lines may end with `@macos`, `@linux` or `@windows`; untagged lines install on all three machines.
-Used for the AI split — Claude Code on the personal Mac and the Ubuntu laptop, Copilot on the work
-Windows machine — and for Windows-only extensions like Remote-WSL:
+Used for the AI split — Claude Code only on the personal Mac and the Ubuntu laptop — and for
+Windows-only extensions like Remote-WSL:
 
 ```
 anthropic.claude-code @macos @linux
-github.copilot @windows
 ms-vscode-remote.remote-wsl @windows
 ```
+
+Copilot is **not** listed: from VS Code 1.139 it ships built in
+(`GitHub.copilot-chat` 0.67.0 under `Contents/Resources/app/extensions/copilot`),
+and listing either `github.copilot` or `github.copilot-chat` makes every install
+run fail — the built-in cannot be downgraded to the marketplace version, and
+`github.copilot` depends on that older build. It runs on both accounts anyway:
+Business on the work Windows machine, Pro personally.
 
 After installing, the installer reports extensions that are installed but not in
 the list (with ready-to-paste `code --uninstall-extension` commands). It never
@@ -53,6 +60,50 @@ VS Code runs on the Windows host (WSL connects via the Remote-WSL extension), so
    git clone https://github.com/<you>/.dotfiles.git ~/dotfiles
    cd ~/dotfiles && ./install.py install vscode
    ```
+
+## Copilot token routing
+
+Copilot bills **one premium request per prompt you send**, times the model
+multiplier — not per token, and not per autonomous step the agent takes inside
+one prompt. So the expensive event is the **retry** after a wrong answer, and
+the goal is to make each prompt land, not to make it small.
+
+That is the opposite of Claude Code, which bills tokens of context per turn.
+Don't carry habits across — see `claude/README.md` for that half.
+
+| Task | Mode | Model |
+| --- | --- | --- |
+| Single well-scoped edit | Edit | Included model |
+| Multi-file or open-ended change | Agent | Included model; premium if it stalls |
+| Design a change before making it | Plan (read-only) | Premium model |
+| Completions while typing | Inline / NES | n/a — not premium-billed |
+
+**Rules that outweigh every setting:**
+
+- **Do not run Copilot code review casually — 13 premium requests per review.**
+  Largest single line item available.
+- **Default to an included model**; reach for a premium one only for
+  architecture and debugging.
+- **Write `.github/copilot-instructions.md`** from
+  [`copilot-instructions.template.md`](copilot-instructions.template.md). One
+  prevented misunderstanding per session pays for the file.
+- **Start a new chat for unrelated work** rather than letting one thread carry
+  irrelevant history.
+
+The settings in `settings.json` deliberately *widen* context per prompt
+(`codesearch`, `temporalContext`, instruction-file pinning): under per-prompt
+billing that context is free, and it is what removes retries.
+
+`chat.agent.maxRequests` is deliberately left at its default of 25 — it caps
+iterations inside a single billed prompt, so lowering it truncates work and
+forces a second prompt. `github.copilot.chat.virtualTools.threshold` is not set
+either; set it only if the 128-tools-per-request error appears, since VS Code
+documents no default value for it.
+
+Billing note: GitHub moved from request-based to usage-based billing on
+2026-06-01, and model multipliers are now legacy (Pro/Pro+ annual only). The
+direction above holds under both. Check the live allowance in GitHub billing
+settings rather than trusting a number written here.
 
 ## Settings Sync
 

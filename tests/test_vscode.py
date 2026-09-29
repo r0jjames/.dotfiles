@@ -1,6 +1,7 @@
 # tests/test_vscode.py
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import tempfile
@@ -57,15 +58,17 @@ class ParseExtensionsTest(unittest.TestCase):
         mac = vscode.parse_extensions(text, "macos")
         linux = vscode.parse_extensions(text, "linux")
         win = vscode.parse_extensions(text, "gitbash")
-        # Claude Code rides the personal machines, Copilot the work Windows one.
+        # Claude Code rides the personal machines only.
         for name in ("anthropic.claude-code",
                      "yahyashareef.claude-code-usage-tracker"):
             self.assertIn(name, mac)
             self.assertIn(name, linux)
             self.assertNotIn(name, win)
-        self.assertIn("github.copilot", win)
-        self.assertNotIn("github.copilot", mac)
-        self.assertNotIn("github.copilot", linux)
+        # Copilot ships built into VS Code >= 1.139, so listing either id
+        # makes every install run fail on the un-downgradable built-in.
+        for exts in (mac, linux, win):
+            self.assertNotIn("github.copilot", exts)
+            self.assertNotIn("github.copilot-chat", exts)
         # Untagged lines reach all three.
         for exts in (mac, linux, win):
             self.assertIn("ms-python.python", exts)
@@ -74,6 +77,42 @@ class ParseExtensionsTest(unittest.TestCase):
         # Windows-only extensions stay off the Unix machines.
         self.assertIn("ms-vscode-remote.remote-wsl", win)
         self.assertNotIn("ms-vscode-remote.remote-wsl", linux)
+
+
+class RepoSettingsTest(unittest.TestCase):
+    """settings.json ships JSONC (comments), so strip them before parsing."""
+
+    def settings(self):
+        text = (core.REPO_ROOT / "vscode" / "settings.json").read_text()
+        stripped = "\n".join(
+            line for line in text.splitlines()
+            if not line.lstrip().startswith("//"))
+        return json.loads(stripped)
+
+    def test_settings_file_is_valid_json_once_comments_are_stripped(self):
+        self.assertIsInstance(self.settings(), dict)
+
+    def test_copilot_context_keys_are_pinned_on(self):
+        # Copilot bills per prompt, not per token: wider context per prompt
+        # is free and is what removes the retries that do cost.
+        s = self.settings()
+        for key in ("github.copilot.chat.codesearch.enabled",
+                    "github.copilot.chat.editor.temporalContext.enabled",
+                    "github.copilot.chat.codeGeneration.useInstructionFiles",
+                    "chat.includeApplyingInstructions",
+                    "github.copilot.chat.summarizeAgentConversationHistory"
+                    ".enabled"):
+            self.assertIs(s.get(key), True, key)
+
+    def test_request_capping_keys_stay_unset(self):
+        # chat.agent.maxRequests caps iterations inside ONE billed prompt, so
+        # lowering it just forces a second prompt. autoApprove is a security
+        # trade a dotfiles default should not make.
+        s = self.settings()
+        for key in ("chat.agent.maxRequests",
+                    "chat.tools.terminal.autoApprove",
+                    "chat.tools.edits.autoApprove"):
+            self.assertNotIn(key, s)
 
 
 class TargetDirTest(unittest.TestCase):

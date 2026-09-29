@@ -85,6 +85,50 @@ in **Settings → Plugins**, then it appears as another entry in the Keymap
 dropdown. `roj-keymap` does **not** depend on it; it's a separate switchable
 keymap, not a base.
 
+## AI assistants (Copilot, Claude Code)
+
+`plugins.txt` lists both: **GitHub Copilot** (`com.github.copilot`, every
+platform — Business at work, Pro personally) and **Claude Code [Beta]**
+(`com.anthropic.code.plugin`, macOS only). The Claude plugin does not bundle
+the CLI; it runs `claude` in the IDE terminal, so install the CLI too.
+
+**Claude Code needs no JetBrains-side configuration.** It reads the same
+`~/.claude/settings.json` that `claude/` in this repo manages. Model, effort
+level and enabled plugins are set there once and apply in every IDE.
+
+**Copilot's settings are not file-manageable, by design of the plugin.**
+`~/Library/Application Support/JetBrains/<IDE>/options/github-copilot.xml`
+looks like a settings file but holds plugin-owned state — `signinNotification
+Shown`, `nesDefaultAppliedForFreePlan`, `legacyXdgConfigMigrated`,
+`terminalRulesVersion`. The only real setting in it is
+`enableNextEditSuggestions`. Dotfiles deliberately does **not** ship this
+file: overwriting it would clobber authentication and migration state the
+plugin maintains itself.
+
+So the Copilot settings below are a manual checklist, applied per IDE:
+
+| Where | Setting | Do what | Why |
+| --- | --- | --- | --- |
+| Tools → GitHub Copilot → Completions | Languages | Deselect languages you never want completions in | Completions are free (not premium-billed), so this is a noise choice, not a cost one |
+| Chat panel → model picker | Model | Included model for routine work; premium model only for architecture and debugging | Model multiplier is applied per prompt |
+| Chat panel → mode | Mode | Prefer **Plan** (read-only) before a large change | A wrong large change costs several prompts to unwind |
+
+**The rule that outweighs every setting here: do not run Copilot code review
+casually — it costs 13 premium requests per review.**
+
+**`fullLine` (JetBrains Full Line Code Completion) is not a token lever.** It
+is installed and runs entirely locally, and Copilot completions are not
+premium-billed either, so neither costs allowance. It is noted only because
+the two conflict: with both enabled, they compete for the same inline
+completion slot. Pick one per language and move on — a quality and latency
+choice, not a cost one.
+
+**`mcpserver` is installed — audit it.** Claude Code defers MCP tool
+definitions by default, so only tool names and server instructions enter
+context. Low cost, but nonzero per configured server. Run `/mcp` in a Claude
+session and disable what is not in use. (`MCP_DOCKER` only connects when
+Rancher Desktop is running — a failure there is expected, not a config bug.)
+
 ## The VDI (Citrix Windows) — how the keymap gets there
 
 Dotfiles can't reach into the VDI (separate Windows host). Two ways in:

@@ -5,3 +5,5 @@
 # (most are bundled and only need enabling).
 
 com.intellij.plugins.vscodekeymap   # VSCode Keymap - optional VS Code muscle-memory layer, switchable in Settings -> Keymap
+com.github.copilot                  # GitHub Copilot - Business on work Windows, Pro personally
+com.anthropic.code.plugin @macos    # Claude Code [Beta] - needs the claude CLI installed separately
