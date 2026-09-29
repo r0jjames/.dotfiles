@@ -240,6 +240,24 @@ Cloud operations set, and a workflow set that overlaps superpowers'
 
 Run `/skill-doctor` for per-skill context cost and invocation counts — it
 names the skills that have never run and says where to turn each one off.
+`claude -p "/skill-doctor"` prints the same report from a fresh session,
+which is the only way to see the effect of a settings change.
+
+`skillOverrides` carries 29 entries, nearly all `user-invocable-only`:
+hidden from the listing Claude reads every turn, still typeable as a slash
+command. Two groups, both measured at 0 invocations by `/skill-doctor`:
+
+- **This repo's own skills** (~1,680 tokens/turn) — they are installed to
+  both targets, and they get used on the Copilot side, where skill context
+  is free under per-prompt billing. Nothing about Copilot changes.
+- **claude.ai sync skills** (~3,010 tokens/turn) — `anthropic-skills:pdf` is
+  kept; it has actually run. A deleted synced copy is re-downloaded on the
+  next sync, so the override is the durable fix, not deletion.
+
+Both formats work for a synced skill's key, `anthropic-skills:docx` or bare
+`docx`; the prefixed form is used here because it matches what
+`/skill-doctor` prints. Verify a change by re-running the report, not by
+assuming — plugin skills silently ignore these entries.
 
 Per-project `enabledPlugins` exists precisely so global context stays small:
 `supabase`, `vercel`, `frontend-design`, `skill-creator`,
