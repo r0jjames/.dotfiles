@@ -373,23 +373,36 @@ deduplicates skill names and honours `skillOverrides` on both sides.
 The design treated skills only as always-loaded weight to prune. That is half
 the subject: skills are also the mechanism for *reducing* tokens.
 
-### Disable individual skills, not whole plugins
+### Disabling individual plugin skills does not work — retracted
 
-`skillOverrides` turns off one skill without disabling its plugin. Twelve
-caveman skills are now off there, 2,180 B of always-loaded description:
+This section originally turned twelve caveman skills off through
+`skillOverrides` and claimed 2,180 B of saving. That was wrong. The skills
+documentation states plainly:
 
-- **Caveman Cloud operations** (1,181 B) — `caveman-learn`, `caveman-optimize`,
-  `caveman-discover`, `caveman-evidence-review`, `caveman-setup`,
-  `caveman-manage`. They drive a paid gateway and observability product that
-  has no configuration on this machine.
-- **Generic dev workflows** (999 B) — `lean-build`, `migration`,
-  `investigate-first`, `surgical-patch`, `verify-and-stop`, `safe-refactor`.
-  These overlap superpowers' `systematic-debugging`,
-  `test-driven-development` and `executing-plans`, which are in active use.
+> Plugin skills are not affected by `skillOverrides`. Manage those through
+> `/plugin` instead.
 
-What stays is caveman's core: the mode itself, `cavecrew` delegation,
-`caveman-explore`, `caveman-stats`, `caveman-compress`, `caveman-review`,
-`caveman-commit`, `caveman-help` — 1,411 B.
+The entries were inert, and the claimed saving never existed. They have been
+removed rather than left in the settings file asserting something false. The
+key format was never the issue: no format works for a plugin skill.
+
+A plugin is therefore all-or-nothing. caveman's 3,591 B buys the mode, the
+`cavecrew` agents, `caveman-explore`, `caveman-stats`, `caveman-compress`,
+`caveman-review`, `caveman-commit` and `caveman-help` — and, unavoidably,
+2,180 B of skills with no use here: the Caveman Cloud operations set (no
+gateway is configured on this machine) and a workflow set that overlaps
+superpowers' `systematic-debugging`, `test-driven-development` and
+`executing-plans`. Disabling the plugin to shed that would cost the mode and
+the agents, which are in daily use, so it stays.
+
+`skillOverrides` does work for user skills, which is why the three entries
+for `architecture-blueprint-generator`, `add-educational-comments` and
+`context-map` are effective.
+
+`/skill-doctor` (v2.1.252+) is the right instrument for this whole exercise:
+it reports per-skill context cost and invocation counts, flags skills that
+have never run, and says where to turn each one off. It should have been the
+starting point.
 
 ### Document the savers so they get used
 
@@ -443,14 +456,15 @@ still to be recorded.
 
 | Measurement | Before | After | Saved |
 | --- | --- | --- | --- |
-| Plugin skill descriptions (loaded) | 8,532 B | 3,715 B | 4,817 B |
+| Plugin skill descriptions (loaded) | 8,532 B | 5,895 B | 2,637 B |
 | `~/.claude/skills` descriptions (loaded) | 5,033 B | 5,033 B | 0 B |
 | `autoMode.environment` | 2,251 B | 1,410 B | 841 B |
-| **Total always-loaded** | **15,816 B** | **10,158 B** | **5,658 B (~1,414 tokens/session)** |
+| **Total always-loaded** | **15,816 B** | **12,338 B** | **3,478 B (~870 tokens/session)** |
 
-Plugin savings break down as: `supabase` 1,626 B, twelve caveman skills
-2,180 B, `claude-code-setup` 354 B, `claude-md-management` 338 B,
-`skill-creator` 319 B.
+Plugin savings break down as: `supabase` 1,626 B, `claude-code-setup` 354 B,
+`claude-md-management` 338 B, `skill-creator` 319 B. An earlier version of
+this table claimed 5,658 B by counting twelve caveman skills that
+`skillOverrides` cannot turn off; see the retraction in Section 5.
 
 Two things are not counted above and are larger than all of it: the CodeTour
 policy flip removes an entire generation pass from every walkthrough that does

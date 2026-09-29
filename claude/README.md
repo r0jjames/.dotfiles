@@ -149,10 +149,11 @@ Auto-triggering skills: `supabase:supabase` (any Supabase task),
 `supabase:supabase-postgres-best-practices` (Postgres query/schema work).
 Includes the Supabase MCP server (migrations, SQL, logs, advisors).
 
-### code-simplifier
+### code-simplifier (disabled — use the built-in `/simplify`)
 
 Agent `code-simplifier:code-simplifier` — simplify recently modified code
-while preserving behavior.
+while preserving behavior. Off globally: the built-in `/simplify` skill
+covers the same ground without a plugin's description weight.
 
 ### claude-md-management (per-project only)
 
@@ -229,12 +230,16 @@ context. Reach for these instead of the default path:
 | Re-reading the same files each session | `/graphify .` | Query a persistent graph instead |
 | Re-exploring a repo you already mapped | `acquire-codebase-knowledge` | One discovery pass, written to `docs/codebase/` |
 
-`skillOverrides` in `settings.json` turns off individual skills without
-disabling their plugin. Twelve caveman skills are off there: the Caveman Cloud
-operations set (no gateway configured here) and the generic workflow set
-(`lean-build`, `migration`, `investigate-first`, `surgical-patch`,
-`verify-and-stop`, `safe-refactor`), which overlaps superpowers'
-`systematic-debugging`, `test-driven-development` and `executing-plans`.
+`skillOverrides` in `settings.json` turns off individual skills — but **only
+user skills**. The docs are explicit: "Plugin skills are not affected by
+`skillOverrides`. Manage those through `/plugin` instead." So a plugin is
+all-or-nothing: caveman's 3,591 B of descriptions is the price of its mode and
+`cavecrew` agents, and 2,180 B of that is skills with no use here (the Caveman
+Cloud operations set, and a workflow set that overlaps superpowers'
+`systematic-debugging`, `test-driven-development` and `executing-plans`).
+
+Run `/skill-doctor` for per-skill context cost and invocation counts — it
+names the skills that have never run and says where to turn each one off.
 
 Per-project `enabledPlugins` exists precisely so global context stays small:
 `supabase`, `vercel`, `frontend-design`, `skill-creator`,
