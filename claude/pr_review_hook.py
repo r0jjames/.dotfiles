@@ -38,7 +38,9 @@ def parse_payload(raw: str) -> Tuple[str, str]:
     command = tool_input.get("command", "") if isinstance(tool_input, dict) else ""
     response = data.get("tool_response")
     if isinstance(response, dict):
-        output = "\n".join(str(response.get(k) or "") for k in ("stdout", "stderr"))
+        # stdout only: gh pr create prints the new URL there, and prints an
+        # *existing* PR's URL to stderr when the branch already has one.
+        output = str(response.get("stdout") or "")
     else:
         output = str(response or "")
     return str(command), output

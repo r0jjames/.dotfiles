@@ -62,6 +62,15 @@ class TriggerTest(unittest.TestCase):
         for raw in ("", "not json", "[]", '{"tool_input": "x"}'):
             self.assertEqual(run(raw), (0, ""), raw)
 
+    def test_existing_pr_error_on_stderr_is_silent(self):
+        """gh pr create prints the *old* PR's URL to stderr when one exists."""
+        err = ('a pull request for branch "x" into branch "main" already '
+               "exists:\n" + URL + "\n")
+        self.assertEqual(
+            run(payload(command="gh pr create --fill; echo done",
+                        response={"stdout": "done\n", "stderr": err})),
+            (0, ""))
+
     def test_string_tool_response(self):
         code, out = run(payload(response=URL))
         self.assertIn(URL, out)
