@@ -10,11 +10,9 @@ fetching, external CLIs like graphify, and the Copilot target).
                 a skill to refresh them.
 
 ~/.copilot/skills is personal scope: it serves Copilot in JetBrains IDEs as
-well as VS Code. The Copilot target also generates one skill per prompt file
-into that directory, so the /create-sb-style commands reach every JetBrains
-project as /skill:create-sb — prompt files themselves have no personal scope
-outside VS Code and would otherwise need per-repo seeding
-(`agent-skills/install.py --repo <path>`).
+well as VS Code. Copilot no longer reads .prompt.md files, so the Copilot
+target generates one skill per prompt file into that directory instead —
+/roj-create-sb in VS Code, /skill:roj-create-sb in JetBrains.
 """
 from __future__ import annotations
 
@@ -79,7 +77,7 @@ def _post() -> None:
     # Deliberately NOT --skills-only. That flag skips community skills and
     # externals, which would leave a new machine without the chain
     # claude/CLAUDE.md documents as the default route into a codebase:
-    # context-map -> acquire-codebase-knowledge -> explain-logic ->
+    # context-map -> acquire-codebase-knowledge -> roj-explain-logic ->
     # code-tour, plus graphify. Each source is idempotent, so the extra work
     # on a re-run is a fetch, not a reinstall.
     core.run([sys.executable, str(INSTALLER),

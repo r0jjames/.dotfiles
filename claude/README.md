@@ -53,7 +53,7 @@ Same command, two differences:
 `settings.json` registers `pr_review_hook.py` as a `PostToolUse` hook on
 Bash. When Claude runs `gh pr create` and the new PR's owner is in
 `PR_REVIEW_OWNERS`, the hook tells Claude to follow
-`~/.claude/skills/review-pr-comment/SKILL.md` (from `agent-skills`), which
+`~/.claude/skills/roj-review-pr-comment/SKILL.md` (from `agent-skills`), which
 posts one `COMMENT` review with inline comments to the PR. It posts
 without asking — the allowlist is the authorization.
 
@@ -69,7 +69,7 @@ Override per repository in its `.claude/settings.json`:
 ```
 
 `{ "env": { "PR_REVIEW_OWNERS": "" } }` opts a repo out. PRs opened from the
-web UI or a plain terminal are not reviewed; run `/review-pr-comment <n>` by
+web UI or a plain terminal are not reviewed; run `/roj-review-pr-comment <n>` by
 hand for those. On Windows/Git Bash the hook needs `python3` on `PATH`.
 
 ## Not managed by this repo

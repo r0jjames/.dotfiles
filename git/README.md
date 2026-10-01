@@ -24,8 +24,8 @@ any repository, kept in one place instead of edited into each repo's
 | `**/.claude/settings.local.json` | Per-machine Claude Code settings, never shared |
 | `.tours/` | CodeTour walkthroughs written by the agent skills — a personal reading aid, not a team artifact |
 
-The `.tours/` entry pairs with the walkthrough skills (`explain-logic`,
-`investigate-issue`, `soundboarding`, `acquire-codebase-knowledge`), which
+The `.tours/` entry pairs with the walkthrough skills (`roj-explain-logic`,
+`roj-investigate-issue`, `roj-soundboarding`, `acquire-codebase-knowledge`), which
 write a `.tour` file at the end of a run. `vsls-contrib.codetour` in
 [`vscode/extensions.txt`](../vscode/extensions.txt) opens them.
 

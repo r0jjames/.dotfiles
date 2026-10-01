@@ -16,7 +16,7 @@ class AgentSkillsTest(unittest.TestCase):
         self.tmp = Path(tempfile.mkdtemp())
         self.addCleanup(shutil.rmtree, self.tmp, ignore_errors=True)
         self.src = self.tmp / "repo" / "agent-skills" / "skills"
-        (self.src / "explain-logic").mkdir(parents=True)
+        (self.src / "roj-explain-logic").mkdir(parents=True)
         patches = [
             mock.patch.object(agent_skills, "SKILLS_SRC", self.src),
             mock.patch.object(agent_skills, "INSTALLER",
@@ -35,9 +35,9 @@ class AgentSkillsTest(unittest.TestCase):
     def install_as(self, target, kind):
         d = self.tmp / (".copilot" if target == "copilot" else ".claude") / "skills"
         d.mkdir(parents=True, exist_ok=True)
-        dest = d / "explain-logic"
+        dest = d / "roj-explain-logic"
         if kind == "symlink":
-            dest.symlink_to(self.src / "explain-logic")
+            dest.symlink_to(self.src / "roj-explain-logic")
         else:
             (dest / "SKILL.md").parent.mkdir(parents=True)
             (dest / "SKILL.md").write_text("x")
@@ -88,11 +88,11 @@ class AgentSkillsTest(unittest.TestCase):
             self.assertFalse(agent_skills._probe())
 
     def test_probe_ignores_symlink_outside_repo(self):
-        other = self.tmp / "elsewhere" / "explain-logic"
+        other = self.tmp / "elsewhere" / "roj-explain-logic"
         other.mkdir(parents=True)
         d = self.tmp / ".claude" / "skills"
         d.mkdir(parents=True)
-        (d / "explain-logic").symlink_to(other)
+        (d / "roj-explain-logic").symlink_to(other)
         with self.os_is("macos"):
             self.assertFalse(agent_skills._probe())
 
@@ -102,11 +102,11 @@ class AgentSkillsTest(unittest.TestCase):
             agent_skills._uninstall()
         cmd = run.call_args[0][0]
         self.assertIn("--uninstall", cmd)
-        self.assertEqual(cmd[cmd.index("--uninstall") + 1], "explain-logic")
+        self.assertEqual(cmd[cmd.index("--uninstall") + 1], "roj-explain-logic")
         self.assertEqual(cmd[-1], "both")
 
     def test_uninstall_noop_without_skills(self):
-        shutil.rmtree(self.src / "explain-logic")
+        shutil.rmtree(self.src / "roj-explain-logic")
         with self.os_is("macos"), mock.patch.object(core, "run") as run:
             agent_skills._uninstall()
         run.assert_not_called()

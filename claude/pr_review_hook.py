@@ -3,7 +3,7 @@
 
 After a Bash call that ran `gh pr create` and printed a new PR URL, if the
 repo owner is in PR_REVIEW_OWNERS, tell Claude to review the PR by reading
-the review-pr-comment skill file. With PR_REVIEW_COPILOT=1, also request a
+the roj-review-pr-comment skill file. With PR_REVIEW_COPILOT=1, also request a
 Copilot review.
 
 The first github.com PR URL in the output is used, so a command that chains
@@ -21,7 +21,7 @@ import subprocess
 import sys
 from typing import Optional, Tuple
 
-SKILL_PATH = "~/.claude/skills/review-pr-comment/SKILL.md"
+SKILL_PATH = "~/.claude/skills/roj-review-pr-comment/SKILL.md"
 COPILOT_BOT = "copilot-pull-request-reviewer[bot]"
 PR_URL = re.compile(r"https://github\.com/([\w.-]+)/([\w.-]+)/pull/(\d+)")
 

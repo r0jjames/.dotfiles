@@ -193,7 +193,7 @@ class ClaudeSettingsTest(unittest.TestCase):
 
     def test_review_skill_stays_out_of_the_listing(self):
         overrides = self.settings()["skillOverrides"]
-        self.assertEqual(overrides["review-pr-comment"], "user-invocable-only")
+        self.assertEqual(overrides["roj-review-pr-comment"], "user-invocable-only")
 
 
 if __name__ == "__main__":
